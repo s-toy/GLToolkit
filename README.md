@@ -1,0 +1,1 @@
+GLToolkit is designed for quickly building OpenGL applications.
