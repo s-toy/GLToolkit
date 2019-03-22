@@ -1,20 +1,20 @@
 #pragma once
-
 #include <GL/glew.h>
 
-typedef struct {
+struct SShaderInfo
+{
 	GLenum Type;
 	const char* pFilename;
 	GLuint Shader;
-} SShaderInfo;
+};
 
-class CShader {
+class CGLShader
+{
 public:
 	bool loadShaders(SShaderInfo* vioShaders);
 
-	GLuint getProgram();
-
-	void useProgram();
+	GLuint getProgram() const { return m_Program; }
+	void useProgram() { glUseProgram(m_Program); }
 
 private:
 	GLuint m_Program;

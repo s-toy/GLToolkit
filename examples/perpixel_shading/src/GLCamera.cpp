@@ -1,8 +1,9 @@
-#include "camera.h"
+#include "GLCamera.h"
 
 //**********************************************************************************************
 //FUNCTION:
-void CCamera::processKeyboard(Camera_Movement vDirection, float vDeltaTime) {
+void CGLCamera::processKeyboard(Camera_Movement vDirection, float vDeltaTime) 
+{
 	float velocity = MovementSpeed * vDeltaTime;
 	if (vDirection == FORWARD)
 		Position += Front * velocity;
@@ -20,7 +21,8 @@ void CCamera::processKeyboard(Camera_Movement vDirection, float vDeltaTime) {
 
 //**********************************************************************************************
 //FUNCTION:
-void CCamera::processMouseMovement(float vXOffset, float vYOffset, GLboolean vConstrainPitch) {
+void CGLCamera::processMouseMovement(float vXOffset, float vYOffset, GLboolean vConstrainPitch) 
+{
 	vXOffset *= MouseSensitivity;
 	vYOffset *= MouseSensitivity;
 
@@ -38,7 +40,8 @@ void CCamera::processMouseMovement(float vXOffset, float vYOffset, GLboolean vCo
 
 //**********************************************************************************************
 //FUNCTION:
-void CCamera::processMouseScroll(float vYOffset) {
+void CGLCamera::processMouseScroll(float vYOffset) 
+{
 	if (Zoom >= 1.0f && Zoom <= 45.0f)
 		Zoom -= vYOffset * SCROLL_SENSITIVTY;
 	if (Zoom <= 1.0f)
@@ -49,7 +52,8 @@ void CCamera::processMouseScroll(float vYOffset) {
 
 //**********************************************************************************************
 //FUNCTION:
-void CCamera::__updateCameraVectors() {
+void CGLCamera::__updateCameraVectors() 
+{
 	glm::vec3 LocFront;
 	LocFront.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 	LocFront.y = sin(glm::radians(Pitch));

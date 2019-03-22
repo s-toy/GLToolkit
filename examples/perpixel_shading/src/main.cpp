@@ -8,20 +8,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "model.h"
-#include "shader.h"
-#include "camera.h"
+#include "GLModel.h"
+#include "GLShader.h"
+#include "GLCamera.h"
 
 using namespace std;
 
-namespace {
+namespace
+{
 	const char* VERT_SHADER_PATH = "shaders/perpixel_shading_vs.glsl";
 	const char* FRAG_SHADER_PATH = "shaders/perpixel_shading_fs.glsl";
 	const char* MODEL_PATH = "../../resource/models/nanosuit/nanosuit.obj";
 	const GLuint SCREEN_WIDTH = 1600, SCREEN_HEIGHT = 900;
 
-	CCamera g_Camera(glm::vec3(0.0f, 0.0f, 3.0f));
-	CModel g_Model;
+	CGLCamera g_Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+	CGLModel g_Model;
 	GLuint g_ShaderProgram;
 
 	GLfloat g_DeltaTime = 0.0f;
@@ -36,22 +37,15 @@ namespace {
 }
 
 void init();
-
 void update();
-
 void keyCallback(GLFWwindow*, int, int, int, int);
-
 void mouseCallback(GLFWwindow*, double, double);
-
 void mouseButtonCallback(GLFWwindow*, int, int, int);
-
 void scrollCallback(GLFWwindow*, double, double);
-
 void doMovement();
 
-//**********************************************************************************************
-//FUNCTION:
-int main(int argc, char **argv) {
+int main()
+{
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -68,7 +62,8 @@ int main(int argc, char **argv) {
 
 	glewInit();
 	init();
-	while (!glfwWindowShouldClose(window)) {
+	while (!glfwWindowShouldClose(window))
+	{
 		update();
 		glfwSwapBuffers(window);
 	}
@@ -79,18 +74,19 @@ int main(int argc, char **argv) {
 
 //**********************************************************************************************
 //FUNCTION:
-void init() {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+void init()
+{
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-	SShaderInfo Shaders[] = {
+	SShaderInfo Shaders[] =
+	{
 		{ GL_VERTEX_SHADER, VERT_SHADER_PATH },
 		{ GL_FRAGMENT_SHADER, FRAG_SHADER_PATH },
 		{ GL_NONE, NULL }
 	};
-	CShader ShaderObj;
+	CGLShader ShaderObj;
 	ShaderObj.loadShaders(Shaders);
 	ShaderObj.useProgram();
 	g_ShaderProgram = ShaderObj.getProgram();
@@ -100,7 +96,8 @@ void init() {
 
 //**********************************************************************************************
 //FUNCTION:
-void update() {
+void update()
+{
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GLfloat CurrentFrame = glfwGetTime();
@@ -118,11 +115,8 @@ void update() {
 	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uViewMatrix"), 1, GL_FALSE, glm::value_ptr(View));
 
 	glm::mat4 Model;
-	Model = glm::translate(Model, glm::vec3(0.0f, -1.0f, 0.0f));
-	static float Rotate = 0.0f;
-	//Rotate += 0.01;
-	Model = glm::rotate(Model, Rotate, glm::vec3(0.0f, 1.0f, 0.0f));
-	Model = glm::scale(Model, glm::vec3(0.6f, 0.6f, 0.6f));
+	Model = glm::translate(Model, glm::vec3(0.0f, -1.5f, 0.0f));
+	Model = glm::scale(Model, glm::vec3(0.2f, 0.2f, 0.2f));
 	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uModelMatrix"), 1, GL_FALSE, glm::value_ptr(Model));
 
 	g_Model.draw(g_ShaderProgram);
@@ -132,7 +126,8 @@ void update() {
 
 //**********************************************************************************************
 //FUNCTION:
-void doMovement() {
+void doMovement()
+{
 	if (g_Keys[GLFW_KEY_W])
 		g_Camera.processKeyboard(FORWARD, g_DeltaTime);
 	if (g_Keys[GLFW_KEY_S])
@@ -149,7 +144,8 @@ void doMovement() {
 
 //**********************************************************************************************
 //FUNCTION:
-void keyCallback(GLFWwindow* vWindow, int vKey, int vScancode, int vAction, int vMode) {
+void keyCallback(GLFWwindow* vWindow, int vKey, int vScancode, int vAction, int vMode)
+{
 	if (vKey == GLFW_KEY_ESCAPE && vAction == GLFW_PRESS)
 		glfwSetWindowShouldClose(vWindow, GL_TRUE);
 	if (vKey >= 0 && vKey < 1024) {
@@ -162,7 +158,8 @@ void keyCallback(GLFWwindow* vWindow, int vKey, int vScancode, int vAction, int 
 
 //**********************************************************************************************
 //FUNCTION:
-void mouseButtonCallback(GLFWwindow* vWndow, int vButton, int vAction, int vMods) {
+void mouseButtonCallback(GLFWwindow* vWndow, int vButton, int vAction, int vMods)
+{
 	if (vButton >= 0 && vButton < 3) {
 		if (vAction == GLFW_PRESS)
 			g_Buttons[vButton] = true;
@@ -173,12 +170,14 @@ void mouseButtonCallback(GLFWwindow* vWndow, int vButton, int vAction, int vMods
 
 //**********************************************************************************************
 //FUNCTION:
-void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
+void mouseCallback(GLFWwindow* window, double xpos, double ypos)
+{
 
 	static bool FirstMouse = true;
 	static GLfloat LastX = SCREEN_WIDTH / 2.0;
 	static GLfloat LastY = SCREEN_HEIGHT / 2.0;
-	if (FirstMouse) {
+	if (FirstMouse)
+	{
 		LastX = xpos;
 		LastY = ypos;
 		FirstMouse = false;
@@ -190,12 +189,12 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 	LastX = xpos;
 	LastY = ypos;
 
-	if (g_Buttons[GLFW_MOUSE_BUTTON_LEFT])
-		g_Camera.processMouseMovement(xoffset, yoffset);
+	if (g_Buttons[GLFW_MOUSE_BUTTON_LEFT]) g_Camera.processMouseMovement(xoffset, yoffset);
 }
 
 //**********************************************************************************************
 //FUNCTION:
-void scrollCallback(GLFWwindow* vWindow, double vXOffset, double vYOffset) {
+void scrollCallback(GLFWwindow* vWindow, double vXOffset, double vYOffset)
+{
 	g_Camera.processMouseScroll(vYOffset);
 }

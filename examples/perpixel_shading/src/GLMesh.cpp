@@ -1,4 +1,4 @@
-#include "mesh.h"
+#include "GLMesh.h"
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -7,7 +7,8 @@
 
 //**********************************************************************************************
 //FUNCTION:
-CMesh::CMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::vector<STexture> vTextures) {
+CGLMesh::CGLMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::vector<STexture> vTextures)
+{
 	m_Vertices = vVertices;
 	m_Indices = vIndices;
 	m_Textures = vTextures;
@@ -17,20 +18,24 @@ CMesh::CMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::
 
 //**********************************************************************************************
 //FUNCTION:
-void CMesh::draw(GLuint vShaderProgram) {
+void CGLMesh::draw(GLuint vShaderProgram)
+{
 	GLuint DiffuseNr = 1;
 	GLuint SpecularNr = 1;
-	for (GLuint i = 0; i < m_Textures.size(); ++i) {
+	for (GLuint i = 0; i < m_Textures.size(); ++i)
+	{
 		glActiveTexture(GL_TEXTURE0 + i);
 
 		std::stringstream SStream;
 		std::string Number;
 		std::string Name = m_Textures[i].Type;
 		SStream << Name;
-		if (Name == "material.texture_diffuse") {
+		if (Name == "uMaterialDiffuse")
+		{
 			SStream << DiffuseNr++;
 		}
-		else if (Name == "material.texture_specular") {
+		else if (Name == "uMaterialSpecular")
+		{
 			SStream << SpecularNr++;
 		}
 		glUniform1i(glGetUniformLocation(vShaderProgram, SStream.str().c_str()), i);
@@ -38,14 +43,13 @@ void CMesh::draw(GLuint vShaderProgram) {
 		glBindTexture(GL_TEXTURE_2D, m_Textures[i].Id);
 	}
 
-	glUniform1f(glGetUniformLocation(vShaderProgram, "material.shininess"), 4.0f);
-
 	glBindVertexArray(m_VAO);
 	glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
 
-	for (GLuint i = 0; i < m_Textures.size(); i++) {
+	for (GLuint i = 0; i < m_Textures.size(); i++)
+	{
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
@@ -53,7 +57,8 @@ void CMesh::draw(GLuint vShaderProgram) {
 
 //**********************************************************************************************
 //FUNCTION:
-void CMesh::__setupMesh() {
+void CGLMesh::__setupMesh()
+{
 	glGenVertexArrays(1, &m_VAO);
 	glGenBuffers(1, &m_VBO);
 	glGenBuffers(1, &m_EBO);

@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "GLShader.h"
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -6,12 +6,15 @@
 
 //**********************************************************************************************
 //FUNCTION:
-static const GLchar* readShader(const char* vFilename) {
+static const GLchar* readShader(const char* vFilename)
+{
 	FILE* pInfile = fopen(vFilename, "rb");
-	if (!pInfile) {
+	if (!pInfile)
+	{
 		std::cerr << "Unable to open file '" << vFilename << "'" << std::endl;
-		return NULL;
+		return nullptr;
 	}
+
 	fseek(pInfile, 0, SEEK_END);
 	int FileLen = ftell(pInfile);
 	fseek(pInfile, 0, SEEK_SET);
@@ -25,18 +28,21 @@ static const GLchar* readShader(const char* vFilename) {
 
 //**********************************************************************************************
 //FUNCTION:
-bool CShader::loadShaders(SShaderInfo* vioShaders) {
-	if (NULL == vioShaders) {
-		return false;
-	}
+bool CGLShader::loadShaders(SShaderInfo* vioShaders)
+{
+	if (NULL == vioShaders) { return false; }
+
 	GLuint ShaderProgram = glCreateProgram();
 	SShaderInfo* pEntry = vioShaders;
-	while (pEntry->Type != GL_NONE) {
+	while (pEntry->Type != GL_NONE)
+	{
 		GLuint ShaderObj = glCreateShader(pEntry->Type);
 		pEntry->Shader = ShaderObj;
 		const GLchar* pSource = readShader(pEntry->pFilename);
-		if (NULL == pSource) {
-			for (pEntry = vioShaders; pEntry->Type != GL_NONE; ++pEntry) {
+		if (NULL == pSource)
+		{
+			for (pEntry = vioShaders; pEntry->Type != GL_NONE; ++pEntry)
+			{
 				glDeleteShader(pEntry->Shader);
 				pEntry->Shader = 0;
 			}
@@ -48,7 +54,8 @@ bool CShader::loadShaders(SShaderInfo* vioShaders) {
 		glCompileShader(ShaderObj);
 		GLint Compiled;
 		glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &Compiled);
-		if (!Compiled) {
+		if (!Compiled)
+		{
 			GLsizei Len;
 			glGetShaderiv(ShaderObj, GL_INFO_LOG_LENGTH, &Len);
 			GLchar* LogInfo = new GLchar[Len + 1];
@@ -65,7 +72,8 @@ bool CShader::loadShaders(SShaderInfo* vioShaders) {
 	glLinkProgram(ShaderProgram);
 	GLint Linked;
 	glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Linked);
-	if (!Linked) {
+	if (!Linked)
+	{
 		GLsizei Len;
 		glGetProgramiv(ShaderProgram, GL_INFO_LOG_LENGTH, &Len);
 
@@ -74,7 +82,8 @@ bool CShader::loadShaders(SShaderInfo* vioShaders) {
 		std::cerr << "Shader linking failed: " << LogInfo << std::endl;
 		delete[] LogInfo;
 
-		for (pEntry = vioShaders; pEntry->Type != GL_NONE; ++pEntry) {
+		for (pEntry = vioShaders; pEntry->Type != GL_NONE; ++pEntry)
+		{
 			glDeleteShader(pEntry->Shader);
 			pEntry->Shader = 0;
 		}
@@ -83,16 +92,4 @@ bool CShader::loadShaders(SShaderInfo* vioShaders) {
 
 	m_Program = ShaderProgram;
 	return true;
-}
-
-//**********************************************************************************************
-//FUNCTION:
-GLuint CShader::getProgram() {
-	return m_Program;
-}
-
-//**********************************************************************************************
-//FUNCTION:
-void CShader::useProgram() {
-	glUseProgram(m_Program);
 }

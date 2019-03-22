@@ -1,40 +1,55 @@
-#version 430 core
+#version 460 core
 
-uniform vec3 uMaterialAmbient = vec3(0.6, 0.6, 0.6);
-uniform vec3 uMaterialDiffuse = vec3(0.6, 0.4, 0.4);
-uniform vec3 uMaterialSpecular = vec3(0.01, 0.01, 0.01);
-uniform float uMaterialShinness = 2.0;
+uniform sampler2D uMaterialDiffuse1;
+uniform sampler2D uMaterialSpecular1;
+uniform float uMaterialShinness = 32.0;
 
-uniform vec3 uLightDirectionE = vec3(-1, 1, -1);
-uniform vec3 uLightAmbient = vec3(0.4, 0.4, 0.4);
-uniform vec3 uLightDiffuse = vec3(0.8, 0.8, 0.8);
-uniform vec3 uLightSpecular = vec3(0.01, 0.01, 0.01);
+uniform vec3 uLightColor = vec3(1.0);
 
-uniform vec3 uViewPos;
+uniform vec3 uViewPos = vec3(0.0);
 
-in vec3 _PositionE;
-in vec3 _NormalE;
-in vec2 _TexCoordV;
+in vec3 _PositionW;
+in vec3 _NormalW;
+in vec2 _TexCoord;
 
 out vec4 _outFragColor;
 
-vec4 computePhongShading4ParallelLight(vec3 vPositionE, vec3 vNormalE, vec3 vViewDir)
+struct SParallelLight
 {
-	vec4 Result;
+	vec3 Color;
+	vec3 Direction;
+};
 
-	vec3 Ambient = uLightAmbient * uMaterialAmbient;
-	vec3 Diffuse = uLightDiffuse * uMaterialDiffuse * max(dot(vNormalE, uLightDirectionE), 0.0);
-	vec3 ReflectDir = reflect(-uLightDirectionE, _NormalE);
-	float Spec = pow(max(dot(vViewDir, ReflectDir), 0.0), uMaterialShinness);
-	vec3 Specular = uLightSpecular * uMaterialSpecular * Spec;
+struct SMaterial
+{
+	vec3 Diffuse;
+	vec3 Specular;
+	float Shinness;
+};
 
-	Result = vec4(Ambient + Diffuse, 1.0f);
+vec3 computePhongShading4ParallelLight(vec3 vPositionW, vec3 vNormalW, vec3 vViewDir, SParallelLight vLight, SMaterial vMaterial)
+{
+	vec3 AmbientColor = 0.2 * vLight.Color * vMaterial.Diffuse;
+	vec3 DiffuseColor = vLight.Color * vMaterial.Diffuse * max(dot(vNormalW, vLight.Direction), 0.0);
+	vec3 ReflectDir = normalize(reflect(-vLight.Direction, _NormalW));
+	vec3 SpecularColor = vLight.Color * vMaterial.Specular * pow(max(dot(vViewDir, ReflectDir), 0.0), vMaterial.Shinness);
 
-	return Result;
+	return AmbientColor + DiffuseColor + SpecularColor;
 }
 
 void main()
-{ 
-	vec3 ViewDir = normalize(uViewPos - _PositionE);
-	_outFragColor = computePhongShading4ParallelLight(_PositionE, normalize(_NormalE), ViewDir);
+{
+	vec3 ViewDirW = normalize(uViewPos - _PositionW);
+	vec3 NormalW = normalize(_NormalW);
+
+	SMaterial Material;
+	Material.Diffuse = texture(uMaterialDiffuse1, _TexCoord).rgb;
+	Material.Specular = texture(uMaterialSpecular1, _TexCoord).rgb;
+	Material.Shinness = 32.0;
+
+	vec3 FinalColor = vec3(0.0);
+	FinalColor += computePhongShading4ParallelLight(_PositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(1.0, 1.0, 1.0)), Material);
+	FinalColor += computePhongShading4ParallelLight(_PositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
+
+	_outFragColor = vec4(FinalColor, 1.0);
 }
