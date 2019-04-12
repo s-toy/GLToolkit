@@ -101,7 +101,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ASSIMP)\lib\$(PlatformTarget);$(OPENGL)\lib\$(PlatformTarget);$(SOIL)\lib\$(PlatformTarget);</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32d.lib;freeglutd.lib;glfw3-vc140.lib;assimp-vc140-mt.lib;SOILd-vc140.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;freeglutd.lib;glfw3-vc140.lib;assimp-vc140-mt.lib;SOILd-vc141.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -118,7 +118,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ASSIMP)\lib\$(PlatformTarget);$(OPENGL)\lib\$(PlatformTarget);$(SOIL)\lib\$(PlatformTarget);</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32d.lib;freeglutd.lib;glfw3-vc140.lib;assimp-vc140-mt.lib;SOILd-vc140.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32d.lib;freeglutd.lib;glfw3-vc140.lib;assimp-vc140-mt.lib;SOILd-vc141.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,7 +139,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ASSIMP)\lib\$(PlatformTarget);$(OPENGL)\lib\$(PlatformTarget);$(SOIL)\lib\$(PlatformTarget);</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32.lib;freeglut.lib;glfw3-vc140.lib;assimp-vc140-mt.lib;SOIL-vc140.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;freeglut.lib;glfw3-vc140.lib;assimp-vc140-mt.lib;SOIL-vc141.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -160,7 +160,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ASSIMP)\lib\$(PlatformTarget);$(OPENGL)\lib\$(PlatformTarget);$(SOIL)\lib\$(PlatformTarget);</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32.lib;freeglut.lib;glfw3-vc140.lib;assimp-vc140-mt.lib;SOIL-vc140.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;freeglut.lib;glfw3-vc140.lib;assimp-vc140-mt.lib;SOIL-vc141.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
