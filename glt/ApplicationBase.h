@@ -1,7 +1,13 @@
 #pragma once
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include "Common.h"
 
 namespace glt
 {
+	class CWindow;
+	class CCamera;
+
 	class CApplicationBase
 	{
 	public:
@@ -10,9 +16,19 @@ namespace glt
 
 		void run();
 
+		const CCamera* getCamera() const { return m_pCamera; }
+
 	protected:
-		bool _initV();
-		void _updateV(float vDeltaTime);
-		void _destroyV();
+		_DISALLOW_COPY_AND_ASSIGN(CApplicationBase);
+
+		virtual bool _initV();
+		virtual void _updateV();
+		virtual void _destroyV();
+
+	private:
+		CWindow* m_pWindow = nullptr;
+		SWindowInfo m_WindowInfo = {};
+
+		CCamera* m_pCamera = nullptr;
 	};
 }

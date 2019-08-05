@@ -15,6 +15,7 @@ namespace glt
 		glm::mat4	getProjectionMatrix() const;
 		glm::dvec3	getPosition() const { return m_CameraPos; }
 		double		getFovy() const { return m_Fovy; }
+		double		getAspect() const { return m_Aspect; }
 
 		void setPosition(glm::dvec3 vCameraPos) { m_CameraPos = vCameraPos; }
 		void setMoveSpeed(double vMoveSpeed)	{ m_MoveSpeed = vMoveSpeed; }

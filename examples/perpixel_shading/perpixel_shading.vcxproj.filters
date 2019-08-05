@@ -24,7 +24,7 @@
     <ClInclude Include="src\GLShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\GLCamera.h">
+    <ClInclude Include="src\MyApplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -39,7 +39,7 @@
     <ClCompile Include="src\GLShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\GLCamera.cpp">
+    <ClCompile Include="src\MyApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

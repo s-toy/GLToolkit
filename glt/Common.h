@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <iostream>
 
 #if (defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW32__))
 #	define _WINDOWS
@@ -22,14 +24,33 @@
 
 namespace glt
 {
-	struct SWindowCreateInfo
+	struct SVector2
 	{
-		int WindowWidth = 0, WindowHeight = 0;
-		int WindowPosX = 0, WindowPosY = 0;
-		std::string WindowTitle = "";
-		bool IsWindowFullScreen = false;
-		bool IsWindowResizable = false;
+		int x = 0, y = 0;
+	};
 
-		bool isValid() const { return (WindowWidth > 0 && WindowHeight > 0); }	//TODO:
+	struct SRect
+	{
+		int x = 0, y = 0, w = 0, h = 0;
+	};
+
+	struct SWindowInfo
+	{
+		std::string Title = "GL APPLICATION";
+
+		uint32_t MonitorID = 0;
+		uint32_t PosX = 100;
+		uint32_t PosY = 100;
+		uint32_t Width = 800;
+		uint32_t Height = 600;
+
+		bool IsFullScreen = false;
+		bool IsResizable = false;
+
+		bool operator==(const SWindowInfo& r) const
+		{
+			return Title == r.Title && MonitorID == r.MonitorID && PosX == r.PosX && PosY == r.PosY
+				&& Width == r.Width && Height == r.Height && IsFullScreen == r.IsFullScreen && IsResizable == r.IsResizable;
+		}
 	};
 }
