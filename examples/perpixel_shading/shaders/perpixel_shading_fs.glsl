@@ -4,7 +4,7 @@
 uniform sampler2D uMaterialDiffuse1;
 uniform sampler2D uMaterialSpecular1;
 
-vec3 uViewPos = vec3(0.0);
+uniform vec3 uViewPos = vec3(0.0);
 
 layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;

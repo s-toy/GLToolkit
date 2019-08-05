@@ -18,6 +18,8 @@ void glt::CApplicationBase::run()
 
 		while (!glfwWindowShouldClose(_pWindow->getGLFWWindow()))
 		{
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			_pCamera->update();
 			_updateV();
 
@@ -52,12 +54,11 @@ bool glt::CApplicationBase::__init()
 #endif
 
 	_pWindow = new CWindow;
-	_EARLY_RETURN(!_pWindow->createWindow(_WindowInfo), "Failed to create window.", false);
+	_EARLY_RETURN(!_pWindow->createWindow(m_WindowInfo), "Failed to create window.", false);
 
 	CInputManager::getInstance()->init(_pWindow->getGLFWWindow());
 
-	glewExperimental = GL_TRUE;
-	_EARLY_RETURN(GLEW_OK != glewInit(), "Failed to initialize glew.", false);
+	_EARLY_RETURN(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Failed to initialize GLAD.", false);
 
 #ifdef _DEBUG
 	GLint Flags; glGetIntegerv(GL_CONTEXT_FLAGS, &Flags);
@@ -70,7 +71,10 @@ bool glt::CApplicationBase::__init()
 	}
 #endif // DEBUG
 
-	_pCamera = new CCamera(glm::dvec3(0.0), double(_WindowInfo.Width) / _WindowInfo.Height);
+	glEnable(GL_DEPTH_TEST);
+	glViewport(0, 0, m_WindowInfo.Width, m_WindowInfo.Height);
+
+	_pCamera = new CCamera(glm::dvec3(0.0), double(m_WindowInfo.Width) / m_WindowInfo.Height);
 
 	if (!_initV()) return false;
 

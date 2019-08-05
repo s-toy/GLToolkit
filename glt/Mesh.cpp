@@ -1,13 +1,15 @@
-#include "GLMesh.h"
+#include "Mesh.h"
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
+using namespace glt;
+
 //**********************************************************************************************
 //FUNCTION:
-CGLMesh::CGLMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::vector<STexture> vTextures)
+CMesh::CMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::vector<STexture> vTextures)
 {
 	m_Vertices = vVertices;
 	m_Indices = vIndices;
@@ -18,7 +20,7 @@ CGLMesh::CGLMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, s
 
 //**********************************************************************************************
 //FUNCTION:
-void CGLMesh::draw(GLuint vShaderProgram)
+void CMesh::draw(GLuint vShaderProgram)
 {
 	GLuint DiffuseNr = 1;
 	GLuint SpecularNr = 1;
@@ -57,7 +59,7 @@ void CGLMesh::draw(GLuint vShaderProgram)
 
 //**********************************************************************************************
 //FUNCTION:
-void CGLMesh::__setupMesh()
+void CMesh::__setupMesh()
 {
 	glGenVertexArrays(1, &m_VAO);
 	glGenBuffers(1, &m_VBO);

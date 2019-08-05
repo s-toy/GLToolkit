@@ -1,50 +1,24 @@
 #include "MyApplication.h"
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "glt/camera.h"
-#include "GLModel.h"
-#include "GLShader.h"
+#include "glt/Camera.h"
+#include "glt/ShaderProgram.h"
+#include "glt/Model.h"
 
 using namespace glt;
-
-namespace
-{
-	const char* VERT_SHADER_PATH = "shaders/perpixel_shading_vs.glsl";
-	const char* FRAG_SHADER_PATH = "shaders/perpixel_shading_fs.glsl";
-	const char* MODEL_PATH = "../../resource/models/nanosuit/nanosuit.obj";
-
-	CGLModel g_Model;
-	GLuint g_ShaderProgram;
-
-	glm::vec3 g_PointLightPositions[] = {
-		glm::vec3(2.3f, -1.6f, -3.0f),
-		glm::vec3(-1.7f, 0.9f, 1.0f)
-	};
-}
 
 //***********************************************************************************************
 //FUNCTION:
 bool CMyApplication::_initV()
 {
-	glEnable(GL_DEPTH_TEST);
-	glViewport(0, 0, _WindowInfo.Width, _WindowInfo.Height);
+	m_pShaderProgram = new CShaderProgram;
+	m_pShaderProgram->addShader("shaders/perpixel_shading_vs.glsl", EShaderType::VERTEX_SHADER);
+	m_pShaderProgram->addShader("shaders/perpixel_shading_fs.glsl", EShaderType::FRAGMENT_SHADER);
 
-	SShaderInfo Shaders[] =
-	{
-		{ GL_VERTEX_SHADER, VERT_SHADER_PATH },
-		{ GL_FRAGMENT_SHADER, FRAG_SHADER_PATH },
-		{ GL_NONE, NULL }
-	};
-	CGLShader ShaderObj;
-	ShaderObj.loadShaders(Shaders);
-	ShaderObj.useProgram();
-	g_ShaderProgram = ShaderObj.getProgram();
+	m_pModel = new CModel;
+	m_pModel->loadModel("../../resource/models/nanosuit/nanosuit.obj");
 
-	g_Model.loadModel(MODEL_PATH);
-
-	_pCamera->setPosition(glm::dvec3(0, 0, 3));
+	_pCamera->setPosition(glm::dvec3(0, 0, 5));
 
 	return true;
 }
@@ -53,27 +27,24 @@ bool CMyApplication::_initV()
 //FUNCTION:
 void CMyApplication::_updateV()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_pShaderProgram->enable();
+	m_pShaderProgram->setUniform3f("uViewPos", _pCamera->getPosition());
+	m_pShaderProgram->setUniformMat4("uProjectionMatrix", _pCamera->getProjectionMatrix());
+	m_pShaderProgram->setUniformMat4("uViewMatrix", _pCamera->getViewMatrix());
 
-	glUniform3f(glGetUniformLocation(g_ShaderProgram, "uViewPos"), _pCamera->getPosition().x, _pCamera->getPosition().y, _pCamera->getPosition().z);
+	auto ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.5f, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f));
+	m_pShaderProgram->setUniformMat4("uModelMatrix", ModelMatrix);
 
-	glm::mat4 Projection = _pCamera->getProjectionMatrix();
-	glm::mat4 View = _pCamera->getViewMatrix();
-	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(Projection));
-	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uViewMatrix"), 1, GL_FALSE, glm::value_ptr(View));
+	m_pModel->draw(m_pShaderProgram->getProgramID());
 
-	auto Model = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.5f, 0.0f));
-	Model = glm::scale(Model, glm::vec3(0.2f, 0.2f, 0.2f));
-	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uModelMatrix"), 1, GL_FALSE, glm::value_ptr(Model));
-
-	g_Model.draw(g_ShaderProgram);
-
-	glFlush();
+	m_pShaderProgram->disable();
 }
 
 //***********************************************************************************************
 //FUNCTION:
 void CMyApplication::_destroyV()
 {
-
+	_SAFE_DELETE(m_pShaderProgram);
+	_SAFE_DELETE(m_pModel);
 }

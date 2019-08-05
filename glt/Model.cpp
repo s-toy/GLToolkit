@@ -1,4 +1,4 @@
-#include "GLModel.h"
+#include "Model.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -7,7 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
-#include <SOIL/SOIL.h>
+#include <SOIL2/stb_image.h>
+
+using namespace glt;
 
 //**********************************************************************************************
 //FUNCTION:
@@ -16,7 +18,7 @@ static GLint __loadTextureFromFile(const std::string& vPath)
 	_ASSERTE(!vPath.empty());
 
 	int Width, Height, Channels;
-	unsigned char* pImageData = SOIL_load_image(vPath.c_str(), &Width, &Height, &Channels, SOIL_LOAD_RGBA);
+	unsigned char* pImageData = stbi_load(vPath.c_str(), &Width, &Height, &Channels, STBI_rgb_alpha);
 
 	GLuint TextureID = 0;
 	if (pImageData)
@@ -32,7 +34,7 @@ static GLint __loadTextureFromFile(const std::string& vPath)
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		SOIL_free_image_data(pImageData);
+		stbi_image_free(pImageData);
 	}
 	else
 	{
@@ -44,7 +46,7 @@ static GLint __loadTextureFromFile(const std::string& vPath)
 
 //**********************************************************************************************
 //FUNCTION:
-bool CGLModel::loadModel(const std::string& vPath)
+bool CModel::loadModel(const std::string& vPath)
 {
 	Assimp::Importer LocImporter;
 	const aiScene* pScene = LocImporter.ReadFile(vPath, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -63,14 +65,14 @@ bool CGLModel::loadModel(const std::string& vPath)
 
 //**********************************************************************************************
 //FUNCTION:
-void CGLModel::draw(GLuint vShaderProgram) {
+void CModel::draw(GLuint vShaderProgram) {
 	for (GLuint i = 0; i < this->m_Meshes.size(); i++)
 		this->m_Meshes[i].draw(vShaderProgram);
 }
 
 //**********************************************************************************************
 //FUNCTION:
-void CGLModel::__processNode(const aiNode* vNode, const aiScene* vScene)
+void CModel::__processNode(const aiNode* vNode, const aiScene* vScene)
 {
 	for (GLuint i = 0; i < vNode->mNumMeshes; ++i)
 	{
@@ -86,7 +88,7 @@ void CGLModel::__processNode(const aiNode* vNode, const aiScene* vScene)
 
 //**********************************************************************************************
 //FUNCTION:
-CGLMesh CGLModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
+CMesh CModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
 {
 	std::vector<SVertex> Vertices;
 	std::vector<GLuint> Indices;
@@ -138,12 +140,12 @@ CGLMesh CGLModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
 		Textures.insert(Textures.end(), SpecularMaps.begin(), SpecularMaps.end());
 	}
 
-	return CGLMesh(Vertices, Indices, Textures);
+	return CMesh(Vertices, Indices, Textures);
 }
 
 //**********************************************************************************************
 //FUNCTION:
-std::vector<STexture> CGLModel::__loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName)
+std::vector<STexture> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName)
 {
 	std::vector<STexture> Textures;
 	for (GLuint i = 0; i < vMat->GetTextureCount(vType); ++i)
