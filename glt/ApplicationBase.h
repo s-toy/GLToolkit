@@ -11,8 +11,8 @@ namespace glt
 	class CApplicationBase
 	{
 	public:
-		CApplicationBase();
-		virtual ~CApplicationBase();
+		CApplicationBase() = default;
+		virtual ~CApplicationBase() = default;
 
 		void run();
 
@@ -21,11 +21,14 @@ namespace glt
 	protected:
 		_DISALLOW_COPY_AND_ASSIGN(CApplicationBase);
 
-		virtual bool _initV();
-		virtual void _updateV();
-		virtual void _destroyV();
+		virtual bool _initV() { return true; }
+		virtual void _updateV() {}
+		virtual void _destroyV() {}
 
 	protected:
+		bool __init();
+		void __destroy();
+
 		CWindow* _pWindow = nullptr;
 		SWindowInfo _WindowInfo = {};
 

@@ -6,32 +6,26 @@
 
 using namespace glt;
 
-CApplicationBase::CApplicationBase()
-{
-}
-
-CApplicationBase::~CApplicationBase()
-{
-}
-
 //*********************************************************************
 //FUNCTION:
 void glt::CApplicationBase::run()
 {
 	try
 	{
-		if (!_initV()) _THROW_RUNTIME_ERROR("Failed to run application due to failure of initialization!");
+		if (!__init()) _THROW_RUNTIME_ERROR("Failed to run application due to failure of initialization!");
 
 		_OUTPUT_EVENT("Succeed to init application.");
 
 		while (!glfwWindowShouldClose(_pWindow->getGLFWWindow()))
 		{
+			_pCamera->update();
 			_updateV();
+
 			glfwSwapBuffers(_pWindow->getGLFWWindow());
 			glfwPollEvents();
 		}
 
-		_destroyV();
+		__destroy();
 
 		_OUTPUT_EVENT("Succeed to end application.");
 	}
@@ -49,25 +43,25 @@ void glt::CApplicationBase::run()
 
 //*********************************************************************
 //FUNCTION:
-bool glt::CApplicationBase::_initV()
+bool glt::CApplicationBase::__init()
 {
-	if (!glfwInit()) return false;
+	_EARLY_RETURN(!glfwInit(), "Failed to initialize glfw.", false);
 
 #ifdef _DEBUG
 	glfwSetErrorCallback(debug_util::glfwErrorCallback);
 #endif
 
 	_pWindow = new CWindow;
-	if (!_pWindow->createWindow(_WindowInfo)) return false;
+	_EARLY_RETURN(!_pWindow->createWindow(_WindowInfo), "Failed to create window.", false);
 
 	CInputManager::getInstance()->init(_pWindow->getGLFWWindow());
 
 	glewExperimental = GL_TRUE;
-	if (GLEW_OK != glewInit()) return false;
+	_EARLY_RETURN(GLEW_OK != glewInit(), "Failed to initialize glew.", false);
 
 #ifdef _DEBUG
-	GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	GLint Flags; glGetIntegerv(GL_CONTEXT_FLAGS, &Flags);
+	if (Flags & GL_CONTEXT_FLAG_DEBUG_BIT)
 	{
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -76,25 +70,21 @@ bool glt::CApplicationBase::_initV()
 	}
 #endif // DEBUG
 
-	_pCamera = new CCamera();
-	_pCamera->setAspect(double(_WindowInfo.Width) / _WindowInfo.Height);
+	_pCamera = new CCamera(glm::dvec3(0.0), double(_WindowInfo.Width) / _WindowInfo.Height);
+
+	if (!_initV()) return false;
 
 	return true;
 }
 
-//***********************************************************************************************
-//FUNCTION:
-void glt::CApplicationBase::_updateV()
-{
-	_pCamera->update();
-}
-
 //*********************************************************************
 //FUNCTION:
-void glt::CApplicationBase::_destroyV()
+void glt::CApplicationBase::__destroy()
 {
-	delete _pCamera;
-	delete _pWindow;
+	_destroyV();
+
+	_SAFE_DELETE(_pCamera);
+	_SAFE_DELETE(_pWindow);
 
 	glfwTerminate();
 }

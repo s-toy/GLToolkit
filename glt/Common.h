@@ -10,6 +10,11 @@
 #define _OUTPUT_WARNING(e)			std::cerr << e << std::endl;
 #define _THROW_RUNTIME_ERROR(e)		throw std::runtime_error(e);
 
+#define _SAFE_DELETE(p)	if(p) { delete p; p = nullptr; }
+
+#define _EARLY_RETURN(condition, prompt, return_value) if (condition) { _OUTPUT_WARNING(prompt); return return_value; }
+#define _EARLY_EXIT(condition, prompt)                 if (condition) { _OUTPUT_WARNING(prompt); return;}
+
 #define _DISALLOW_COPY_AND_ASSIGN(TypeName) \
     TypeName(const TypeName &) = delete; \
     TypeName &operator =(const TypeName &) = delete;

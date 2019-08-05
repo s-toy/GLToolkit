@@ -14,7 +14,6 @@ namespace
 	const char* VERT_SHADER_PATH = "shaders/perpixel_shading_vs.glsl";
 	const char* FRAG_SHADER_PATH = "shaders/perpixel_shading_fs.glsl";
 	const char* MODEL_PATH = "../../resource/models/nanosuit/nanosuit.obj";
-	const GLuint SCREEN_WIDTH = 1600, SCREEN_HEIGHT = 900;
 
 	CGLModel g_Model;
 	GLuint g_ShaderProgram;
@@ -29,9 +28,6 @@ namespace
 //FUNCTION:
 bool CMyApplication::_initV()
 {
-	if (!CApplicationBase::_initV()) return false;
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, _WindowInfo.Width, _WindowInfo.Height);
 
@@ -57,8 +53,6 @@ bool CMyApplication::_initV()
 //FUNCTION:
 void CMyApplication::_updateV()
 {
-	CApplicationBase::_updateV();
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUniform3f(glGetUniformLocation(g_ShaderProgram, "uViewPos"), _pCamera->getPosition().x, _pCamera->getPosition().y, _pCamera->getPosition().z);
@@ -68,8 +62,7 @@ void CMyApplication::_updateV()
 	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(Projection));
 	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uViewMatrix"), 1, GL_FALSE, glm::value_ptr(View));
 
-	glm::mat4 Model;
-	Model = glm::translate(Model, glm::vec3(0.0f, -1.5f, 0.0f));
+	auto Model = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, -1.5f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.2f, 0.2f, 0.2f));
 	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uModelMatrix"), 1, GL_FALSE, glm::value_ptr(Model));
 
@@ -82,5 +75,5 @@ void CMyApplication::_updateV()
 //FUNCTION:
 void CMyApplication::_destroyV()
 {
-	CApplicationBase::_destroyV();
+
 }
