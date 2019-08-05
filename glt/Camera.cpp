@@ -55,9 +55,7 @@ glm::mat4 CCamera::getViewMatrix() const
 //Function:
 glm::mat4 CCamera::getProjectionMatrix() const
 {
-	auto ProjectionMatrix = glm::perspective(glm::radians(m_Fovy), m_Aspect, m_Near, m_Far);
-	ProjectionMatrix[1][1] *= -1; //NOTE: 在裁剪坐标系中，Vulkan与OpenGL y方向相反
-	return ProjectionMatrix;
+	return glm::perspective(glm::radians(m_Fovy), m_Aspect, m_Near, m_Far);
 }
 
 //************************************************************************************

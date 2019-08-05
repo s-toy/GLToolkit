@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "Camera.h"
 #include "InputManager.h"
+#include "DebugUtil.h"
 
 using namespace glt;
 
@@ -23,10 +24,10 @@ void glt::CApplicationBase::run()
 
 		_OUTPUT_EVENT("Succeed to init application.");
 
-		while (!glfwWindowShouldClose(m_pWindow->getGLFWWindow()))
+		while (!glfwWindowShouldClose(_pWindow->getGLFWWindow()))
 		{
 			_updateV();
-			glfwSwapBuffers(m_pWindow->getGLFWWindow());
+			glfwSwapBuffers(_pWindow->getGLFWWindow());
 			glfwPollEvents();
 		}
 
@@ -46,15 +47,6 @@ void glt::CApplicationBase::run()
 	}
 }
 
-//***********************************************************************************
-//FUNCTION:
-#ifdef _DEBUG
-static void __glfwErrorCallback(int vError, const char* vDescription)
-{
-	_OUTPUT_WARNING(std::string("GLFW error: ") + vDescription);
-}
-#endif
-
 //*********************************************************************
 //FUNCTION:
 bool glt::CApplicationBase::_initV()
@@ -62,19 +54,30 @@ bool glt::CApplicationBase::_initV()
 	if (!glfwInit()) return false;
 
 #ifdef _DEBUG
-	glfwSetErrorCallback(__glfwErrorCallback);
+	glfwSetErrorCallback(debug_util::glfwErrorCallback);
 #endif
 
-	m_pWindow = new CWindow;
-	if (!m_pWindow->createWindow(m_WindowInfo)) return false;
+	_pWindow = new CWindow;
+	if (!_pWindow->createWindow(_WindowInfo)) return false;
 
-	CInputManager::getInstance()->init(m_pWindow->getGLFWWindow());
+	CInputManager::getInstance()->init(_pWindow->getGLFWWindow());
 
 	glewExperimental = GL_TRUE;
 	if (GLEW_OK != glewInit()) return false;
 
-	m_pCamera = new CCamera;
-	m_pCamera->setAspect(double(m_WindowInfo.Width) / m_WindowInfo.Height);
+#ifdef _DEBUG
+	GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	{
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(debug_util::glDebugCallback, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+	}
+#endif // DEBUG
+
+	_pCamera = new CCamera();
+	_pCamera->setAspect(double(_WindowInfo.Width) / _WindowInfo.Height);
 
 	return true;
 }
@@ -83,15 +86,15 @@ bool glt::CApplicationBase::_initV()
 //FUNCTION:
 void glt::CApplicationBase::_updateV()
 {
-	m_pCamera->update();
+	_pCamera->update();
 }
 
 //*********************************************************************
 //FUNCTION:
 void glt::CApplicationBase::_destroyV()
 {
-	glfwTerminate();
+	delete _pCamera;
+	delete _pWindow;
 
-	delete m_pCamera;
-	delete m_pWindow;
+	glfwTerminate();
 }

@@ -31,8 +31,9 @@ bool CMyApplication::_initV()
 {
 	if (!CApplicationBase::_initV()) return false;
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glViewport(0, 0, _WindowInfo.Width, _WindowInfo.Height);
 
 	SShaderInfo Shaders[] =
 	{
@@ -47,6 +48,8 @@ bool CMyApplication::_initV()
 
 	g_Model.loadModel(MODEL_PATH);
 
+	_pCamera->setPosition(glm::dvec3(0, 0, 3));
+
 	return true;
 }
 
@@ -58,11 +61,10 @@ void CMyApplication::_updateV()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	auto pCamera = getCamera();
-	glUniform3f(glGetUniformLocation(g_ShaderProgram, "uViewPos"), pCamera->getPosition().x, pCamera->getPosition().y, pCamera->getPosition().z);
+	glUniform3f(glGetUniformLocation(g_ShaderProgram, "uViewPos"), _pCamera->getPosition().x, _pCamera->getPosition().y, _pCamera->getPosition().z);
 
-	glm::mat4 Projection = pCamera->getProjectionMatrix();
-	glm::mat4 View = pCamera->getViewMatrix();
+	glm::mat4 Projection = _pCamera->getProjectionMatrix();
+	glm::mat4 View = _pCamera->getViewMatrix();
 	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(Projection));
 	glUniformMatrix4fv(glGetUniformLocation(g_ShaderProgram, "uViewMatrix"), 1, GL_FALSE, glm::value_ptr(View));
 

@@ -116,7 +116,13 @@ bool CWindow::createWindow(const SWindowInfo& vWindowInfo)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, m_WindowInfo.IsResizable);
 
+#ifdef _DEBUG
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
 	m_WindowInfo.IsFullScreen ? __createFullScreenWindow() : __createWindow();
+
+	glfwMakeContextCurrent(m_pWindow);
 
 	return true;
 }

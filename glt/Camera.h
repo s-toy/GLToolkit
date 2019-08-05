@@ -18,11 +18,11 @@ namespace glt
 		double		getAspect() const { return m_Aspect; }
 
 		void setPosition(glm::dvec3 vCameraPos) { m_CameraPos = vCameraPos; }
-		void setMoveSpeed(double vMoveSpeed)	{ m_MoveSpeed = vMoveSpeed; }
-		void setFarPlane(double vFarPlane)		{ m_Far = vFarPlane; }
-		void setNearPlane(double vNearPlane)	{ m_Near = vNearPlane; }
-		void setFovy(double vFovy)				{ m_Fovy = vFovy; }
-		void setAspect(double vAspect)			{ m_Aspect = vAspect; }
+		void setMoveSpeed(double vMoveSpeed) { m_MoveSpeed = vMoveSpeed; }
+		void setFarPlane(double vFarPlane) { m_Far = vFarPlane; }
+		void setNearPlane(double vNearPlane) { m_Near = vNearPlane; }
+		void setFovy(double vFovy) { m_Fovy = vFovy; }
+		void setAspect(double vAspect) { m_Aspect = vAspect; }
 
 	private:
 		void __cursorCallback(double vPosX, double vPosY);
@@ -31,14 +31,14 @@ namespace glt
 		void __updateCameraVectors();
 		void __processKeyboard();
 
-		glm::mat4 m_ViewMatrix;
-		glm::mat4 m_ProjectionMatrix;
+		glm::mat4 m_ViewMatrix = {};
+		glm::mat4 m_ProjectionMatrix = {};
 
-		glm::dvec3 m_CameraPos;
-		glm::dvec3 m_CameraUp;
-		glm::dvec3 m_CameraFront;
-		glm::dvec3 m_CameraRight;
-		glm::dvec3 m_WorldUp;
+		glm::dvec3 m_CameraPos = {};
+		glm::dvec3 m_CameraUp = {};
+		glm::dvec3 m_CameraFront = {};
+		glm::dvec3 m_CameraRight = {};
+		glm::dvec3 m_WorldUp = {};
 
 		double m_MoveSpeed = 0.01;
 		double m_Pitch = 0.0;

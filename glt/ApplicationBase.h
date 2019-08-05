@@ -16,7 +16,7 @@ namespace glt
 
 		void run();
 
-		const CCamera* getCamera() const { return m_pCamera; }
+		CCamera* fetchCamera() const { return _pCamera; }
 
 	protected:
 		_DISALLOW_COPY_AND_ASSIGN(CApplicationBase);
@@ -25,10 +25,10 @@ namespace glt
 		virtual void _updateV();
 		virtual void _destroyV();
 
-	private:
-		CWindow* m_pWindow = nullptr;
-		SWindowInfo m_WindowInfo = {};
+	protected:
+		CWindow* _pWindow = nullptr;
+		SWindowInfo _WindowInfo = {};
 
-		CCamera* m_pCamera = nullptr;
+		CCamera* _pCamera = nullptr;
 	};
 }
