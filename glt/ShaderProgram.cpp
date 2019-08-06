@@ -149,21 +149,21 @@ void CShaderProgram::__compileShader(GLuint& vShader)
 {
 	glCompileShader(vShader);
 
-	GLint Compile;
-	glGetShaderiv(vShader, GL_COMPILE_STATUS, &Compile);
+	int Success;
+	glGetShaderiv(vShader, GL_COMPILE_STATUS, &Success);
 
-	if (!Compile)
+	if (!Success)
 	{
 		GLint LogLength;
-		GLchar* pLog = nullptr;
+		GLchar* pInfoLog = nullptr;
 		glGetShaderiv(vShader, GL_INFO_LOG_LENGTH, &LogLength);
 
 		if (LogLength > 0)
 		{
-			pLog = new GLchar[LogLength];
-			glGetShaderInfoLog(vShader, LogLength, &LogLength, pLog);
-			fprintf(stderr, "Compile log = '%s' \n", pLog);
-			delete[] pLog;
+			pInfoLog = new GLchar[LogLength];
+			glGetShaderInfoLog(vShader, LogLength, &LogLength, pInfoLog);
+			fprintf(stderr, "Compile log = '%s' \n", pInfoLog);
+			delete[] pInfoLog;
 		}
 	}
 }
@@ -174,27 +174,20 @@ void CShaderProgram::__linkProgram(GLuint& vProgram)
 {
 	glLinkProgram(vProgram);
 
-	GLint Link;
-	glGetProgramiv(vProgram, GL_LINK_STATUS, &Link);
+	int Success;
+	glGetProgramiv(vProgram, GL_LINK_STATUS, &Success);
 
-	if (!Link)
+	if (!Success)
 	{
 		GLint LogLength;
 		glGetProgramiv(vProgram, GL_INFO_LOG_LENGTH, &LogLength);
 
 		if (LogLength > 0)
 		{
-			auto pLog = new GLchar[LogLength];
-			glGetProgramInfoLog(vProgram, LogLength, &LogLength, pLog);
-			fprintf(stderr, "Link log = '%s' \n", pLog);
-			delete[] pLog;
+			auto pInfoLog = new GLchar[LogLength];
+			glGetProgramInfoLog(vProgram, LogLength, &LogLength, pInfoLog);
+			fprintf(stderr, "Link log = '%s' \n", pInfoLog);
+			delete[] pInfoLog;
 		}
 	}
-}
-
-//*********************************************************************************
-//FUNCTION:
-void CShaderProgram::__printUniformWarningInfo(const std::string& vUniform)
-{
-	std::cout << "The Uniform '" << vUniform << "' does not exist or never be used: " << std::endl;
 }
