@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <assimp/Importer.hpp>
+#include "IndexBuffer.h"
+#include "VertexArray.h"
 
 namespace glt
 {
@@ -23,7 +24,7 @@ namespace glt
 	class CMesh
 	{
 	public:
-		CMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::vector<STexture> vTextures);
+		CMesh(std::vector<SVertex> vVertices, std::vector<unsigned int> vIndices, std::vector<STexture> vTextures);
 
 		void draw(GLuint vShaderProgram);
 
@@ -34,6 +35,9 @@ namespace glt
 		std::vector<SVertex> m_Vertices;
 		std::vector<GLuint> m_Indices;
 		std::vector<STexture> m_Textures;
-		GLuint m_VAO, m_VBO, m_EBO;
+
+		std::unique_ptr<CVertexBuffer> m_pVertexBuffer;
+		std::unique_ptr<CIndexBuffer> m_pIndexBuffer;
+		std::unique_ptr<CVertexArray> m_pVertexArray;
 	};
 }

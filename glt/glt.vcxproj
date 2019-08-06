@@ -160,22 +160,30 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="DebugUtil.h" />
+    <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="MonitorManager.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="VertexArray.h" />
+    <ClInclude Include="VertexArrayLayout.h" />
+    <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ApplicationBase.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DebugUtil.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="MonitorManager.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="VertexArray.cpp" />
+    <ClCompile Include="VertexArrayLayout.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

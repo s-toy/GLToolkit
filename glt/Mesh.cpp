@@ -1,9 +1,6 @@
 #include "Mesh.h"
 #include <string>
-#include <fstream>
 #include <sstream>
-#include <iostream>
-#include <glm/gtc/matrix_transform.hpp>
 
 using namespace glt;
 
@@ -45,10 +42,9 @@ void CMesh::draw(GLuint vShaderProgram)
 		glBindTexture(GL_TEXTURE_2D, m_Textures[i].Id);
 	}
 
-	glBindVertexArray(m_VAO);
+	m_pVertexArray->bind();
+	m_pIndexBuffer->bind();
 	glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
-
-	glBindVertexArray(0);
 
 	for (GLuint i = 0; i < m_Textures.size(); i++)
 	{
@@ -61,25 +57,13 @@ void CMesh::draw(GLuint vShaderProgram)
 //FUNCTION:
 void CMesh::__setupMesh()
 {
-	glGenVertexArrays(1, &m_VAO);
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_EBO);
+	m_pVertexBuffer = std::make_unique<CVertexBuffer>(&m_Vertices[0], m_Vertices.size() * sizeof(SVertex));
+	m_pIndexBuffer = std::make_unique<CIndexBuffer>(&m_Indices[0], m_Indices.size());
+	m_pVertexArray = std::make_unique<CVertexArray>();
 
-	glBindVertexArray(m_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(SVertex), &m_Vertices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(GLuint), &m_Indices[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SVertex), (GLvoid*)0);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(SVertex), (GLvoid*)offsetof(SVertex, Normal));
-
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(SVertex), (GLvoid*)offsetof(SVertex, TexCoords));
-
-	glBindVertexArray(0);
+	CVertexArrayLayout Layout;
+	Layout.push<float>(3);
+	Layout.push<float>(3);
+	Layout.push<float>(2);
+	m_pVertexArray->addBuffer(*m_pVertexBuffer, Layout);
 }
