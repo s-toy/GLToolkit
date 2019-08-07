@@ -112,15 +112,4 @@
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="src\glt.vcxproj">
-      <Filter>src</Filter>
-    </None>
-    <None Include="src\glt.vcxproj.filters">
-      <Filter>src</Filter>
-    </None>
-    <None Include="src\glt.vcxproj.user">
-      <Filter>src</Filter>
-    </None>
-  </ItemGroup>
 </Project>
