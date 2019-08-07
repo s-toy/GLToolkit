@@ -7,42 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
-#include <SOIL2/stb_image.h>
+#include "TextureUtil.h"
 
 using namespace glt;
-
-//**********************************************************************************************
-//FUNCTION:
-static GLint __loadTextureFromFile(const std::string& vPath)
-{
-	_ASSERTE(!vPath.empty());
-
-	int Width, Height, Channels;
-	unsigned char* pImageData = stbi_load(vPath.c_str(), &Width, &Height, &Channels, STBI_rgb_alpha);
-
-	GLuint TextureID = 0;
-	if (pImageData)
-	{
-		glGenTextures(1, &TextureID);
-		glBindTexture(GL_TEXTURE_2D, TextureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImageData);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		stbi_image_free(pImageData);
-	}
-	else
-	{
-		std::cerr << "Failed to load texture file [" << vPath << "]!" << std::endl;
-	}
-
-	return TextureID;
-}
 
 //**********************************************************************************************
 //FUNCTION:
@@ -167,7 +134,7 @@ std::vector<STexture> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiT
 		{
 			STexture TempTexture;
 			auto TexturePath = this->m_Directory + std::string("/") + std::string(Str.C_Str());
-			TempTexture.Id = __loadTextureFromFile(TexturePath);
+			TempTexture.Id = util::loadTexture(TexturePath.c_str(), GL_REPEAT, GL_LINEAR, GL_RGBA);
 			TempTexture.Type = vTypeName;
 			TempTexture.Path = Str;
 			Textures.push_back(TempTexture);

@@ -1,5 +1,5 @@
 #pragma once
-#include "glt/ApplicationBase.h"
+#include "ApplicationBase.h"
 
 namespace glt
 {

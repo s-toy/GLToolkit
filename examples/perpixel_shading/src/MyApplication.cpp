@@ -1,9 +1,9 @@
 #include "MyApplication.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "glt/Camera.h"
-#include "glt/ShaderProgram.h"
-#include "glt/Model.h"
+#include "Camera.h"
+#include "ShaderProgram.h"
+#include "Model.h"
 
 using namespace glt;
 
