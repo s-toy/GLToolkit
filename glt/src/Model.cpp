@@ -16,7 +16,7 @@ using namespace glt;
 bool CModel::loadModel(const std::string& vPath)
 {
 	Assimp::Importer LocImporter;
-	const aiScene* pScene = LocImporter.ReadFile(vPath, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* pScene = LocImporter.ReadFile(vPath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
 
 	if (!pScene || pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
 	{

@@ -163,10 +163,10 @@
     <ClInclude Include="src\DebugUtil.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\InputManager.h" />
+    <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\MonitorManager.h" />
-    <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\ShaderProgram.h" />
     <ClInclude Include="src\TextureUtil.h" />
     <ClInclude Include="src\VertexArray.h" />
@@ -181,10 +181,10 @@
     <ClCompile Include="src\DebugUtil.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\MonitorManager.cpp" />
-    <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\TextureUtil.cpp" />
     <ClCompile Include="src\VertexArray.cpp" />

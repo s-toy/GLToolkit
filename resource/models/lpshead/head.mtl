@@ -1,0 +1,7 @@
+# File created by ZBrush
+# ToolType: PolyMesh3D
+# www.zbrush.com
+newmtl defaultMat
+map_Kd lambertian.png
+map_Ks SpecularAOMap.png
+Ns 5

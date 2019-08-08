@@ -135,10 +135,7 @@ const GLchar* const CShaderProgram::__readShaderFile(const std::string& vFileNam
 GLint CShaderProgram::__getUniformLocation(const std::string& vName) const
 {
 	if (m_UniformLocCacheMap.find(vName) == m_UniformLocCacheMap.end())
-	{
 		m_UniformLocCacheMap[vName] = glGetUniformLocation(m_ProgramID, vName.c_str());
-		_ASSERTE(m_UniformLocCacheMap[vName] != -1);
-	}
 
 	return m_UniformLocCacheMap[vName];
 }

@@ -40,9 +40,6 @@
     <ClInclude Include="src\MonitorManager.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Renderer.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="src\ShaderProgram.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -59,6 +56,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Window.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Material.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
@@ -90,9 +90,6 @@
     <ClCompile Include="src\MonitorManager.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Renderer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\ShaderProgram.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -109,6 +106,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Window.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Material.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
