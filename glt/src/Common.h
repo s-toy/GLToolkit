@@ -58,4 +58,18 @@ namespace glt
 				&& Width == r.Width && Height == r.Height && IsFullScreen == r.IsFullScreen && IsResizable == r.IsResizable;
 		}
 	};
+
+	template <class ... Args>
+	static std::string format(const char *vFormat, Args... args)
+	{
+		if (nullptr == vFormat) return std::string{};
+
+		int n = snprintf(nullptr, 0, vFormat, args...);
+		if (0 == n) return std::string{};
+
+		std::string Ret(n, '\0');
+		snprintf(&*Ret.begin(), n + 1, vFormat, args...);
+
+		return Ret;
+	}
 }

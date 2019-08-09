@@ -21,12 +21,14 @@ namespace glt
 		glm::vec2 TexCoords;
 	} SVertex;
 
+	class CShaderProgram;
+
 	class CMesh
 	{
 	public:
 		CMesh(std::vector<SVertex> vVertices, std::vector<unsigned int> vIndices, std::vector<STexture> vTextures);
 
-		void draw(GLuint vShaderProgram);
+		void draw(const CShaderProgram& vShaderProgram) const;
 
 	private:
 		void __setupMesh();

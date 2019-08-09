@@ -1,8 +1,8 @@
 #version 460
 #extension GL_ARB_separate_shader_objects : enable
 
-uniform sampler2D uMaterialDiffuse1;
-uniform sampler2D uMaterialSpecular1;
+uniform sampler2D uMaterialDiffuse;
+uniform sampler2D uMaterialSpecular;
 
 uniform vec3 uViewPos = vec3(0.0);
 
@@ -31,8 +31,8 @@ void main()
 	vec3 NormalW = normalize(_inNormalW);
 
 	SMaterial Material;
-	Material.Diffuse = texture(uMaterialDiffuse1, _inTexCoord).rgb;
-	Material.Specular = texture(uMaterialSpecular1, _inTexCoord).rgb;
+	Material.Diffuse = texture(uMaterialDiffuse, _inTexCoord).rgb;
+	Material.Specular = texture(uMaterialSpecular, _inTexCoord).rgb;
 	Material.Shinness = 32.0;
 
 	vec3 FinalColor = vec3(0.0);

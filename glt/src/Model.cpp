@@ -8,33 +8,34 @@
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include "TextureUtil.h"
+#include "Common.h"
 
 using namespace glt;
 
+//***********************************************************************************************
+//FUNCTION:
+CModel::CModel(const std::string& vFilePath)
+{
+	if (!__loadModel(vFilePath))
+	{
+		_OUTPUT_WARNING("Failed to load model.");
+		_ASSERTE(false);
+	}
+}
+
 //**********************************************************************************************
 //FUNCTION:
-bool CModel::loadModel(const std::string& vPath)
+bool CModel::__loadModel(const std::string& vPath)
 {
 	Assimp::Importer LocImporter;
 	const aiScene* pScene = LocImporter.ReadFile(vPath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
 
-	if (!pScene || pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
-	{
-		std::cout << "ERROR::ASSIMP:: " << LocImporter.GetErrorString() << std::endl;
-		return false;
-	}
+	if (!pScene || pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode) { return false; }
 
 	m_Directory = vPath.substr(0, vPath.find_last_of('/'));
 	__processNode(pScene->mRootNode, pScene);
 
 	return true;
-}
-
-//**********************************************************************************************
-//FUNCTION:
-void CModel::draw(GLuint vShaderProgram) {
-	for (GLuint i = 0; i < this->m_Meshes.size(); i++)
-		this->m_Meshes[i].draw(vShaderProgram);
 }
 
 //**********************************************************************************************
@@ -142,4 +143,14 @@ std::vector<STexture> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiT
 		}
 	}
 	return Textures;
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CModel::draw(const CShaderProgram& vShaderProgram) const
+{
+	for (const auto& Mesh : m_Meshes)
+	{
+		Mesh.draw(vShaderProgram);
+	}
 }

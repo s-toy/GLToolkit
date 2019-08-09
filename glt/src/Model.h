@@ -6,12 +6,14 @@
 
 namespace glt
 {
+	class CShaderProgram;
+
 	class CModel
 	{
 	public:
-		void draw(GLuint vShaderProgram);
+		CModel(const std::string& vFilePath);
 
-		bool loadModel(const std::string& vPath);
+		void draw(const CShaderProgram& vShaderProgram) const;
 
 	private:
 		void __processNode(const aiNode* vNode, const aiScene* vScene);
@@ -20,7 +22,8 @@ namespace glt
 
 		std::vector<STexture> __loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName);
 
-	private:
+		bool __loadModel(const std::string& vPath);
+
 		std::vector<CMesh> m_Meshes;
 		std::string m_Directory;
 		std::vector<STexture> m_LoadedTextures;

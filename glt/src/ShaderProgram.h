@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-#include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
 namespace glt
 {
@@ -20,20 +20,22 @@ namespace glt
 		CShaderProgram();
 		~CShaderProgram();
 
+		void bind() const { glUseProgram(m_ProgramID); }
+		void unbind() const { glUseProgram(0); }
+
 		void addShader(const std::string& vShaderName, EShaderType vShaderType);
-		void enable() const { glUseProgram(m_ProgramID); }
-		void disable() const { glUseProgram(0); }
+
 		unsigned int getProgramID() const { return m_ProgramID; }
 
-		void setUniform1i(const std::string& vName, int vValue);
+		void updateUniform1i(const std::string& vName, int vValue) const;
 
-		void setUniform1f(const std::string& vName, float vValue);
-		void setUniform2f(const std::string& vName, const glm::vec2& vValue);
-		void setUniform3f(const std::string& vName, const glm::vec3& vValue);
-		void setUniform4f(const std::string& vName, const glm::vec4& vValue);
+		void updateUniform1f(const std::string& vName, float vValue) const;
+		void updateUniform2f(const std::string& vName, const glm::vec2& vValue) const;
+		void updateUniform3f(const std::string& vName, const glm::vec3& vValue) const;
+		void updateUniform4f(const std::string& vName, const glm::vec4& vValue) const;
 
-		void setUniformMat3(const std::string& vName, const glm::mat3& vValue);
-		void setUniformMat4(const std::string& vName, const glm::mat4& vValue);
+		void updateUniformMat3(const std::string& vName, const glm::mat3& vValue) const;
+		void updateUniformMat4(const std::string& vName, const glm::mat4& vValue) const;
 
 	private:
 		GLuint m_ProgramID;
@@ -44,6 +46,5 @@ namespace glt
 		GLint __getUniformLocation(const std::string& vName) const;
 		void __compileShader(GLuint& vShader);
 		void __linkProgram(GLuint& vProgram);
-		void __printUniformWarningInfo(const std::string& vUniform);
 	};
 }

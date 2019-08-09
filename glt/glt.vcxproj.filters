@@ -22,9 +22,6 @@
     <ClInclude Include="src\Common.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\DebugUtil.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="src\IndexBuffer.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -73,9 +70,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Camera.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DebugUtil.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\IndexBuffer.cpp">

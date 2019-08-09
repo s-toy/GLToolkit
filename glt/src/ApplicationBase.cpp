@@ -1,8 +1,7 @@
 #include "ApplicationBase.h"
+#include <GLFW/glfw3.h>
 #include "Window.h"
-#include "Camera.h"
 #include "InputManager.h"
-#include "DebugUtil.h"
 
 using namespace glt;
 
@@ -18,8 +17,6 @@ void glt::CApplicationBase::run()
 
 		while (!glfwWindowShouldClose(_pWindow->getGLFWWindow()))
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 			_pCamera->update();
 			_updateV();
 
@@ -43,6 +40,15 @@ void glt::CApplicationBase::run()
 	}
 }
 
+//***********************************************************************************
+//FUNCTION:
+#ifdef _DEBUG
+static void __glfwErrorCallback(int vError, const char* vDescription)
+{
+	_OUTPUT_WARNING(std::string("GLFW error: ") + vDescription);
+}
+#endif
+
 //*********************************************************************
 //FUNCTION:
 bool glt::CApplicationBase::__init()
@@ -50,29 +56,15 @@ bool glt::CApplicationBase::__init()
 	_EARLY_RETURN(!glfwInit(), "Failed to initialize glfw.", false);
 
 #ifdef _DEBUG
-	glfwSetErrorCallback(debug_util::glfwErrorCallback);
+	glfwSetErrorCallback(__glfwErrorCallback);
 #endif
 
 	_pWindow = new CWindow;
 	_EARLY_RETURN(!_pWindow->createWindow(m_WindowInfo), "Failed to create window.", false);
 
+	_EARLY_RETURN(!CRenderer::getInstance()->init(), "Failed to initialize renderer.", false);
+
 	CInputManager::getInstance()->init(_pWindow->getGLFWWindow());
-
-	_EARLY_RETURN(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Failed to initialize GLAD.", false);
-
-#ifdef _DEBUG
-	GLint Flags; glGetIntegerv(GL_CONTEXT_FLAGS, &Flags);
-	if (Flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-	{
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(debug_util::glDebugCallback, nullptr);
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-	}
-#endif // DEBUG
-
-	glEnable(GL_DEPTH_TEST);
-	glViewport(0, 0, m_WindowInfo.Width, m_WindowInfo.Height);
 
 	_pCamera = new CCamera(glm::dvec3(0.0), double(m_WindowInfo.Width) / m_WindowInfo.Height);
 
@@ -89,6 +81,8 @@ void glt::CApplicationBase::__destroy()
 
 	_SAFE_DELETE(_pCamera);
 	_SAFE_DELETE(_pWindow);
+
+	CRenderer::getInstance()->destroy();
 
 	glfwTerminate();
 }

@@ -1,12 +1,11 @@
 #pragma once
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include "Common.h"
+#include "Renderer.h"
+#include "Camera.h"
 
 namespace glt
 {
 	class CWindow;
-	class CCamera;
 
 	class CApplicationBase
 	{
@@ -18,6 +17,7 @@ namespace glt
 
 		void setWindowWidth(int vWidth) { m_WindowInfo.Width = vWidth; }
 		void setWindowHeight(int vHeight) { m_WindowInfo.Height = vHeight; }
+		void setWindowTitle(const char* vTitle) { m_WindowInfo.Title = vTitle; }
 
 		CCamera* fetchCamera() const { return _pCamera; }
 

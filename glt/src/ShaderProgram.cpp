@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
+#include "Common.h"
 
 using namespace glt;
 
@@ -53,49 +54,49 @@ void CShaderProgram::addShader(const std::string& vShaderName, EShaderType vShad
 
 //*********************************************************************
 //FUNCTION:
-void CShaderProgram::setUniform1i(const std::string& vName, int vValue)
+void CShaderProgram::updateUniform1i(const std::string& vName, int vValue) const
 {
 	glUniform1i(__getUniformLocation(vName), vValue);
 }
 
 //*********************************************************************
 //FUNCTION:
-void CShaderProgram::setUniform1f(const std::string& vName, float vValue)
+void CShaderProgram::updateUniform1f(const std::string& vName, float vValue) const
 {
 	glUniform1f(__getUniformLocation(vName), vValue);
 }
 
 //*********************************************************************
 //FUNCTION:
-void CShaderProgram::setUniform2f(const std::string& vName, const glm::vec2& vValue)
+void CShaderProgram::updateUniform2f(const std::string& vName, const glm::vec2& vValue) const
 {
 	glUniform2f(__getUniformLocation(vName), vValue.x, vValue.y);
 }
 
 //*********************************************************************
 //FUNCTION:
-void CShaderProgram::setUniform3f(const std::string& vName, const glm::vec3& vValue)
+void CShaderProgram::updateUniform3f(const std::string& vName, const glm::vec3& vValue) const
 {
 	glUniform3f(__getUniformLocation(vName), vValue.x, vValue.y, vValue.z);
 }
 
 //*********************************************************************
 //FUNCTION:
-void CShaderProgram::setUniform4f(const std::string& vName, const glm::vec4& vValue)
+void CShaderProgram::updateUniform4f(const std::string& vName, const glm::vec4& vValue) const
 {
 	glUniform4f(__getUniformLocation(vName), vValue.x, vValue.y, vValue.z, vValue.w);
 }
 
 //*********************************************************************
 //FUNCTION:
-void CShaderProgram::setUniformMat3(const std::string& vName, const glm::mat3& vValue)
+void CShaderProgram::updateUniformMat3(const std::string& vName, const glm::mat3& vValue) const
 {
 	glUniformMatrix3fv(__getUniformLocation(vName), 1, GL_FALSE, &vValue[0][0]);
 }
 
 //*********************************************************************
 //FUNCTION:
-void CShaderProgram::setUniformMat4(const std::string& vName, const glm::mat4& vValue)
+void CShaderProgram::updateUniformMat4(const std::string& vName, const glm::mat4& vValue) const
 {
 	glUniformMatrix4fv(__getUniformLocation(vName), 1, GL_FALSE, &vValue[0][0]);
 }
@@ -135,7 +136,10 @@ const GLchar* const CShaderProgram::__readShaderFile(const std::string& vFileNam
 GLint CShaderProgram::__getUniformLocation(const std::string& vName) const
 {
 	if (m_UniformLocCacheMap.find(vName) == m_UniformLocCacheMap.end())
+	{
 		m_UniformLocCacheMap[vName] = glGetUniformLocation(m_ProgramID, vName.c_str());
+		if (m_UniformLocCacheMap[vName] == -1) _OUTPUT_WARNING(format("The Uniform '%s' does not exist or never be used.", vName.c_str()));
+	}
 
 	return m_UniformLocCacheMap[vName];
 }

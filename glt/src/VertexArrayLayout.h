@@ -19,6 +19,7 @@ namespace glt
 			case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
 			default: _ASSERTE(false);
 			}
+			return 0;
 		}
 	};
 
