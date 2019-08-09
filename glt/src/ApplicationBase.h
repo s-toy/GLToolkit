@@ -1,7 +1,6 @@
 #pragma once
 #include "Common.h"
 #include "Renderer.h"
-#include "Camera.h"
 
 namespace glt
 {
@@ -19,8 +18,6 @@ namespace glt
 		void setWindowHeight(int vHeight) { m_WindowInfo.Height = vHeight; }
 		void setWindowTitle(const char* vTitle) { m_WindowInfo.Title = vTitle; }
 
-		CCamera* fetchCamera() const { return _pCamera; }
-
 	protected:
 		_DISALLOW_COPY_AND_ASSIGN(CApplicationBase);
 
@@ -33,7 +30,6 @@ namespace glt
 		void __destroy();
 
 		CWindow* _pWindow = nullptr;
-		CCamera* _pCamera = nullptr;
 
 	private:
 		SWindowInfo m_WindowInfo = {};

@@ -138,7 +138,9 @@ GLint CShaderProgram::__getUniformLocation(const std::string& vName) const
 	if (m_UniformLocCacheMap.find(vName) == m_UniformLocCacheMap.end())
 	{
 		m_UniformLocCacheMap[vName] = glGetUniformLocation(m_ProgramID, vName.c_str());
+#ifdef _DEBUG
 		if (m_UniformLocCacheMap[vName] == -1) _OUTPUT_WARNING(format("The Uniform '%s' does not exist or never be used.", vName.c_str()));
+#endif
 	}
 
 	return m_UniformLocCacheMap[vName];

@@ -72,6 +72,8 @@ bool CRenderer::init()
 
 	glEnable(GL_DEPTH_TEST);
 
+	m_pCamera = new CCamera;
+
 	return true;
 }
 
@@ -79,6 +81,7 @@ bool CRenderer::init()
 //FUNCTION:
 void CRenderer::destroy()
 {
+	_SAFE_DELETE(m_pCamera);
 }
 
 //***********************************************************************************************
@@ -96,6 +99,7 @@ void CRenderer::draw(const CVertexArray& vVertexArray, const CIndexBuffer& vInde
 	vIndexBuffer.bind();
 	vShaderProgram.bind();
 
+	__updateShaderUniform(vShaderProgram);
 	glDrawElements(GL_TRIANGLES, vIndexBuffer.getCount(), GL_UNSIGNED_INT, nullptr);
 
 #ifdef _DEBUG
@@ -111,9 +115,30 @@ void CRenderer::draw(const CModel& vModel, const CShaderProgram& vShaderProgram)
 {
 	vShaderProgram.bind();
 
+	__updateShaderUniform(vShaderProgram);
+	auto ModelMatrix = glm::translate(glm::mat4(1.0), vModel.getPosition());
+	ModelMatrix = glm::scale(ModelMatrix, vModel.getScale());
+	vShaderProgram.updateUniformMat4("uModelMatrix", ModelMatrix);
+
 	vModel.draw(vShaderProgram);
 
 #ifdef _DEBUG
 	vShaderProgram.unbind();
 #endif
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::__updateShaderUniform(const CShaderProgram& vShaderProgram) const
+{
+	vShaderProgram.updateUniform3f("uViewPos", m_pCamera->getPosition());
+	vShaderProgram.updateUniformMat4("uProjectionMatrix", m_pCamera->getProjectionMatrix());
+	vShaderProgram.updateUniformMat4("uViewMatrix", m_pCamera->getViewMatrix());
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::update()
+{
+	m_pCamera->update();
 }

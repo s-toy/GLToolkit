@@ -2,13 +2,14 @@
 #include <string>
 #include <vector>
 #include <assimp/scene.h>
+#include "Entity.h"
 #include "Mesh.h"
 
 namespace glt
 {
 	class CShaderProgram;
 
-	class CModel
+	class CModel : public CEntity
 	{
 	public:
 		CModel(const std::string& vFilePath);

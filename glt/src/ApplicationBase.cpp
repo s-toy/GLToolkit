@@ -17,7 +17,7 @@ void glt::CApplicationBase::run()
 
 		while (!glfwWindowShouldClose(_pWindow->getGLFWWindow()))
 		{
-			_pCamera->update();
+			CRenderer::getInstance()->update();
 			_updateV();
 
 			glfwSwapBuffers(_pWindow->getGLFWWindow());
@@ -63,10 +63,9 @@ bool glt::CApplicationBase::__init()
 	_EARLY_RETURN(!_pWindow->createWindow(m_WindowInfo), "Failed to create window.", false);
 
 	_EARLY_RETURN(!CRenderer::getInstance()->init(), "Failed to initialize renderer.", false);
+	CRenderer::getInstance()->fetchCamera()->setAspect((double)m_WindowInfo.Width / m_WindowInfo.Height);
 
 	CInputManager::getInstance()->init(_pWindow->getGLFWWindow());
-
-	_pCamera = new CCamera(glm::dvec3(0.0), double(m_WindowInfo.Width) / m_WindowInfo.Height);
 
 	if (!_initV()) return false;
 
@@ -79,7 +78,6 @@ void glt::CApplicationBase::__destroy()
 {
 	_destroyV();
 
-	_SAFE_DELETE(_pCamera);
 	_SAFE_DELETE(_pWindow);
 
 	CRenderer::getInstance()->destroy();
