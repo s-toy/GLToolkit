@@ -15,7 +15,7 @@ namespace glt
 		unsigned int getCount() const { return m_Count; }
 
 	private:
-		unsigned int m_BufferID = 0;
+		unsigned int m_ObjectID = 0;
 		unsigned int m_Count = 0;
 	};
 }

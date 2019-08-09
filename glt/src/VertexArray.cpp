@@ -4,13 +4,13 @@ using namespace glt;
 
 CVertexArray::CVertexArray()
 {
-	glGenVertexArrays(1, &m_VertexArrayObjectID);
-	glBindVertexArray(m_VertexArrayObjectID);
+	glGenVertexArrays(1, &m_ObjectID);
+	glBindVertexArray(m_ObjectID);
 }
 
 CVertexArray::~CVertexArray()
 {
-	glDeleteVertexArrays(1, &m_VertexArrayObjectID);
+	glDeleteVertexArrays(1, &m_ObjectID);
 }
 
 //*********************************************************************
@@ -33,7 +33,7 @@ void CVertexArray::addBuffer(const CVertexBuffer& vBuffer, const CVertexArrayLay
 //FUNCTION:
 void glt::CVertexArray::bind() const
 {
-	glBindVertexArray(m_VertexArrayObjectID);
+	glBindVertexArray(m_ObjectID);
 }
 
 //*********************************************************************

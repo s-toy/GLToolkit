@@ -15,6 +15,6 @@ namespace glt
 		void unbind() const;
 
 	private:
-		unsigned int m_VertexArrayObjectID = 0;
+		unsigned int m_ObjectID = 0;
 	};
 }
