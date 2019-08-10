@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
-#include "TextureUtil.h"
+#include "Texture.h"
 #include "Common.h"
 
 using namespace glt;
@@ -21,6 +21,13 @@ CModel::CModel(const std::string& vFilePath)
 		_OUTPUT_WARNING("Failed to load model.");
 		_ASSERTE(false);
 	}
+}
+
+//***********************************************************************************************
+//FUNCTION:
+CModel::~CModel()
+{
+	for (auto pTexture : m_LoadedTextures) _SAFE_DELETE(pTexture);
 }
 
 //**********************************************************************************************
@@ -60,7 +67,7 @@ CMesh CModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
 {
 	std::vector<SVertex> Vertices;
 	std::vector<GLuint> Indices;
-	std::vector<STexture> Textures;
+	std::vector<CTexture2D*> Textures;
 
 	for (GLuint i = 0; i < vMesh->mNumVertices; ++i)
 	{
@@ -101,10 +108,10 @@ CMesh CModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
 	{
 		aiMaterial* pMaterial = vScene->mMaterials[vMesh->mMaterialIndex];
 
-		std::vector<STexture> DiffuseMaps = __loadMaterialTextures(pMaterial, aiTextureType_DIFFUSE, "uMaterialDiffuse");
+		std::vector<CTexture2D*> DiffuseMaps = __loadMaterialTextures(pMaterial, aiTextureType_DIFFUSE, "uMaterialDiffuse");
 		Textures.insert(Textures.end(), DiffuseMaps.begin(), DiffuseMaps.end());
 
-		std::vector<STexture> SpecularMaps = __loadMaterialTextures(pMaterial, aiTextureType_SPECULAR, "uMaterialSpecular");
+		std::vector<CTexture2D*> SpecularMaps = __loadMaterialTextures(pMaterial, aiTextureType_SPECULAR, "uMaterialSpecular");
 		Textures.insert(Textures.end(), SpecularMaps.begin(), SpecularMaps.end());
 	}
 
@@ -113,9 +120,9 @@ CMesh CModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
 
 //**********************************************************************************************
 //FUNCTION:
-std::vector<STexture> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName)
+std::vector<CTexture2D*> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName)
 {
-	std::vector<STexture> Textures;
+	std::vector<CTexture2D*> Textures;
 	for (GLuint i = 0; i < vMat->GetTextureCount(vType); ++i)
 	{
 		aiString Str;
@@ -124,7 +131,7 @@ std::vector<STexture> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiT
 		GLboolean Skip = false;
 		for (GLuint j = 0; j < m_LoadedTextures.size(); j++)
 		{
-			if (std::strcmp(m_LoadedTextures[j].Path.C_Str(), Str.C_Str()) == 0)
+			if (std::strcmp(m_LoadedTextures[j]->getFilePath().c_str(), Str.C_Str()) == 0)
 			{
 				Textures.push_back(m_LoadedTextures[j]);
 				Skip = true;
@@ -133,13 +140,13 @@ std::vector<STexture> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiT
 		}
 		if (!Skip)
 		{
-			STexture TempTexture;
 			auto TexturePath = this->m_Directory + std::string("/") + std::string(Str.C_Str());
-			TempTexture.Id = util::loadTexture(TexturePath.c_str(), GL_REPEAT, GL_LINEAR, GL_RGBA);
-			TempTexture.Type = vTypeName;
-			TempTexture.Path = Str;
-			Textures.push_back(TempTexture);
-			this->m_LoadedTextures.push_back(TempTexture);
+
+			auto pTempTexture = new CTexture2D;
+			pTempTexture->load(TexturePath.c_str(), GL_REPEAT, GL_LINEAR, GL_RGBA);
+			pTempTexture->setTextureName(vTypeName);
+			Textures.push_back(pTempTexture);
+			this->m_LoadedTextures.push_back(pTempTexture);
 		}
 	}
 	return Textures;

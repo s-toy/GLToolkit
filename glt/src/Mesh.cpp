@@ -3,12 +3,13 @@
 #include <sstream>
 #include "ShaderProgram.h"
 #include "Renderer.h"
+#include "Texture.h"
 
 using namespace glt;
 
 //**********************************************************************************************
 //FUNCTION:
-CMesh::CMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::vector<STexture> vTextures)
+CMesh::CMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::vector<CTexture2D*> vTextures)
 {
 	m_Vertices = vVertices;
 	m_Indices = vIndices;
@@ -41,9 +42,8 @@ void CMesh::draw(const CShaderProgram& vShaderProgram) const
 
 	for (GLuint i = 0; i < m_Textures.size(); ++i)
 	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, m_Textures[i].Id);
-		vShaderProgram.updateUniform1i(m_Textures[i].Type, i);
+		m_Textures[i]->bindV(i);
+		vShaderProgram.updateUniform1i(m_Textures[i]->getTextureName(), i);
 	}
 
 	glDrawElements(GL_TRIANGLES, m_pIndexBuffer->getCount(), GL_UNSIGNED_INT, nullptr);
@@ -54,8 +54,7 @@ void CMesh::draw(const CShaderProgram& vShaderProgram) const
 
 	for (GLuint i = 0; i < m_Textures.size(); i++)
 	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		m_Textures[i]->unbindV();
 	}
 #endif
 }

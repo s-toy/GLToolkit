@@ -40,9 +40,6 @@
     <ClInclude Include="src\ShaderProgram.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\TextureUtil.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="src\VertexArray.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -62,6 +59,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Entity.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Texture.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
@@ -93,9 +93,6 @@
     <ClCompile Include="src\ShaderProgram.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\TextureUtil.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\VertexArray.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -115,6 +112,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Entity.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

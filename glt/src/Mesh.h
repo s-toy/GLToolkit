@@ -9,24 +9,18 @@ namespace glt
 {
 	typedef struct
 	{
-		GLuint Id;
-		std::string Type;
-		aiString Path;
-	} STexture;
-
-	typedef struct
-	{
 		glm::vec3 Position;
 		glm::vec3 Normal;
 		glm::vec2 TexCoords;
 	} SVertex;
 
 	class CShaderProgram;
+	class CTexture2D;
 
 	class CMesh
 	{
 	public:
-		CMesh(std::vector<SVertex> vVertices, std::vector<unsigned int> vIndices, std::vector<STexture> vTextures);
+		CMesh(std::vector<SVertex> vVertices, std::vector<unsigned int> vIndices, std::vector<CTexture2D*> vTextures);
 
 		void draw(const CShaderProgram& vShaderProgram) const;
 
@@ -36,7 +30,7 @@ namespace glt
 	private:
 		std::vector<SVertex> m_Vertices;
 		std::vector<GLuint> m_Indices;
-		std::vector<STexture> m_Textures;
+		std::vector<CTexture2D*> m_Textures;
 
 		std::unique_ptr<CVertexBuffer> m_pVertexBuffer;
 		std::unique_ptr<CIndexBuffer> m_pIndexBuffer;

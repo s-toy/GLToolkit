@@ -8,11 +8,13 @@
 namespace glt
 {
 	class CShaderProgram;
+	class CTexture2D;
 
 	class CModel : public CEntity
 	{
 	public:
 		CModel(const std::string& vFilePath);
+		~CModel();
 
 		void draw(const CShaderProgram& vShaderProgram) const;
 
@@ -21,12 +23,12 @@ namespace glt
 
 		CMesh __processMesh(const aiMesh* vMesh, const aiScene* vScene);
 
-		std::vector<STexture> __loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName);
+		std::vector<CTexture2D*> __loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName);
 
 		bool __loadModel(const std::string& vPath);
 
 		std::vector<CMesh> m_Meshes;
 		std::string m_Directory;
-		std::vector<STexture> m_LoadedTextures;
+		std::vector<CTexture2D*> m_LoadedTextures;
 	};
 }
