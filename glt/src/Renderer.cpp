@@ -57,7 +57,7 @@ static void __glDebugCallback(GLenum vSource, GLenum vType, GLuint vID, GLenum v
 //FUNCTION:
 bool CRenderer::init()
 {
-	_EARLY_RETURN(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Failed to initialize GLAD.", false);
+	_EARLY_RETURN(!gladLoadGL(), "Failed to initialize GLAD.", false);
 
 #ifdef _DEBUG
 	GLint Flags; glGetIntegerv(GL_CONTEXT_FLAGS, &Flags);

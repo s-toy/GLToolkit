@@ -1,5 +1,8 @@
 #include "ApplicationBase.h"
 #include <GLFW/glfw3.h>
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 #include "Window.h"
 #include "InputManager.h"
 
@@ -15,10 +18,28 @@ void glt::CApplicationBase::run()
 
 		_OUTPUT_EVENT("Succeed to init application.");
 
+		bool show_demo_window = true;
+		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
 		while (!glfwWindowShouldClose(_pWindow->getGLFWWindow()))
 		{
 			CRenderer::getInstance()->update();
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+			ImGui::ShowDemoWindow(&show_demo_window);
+
 			_updateV();
+
+			ImGui::Render();
+			int display_w, display_h;
+			glfwGetFramebufferSize(_pWindow->getGLFWWindow(), &display_w, &display_h);
+			glViewport(0, 0, 500, 500);
+			glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+			glClear(GL_COLOR_BUFFER_BIT);
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 			glfwSwapBuffers(_pWindow->getGLFWWindow());
 			glfwPollEvents();
@@ -67,7 +88,21 @@ bool glt::CApplicationBase::__init()
 
 	CInputManager::getInstance()->init(_pWindow->getGLFWWindow());
 
+	_EARLY_RETURN(!__initIMGUI(), "Failed to initailize ImGUI.", false);
+
 	if (!_initV()) return false;
+
+	return true;
+}
+
+//***********************************************************************************************
+//FUNCTION:
+bool glt::CApplicationBase::__initIMGUI()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	if (!ImGui_ImplGlfw_InitForOpenGL(_pWindow->getGLFWWindow(), true)) return false;
 
 	return true;
 }

@@ -27,6 +27,7 @@ namespace glt
 
 	protected:
 		bool __init();
+		bool __initIMGUI();
 		void __destroy();
 
 		CWindow* _pWindow = nullptr;

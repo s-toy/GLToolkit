@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include "../external/stb_image.h"
+#include "stb_image/stb_image.h"
 #include "Common.h"
 
 using namespace glt;

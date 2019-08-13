@@ -8,11 +8,14 @@
     <Filter Include="external">
       <UniqueIdentifier>{045db69c-7024-406e-8e78-6697f1a5180e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external\imgui">
+      <UniqueIdentifier>{831363c3-f815-4d40-9c3a-2091cf20bd71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\stb_image">
+      <UniqueIdentifier>{aa6fe6e4-d1c6-41c5-b0b5-15145cc1ad11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="external\stb_image.h">
-      <Filter>external</Filter>
-    </ClInclude>
     <ClInclude Include="src\ApplicationBase.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -64,11 +67,35 @@
     <ClInclude Include="src\Texture.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="external\imgui\imconfig.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui_impl_opengl3.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui_internal.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imstb_rectpack.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imstb_textedit.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imstb_truetype.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\imgui\imgui_impl_glfw.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\stb_image\stb_image.h">
+      <Filter>external\stb_image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="external\stb_image.cpp">
-      <Filter>external</Filter>
-    </ClCompile>
     <ClCompile Include="src\ApplicationBase.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -116,6 +143,27 @@
     </ClCompile>
     <ClCompile Include="src\Texture.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_demo.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_draw.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_impl_opengl3.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_widgets.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui\imgui_impl_glfw.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\stb_image\stb_image.cpp">
+      <Filter>external\stb_image</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
