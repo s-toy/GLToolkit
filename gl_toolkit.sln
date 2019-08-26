@@ -7,8 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glt", "glt\glt.vcxproj", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{2D068047-142B-4875-A2FF-70A8F920D8FB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6B7C0AD6-B02D-4359-BC33-5B8B8A94BC7F}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "perpixel_shading", "examples\perpixel_shading\perpixel_shading.vcxproj", "{C2AE9635-BD83-4ADD-A9B7-C43D4F65937A}"
 EndProject
 Global
