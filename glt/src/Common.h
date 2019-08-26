@@ -41,6 +41,9 @@ namespace glt
 
 	struct SWindowInfo
 	{
+		SWindowInfo() {}
+		SWindowInfo(uint32_t vWidth, uint32_t vHeight, const std::string& vTitle) :Width(vWidth), Height(vHeight), Title(vTitle) {}
+
 		std::string Title = "GL APPLICATION";
 
 		uint32_t MonitorID = 0;
