@@ -14,6 +14,9 @@
     <Filter Include="external\stb_image">
       <UniqueIdentifier>{aa6fe6e4-d1c6-41c5-b0b5-15145cc1ad11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external\glad">
+      <UniqueIdentifier>{4daf7ed7-2761-4d73-9cbd-7ca3b4308669}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\imconfig.h">
@@ -94,6 +97,15 @@
     <ClInclude Include="Window.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="external\glad\glad.h">
+      <Filter>external\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="external\glad\khrplatform.h">
+      <Filter>external\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="Export.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\imgui\imgui.cpp">
@@ -164,6 +176,9 @@
     </ClCompile>
     <ClCompile Include="Window.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="external\glad\glad.c">
+      <Filter>external\glad</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

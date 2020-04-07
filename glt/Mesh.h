@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <glm/glm.hpp>
 #include <assimp/Importer.hpp>
 #include "IndexBuffer.h"

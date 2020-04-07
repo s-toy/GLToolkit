@@ -38,7 +38,7 @@ private:
 int main()
 {
 	CMyApplication App;
-	if (!App.init(SWindowInfo(1600, 900, "Per-pixel Shading Demo"))) return -1;
+	if (!App.init(SWindowInfo(1024, 576, "Per-pixel Shading Demo"))) return -1;
 	App.run();
 
 	return 0;
