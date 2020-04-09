@@ -52,7 +52,7 @@ void CModel::__processNode(const aiNode* vNode, const aiScene* vScene)
 	for (GLuint i = 0; i < vNode->mNumMeshes; ++i)
 	{
 		aiMesh* mesh = vScene->mMeshes[vNode->mMeshes[i]];
-		m_Meshes.push_back(__processMesh(mesh, vScene));
+		m_Meshes.push_back(std::move(__processMesh(mesh, vScene)));
 	}
 
 	for (GLuint i = 0; i < vNode->mNumChildren; ++i)

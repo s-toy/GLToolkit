@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 #include <glad/glad.h>
+#include "Export.h"
 
 namespace glt
 {
@@ -14,7 +15,7 @@ namespace glt
 		COMPUTE_SHADER
 	};
 
-	class CShaderProgram
+	class GLT_DECLSPEC CShaderProgram
 	{
 	public:
 		CShaderProgram();

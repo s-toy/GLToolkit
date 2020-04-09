@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "Camera.h"
+#include "Export.h"
 
 namespace glt
 {
@@ -9,7 +10,7 @@ namespace glt
 	class CShaderProgram;
 	class CModel;
 
-	class CRenderer
+	class GLT_DECLSPEC CRenderer
 	{
 	public:
 		~CRenderer() = default;

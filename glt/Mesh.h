@@ -5,6 +5,7 @@
 #include <assimp/Importer.hpp>
 #include "IndexBuffer.h"
 #include "VertexArray.h"
+#include "Common.h"
 
 namespace glt
 {
@@ -21,7 +22,7 @@ namespace glt
 	class CMesh
 	{
 	public:
-		CMesh(std::vector<SVertex> vVertices, std::vector<unsigned int> vIndices, std::vector<CTexture2D*> vTextures);
+		CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<CTexture2D*>& vTextures);
 
 		void draw(const CShaderProgram& vShaderProgram) const;
 
@@ -33,8 +34,8 @@ namespace glt
 		std::vector<GLuint> m_Indices;
 		std::vector<CTexture2D*> m_Textures;
 
-		std::unique_ptr<CVertexBuffer> m_pVertexBuffer;
-		std::unique_ptr<CIndexBuffer> m_pIndexBuffer;
-		std::unique_ptr<CVertexArray> m_pVertexArray;
+		std::shared_ptr<CVertexBuffer> m_pVertexBuffer;
+		std::shared_ptr<CIndexBuffer> m_pIndexBuffer;
+		std::shared_ptr<CVertexArray> m_pVertexArray;
 	};
 }

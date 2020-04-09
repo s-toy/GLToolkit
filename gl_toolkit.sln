@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glt", "glt\glt.vcxproj", "{0DD6211C-E3F7-4365-B552-FBF11476F2C4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{2D068047-142B-4875-A2FF-70A8F920D8FB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "perpixel_shading", "examples\perpixel_shading\perpixel_shading.vcxproj", "{C2AE9635-BD83-4ADD-A9B7-C43D4F65937A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "order_independent_transparency", "examples\order_independent_transparency\order_independent_transparency.vcxproj", "{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,12 +35,21 @@ Global
 		{C2AE9635-BD83-4ADD-A9B7-C43D4F65937A}.Release|x64.Build.0 = Release|x64
 		{C2AE9635-BD83-4ADD-A9B7-C43D4F65937A}.Release|x86.ActiveCfg = Release|Win32
 		{C2AE9635-BD83-4ADD-A9B7-C43D4F65937A}.Release|x86.Build.0 = Release|Win32
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}.Debug|x64.ActiveCfg = Debug|x64
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}.Debug|x64.Build.0 = Debug|x64
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}.Debug|x86.ActiveCfg = Debug|Win32
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}.Debug|x86.Build.0 = Debug|Win32
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}.Release|x64.ActiveCfg = Release|x64
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}.Release|x64.Build.0 = Release|x64
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}.Release|x86.ActiveCfg = Release|Win32
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C2AE9635-BD83-4ADD-A9B7-C43D4F65937A} = {2D068047-142B-4875-A2FF-70A8F920D8FB}
+		{A6915C7B-2083-411C-8503-1F9CE5FDEAB8} = {2D068047-142B-4875-A2FF-70A8F920D8FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {434340AF-3E18-4E07-AD6B-4ED6F7D30D52}

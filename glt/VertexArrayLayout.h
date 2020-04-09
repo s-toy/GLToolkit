@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <glad/glad.h>
+#include "Export.h"
 
 namespace glt
 {
@@ -23,7 +24,7 @@ namespace glt
 		}
 	};
 
-	class CVertexArrayLayout
+	class GLT_DECLSPEC CVertexArrayLayout
 	{
 	public:
 		CVertexArrayLayout();

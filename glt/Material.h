@@ -1,10 +1,11 @@
 #pragma once
+#include "Export.h"
 
 namespace glt
 {
 	class CShaderProgram;
 
-	class CMaterial
+	class GLT_DECLSPEC CMaterial
 	{
 	public:
 		CMaterial();

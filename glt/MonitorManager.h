@@ -2,6 +2,7 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "Common.h"
+#include "Export.h"
 
 namespace glt
 {
@@ -12,7 +13,7 @@ namespace glt
 		GLFWmonitor*	pMonitor = nullptr;
 	};
 
-	class CMonitorManager
+	class GLT_DECLSPEC CMonitorManager
 	{
 	public:
 		virtual ~CMonitorManager();

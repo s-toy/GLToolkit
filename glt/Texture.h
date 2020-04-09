@@ -2,10 +2,11 @@
 #include <string>
 #include <vector>
 #include <GLAD/glad.h>
+#include "Export.h"
 
 namespace glt
 {
-	class CTexture
+	class GLT_DECLSPEC CTexture
 	{
 	public:
 		CTexture() = default;

@@ -3,10 +3,11 @@
 #include <GLFW/glfw3.h>
 #include "Common.h"
 #include "MonitorManager.h"
+#include "Export.h"
 
 namespace glt
 {
-	class CWindow
+	class GLT_DECLSPEC CWindow
 	{
 	public:
 		CWindow();

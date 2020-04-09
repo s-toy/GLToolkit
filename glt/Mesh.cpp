@@ -9,7 +9,7 @@ using namespace glt;
 
 //**********************************************************************************************
 //FUNCTION:
-CMesh::CMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::vector<CTexture2D*> vTextures)
+CMesh::CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<CTexture2D*>& vTextures)
 {
 	m_Vertices = vVertices;
 	m_Indices = vIndices;
@@ -22,9 +22,9 @@ CMesh::CMesh(std::vector<SVertex> vVertices, std::vector<GLuint> vIndices, std::
 //FUNCTION:
 void CMesh::__setupMesh()
 {
-	m_pVertexBuffer = std::make_unique<CVertexBuffer>(&m_Vertices[0], m_Vertices.size() * sizeof(SVertex));
-	m_pIndexBuffer = std::make_unique<CIndexBuffer>(&m_Indices[0], m_Indices.size());
-	m_pVertexArray = std::make_unique<CVertexArray>();
+	m_pVertexBuffer = std::make_shared<CVertexBuffer>(&m_Vertices[0], m_Vertices.size() * sizeof(SVertex));
+	m_pIndexBuffer = std::make_shared<CIndexBuffer>(&m_Indices[0], m_Indices.size());
+	m_pVertexArray = std::make_shared<CVertexArray>();
 
 	CVertexArrayLayout Layout;
 	Layout.push<float>(3);

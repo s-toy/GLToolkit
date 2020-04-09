@@ -4,13 +4,14 @@
 #include <assimp/scene.h>
 #include "Entity.h"
 #include "Mesh.h"
+#include "Export.h"
 
 namespace glt
 {
 	class CShaderProgram;
 	class CTexture2D;
 
-	class CModel : public CEntity
+	class GLT_DECLSPEC CModel : public CEntity
 	{
 	public:
 		CModel(const std::string& vFilePath);

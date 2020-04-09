@@ -1,10 +1,11 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Export.h"
 
 namespace glt
 {
-	class CEntity
+	class GLT_DECLSPEC CEntity
 	{
 	public:
 		CEntity();

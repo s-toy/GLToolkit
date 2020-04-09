@@ -1,9 +1,10 @@
 #pragma once
 #include <glad/glad.h>
+#include "Export.h"
 
 namespace glt
 {
-	class CIndexBuffer
+	class GLT_DECLSPEC CIndexBuffer
 	{
 	public:
 		CIndexBuffer(const unsigned int* vData, unsigned int vCount, unsigned int vUsage = GL_STATIC_DRAW);

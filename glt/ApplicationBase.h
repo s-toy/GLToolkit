@@ -2,12 +2,13 @@
 #include <imgui/imgui.h>
 #include "Common.h"
 #include "Renderer.h"
+#include "Export.h"
 
 namespace glt
 {
 	class CWindow;
 
-	class CApplicationBase
+	class GLT_DECLSPEC CApplicationBase
 	{
 	public:
 		CApplicationBase() = default;

@@ -4,10 +4,11 @@
 #include <array>
 #include <vector>
 #include "Common.h"
+#include "Export.h"
 
 namespace glt
 {
-	class CInputManager
+	class GLT_DECLSPEC CInputManager
 	{
 	public:
 		~CInputManager();

@@ -1,10 +1,11 @@
 #pragma once
 #include "VertexBuffer.h"
 #include "VertexArrayLayout.h"
+#include "Export.h"
 
 namespace glt
 {
-	class CVertexArray
+	class GLT_DECLSPEC CVertexArray
 	{
 	public:
 		CVertexArray();
