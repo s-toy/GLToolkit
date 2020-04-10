@@ -51,7 +51,7 @@ void CTexture2D::load(const char *vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint v
 
 //***********************************************************************************************
 //FUNCTION:
-void CTexture2D::create(unsigned int vWidth, unsigned int vHeight, GLint vInternalFormat /*= GL_RGB32F*/, GLenum vFormat /*= GL_RGB*/, bool vGenerateMipMap /*= GL_FALSE*/)
+void CTexture2D::createEmpty(unsigned int vWidth, unsigned int vHeight, GLint vInternalFormat /*= GL_RGB32F*/, GLenum vFormat /*= GL_RGB*/, bool vGenerateMipMap /*= GL_FALSE*/)
 {
 	glGenTextures(1, &m_ObjectID);
 	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
@@ -126,7 +126,7 @@ void CTextureCube::load(const std::vector<std::string>& vFaces, bool vGenerateMi
 
 //***********************************************************************************************
 //FUNCTION:
-void CTextureCube::create(int vWidth, int vHeight, bool vGenerateMipMap)
+void CTextureCube::createEmpty(int vWidth, int vHeight, bool vGenerateMipMap)
 {
 	glGenTextures(1, &m_ObjectID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_ObjectID);

@@ -31,13 +31,13 @@ public:
 		CRenderer::getInstance()->fetchCamera()->setPosition(glm::dvec3(0, 0, 5));
 
 		m_PositionTex = std::make_shared<CTexture2D>();
-		m_PositionTex->create(WIN_WIDTH, WIN_HEIGHT, GL_RGB16F, GL_RGB);
+		m_PositionTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB16F, GL_RGB);
 		m_NormalTex = std::make_shared<CTexture2D>();
-		m_NormalTex->create(WIN_WIDTH, WIN_HEIGHT, GL_RGB16F, GL_RGB);
+		m_NormalTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB16F, GL_RGB);
 		m_DiffuseTex = std::make_shared<CTexture2D>();
-		m_DiffuseTex->create(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB);
+		m_DiffuseTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB);
 		m_SpecularTex = std::make_shared<CTexture2D>();
-		m_SpecularTex->create(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB);
+		m_SpecularTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB);
 
 		m_pOffscreenFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pOffscreenFrameBuffer->set(EAttachment::COLOR0, m_PositionTex);
@@ -52,11 +52,13 @@ public:
 	{
 		auto pRenderer = CRenderer::getInstance();
 
+		//generate gbuffer pass
 		m_pOffscreenFrameBuffer->bind();
 		pRenderer->clear();
 		pRenderer->draw(*m_pModel, *m_pGenGbufferShaderProgram);
 		m_pOffscreenFrameBuffer->unbind();
 
+		//deferred shading pass
 		pRenderer->clear();
 		m_PositionTex->bindV(0);
 		m_NormalTex->bindV(1);
@@ -69,11 +71,6 @@ public:
 		m_pDeferredShadingProgram->updateUniformTexture("uDiffuseTex", m_DiffuseTex);
 		m_pDeferredShadingProgram->updateUniformTexture("uSpecularTex", m_SpecularTex);
 		pRenderer->drawScreenQuad(*m_pDeferredShadingProgram);
-
-		m_PositionTex->unbindV();
-		m_NormalTex->unbindV();
-		m_DiffuseTex->unbindV();
-		m_SpecularTex->unbindV();
 	}
 
 private:
