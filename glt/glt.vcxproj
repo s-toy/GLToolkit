@@ -191,6 +191,8 @@
     <ClInclude Include="ApplicationBase.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="CpuTimer.h" />
+    <ClInclude Include="DebugUtil.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Export.h" />
     <ClInclude Include="external\glad\glad.h" />
@@ -221,6 +223,8 @@
   <ItemGroup>
     <ClCompile Include="ApplicationBase.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CpuTimer.cpp" />
+    <ClCompile Include="DebugUtil.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="external\glad\glad.c" />
     <ClCompile Include="external\imgui\imgui.cpp" />

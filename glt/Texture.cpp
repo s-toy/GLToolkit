@@ -67,7 +67,7 @@ void CTexture2D::create(unsigned int vWidth, unsigned int vHeight, GLint vIntern
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+		glTexParameteri(GL_TEXTURE_2D, GL_AUTO_GENERATE_MIPMAP, GL_TRUE);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);

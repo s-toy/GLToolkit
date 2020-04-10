@@ -3,55 +3,12 @@
 #include <GLFW/glfw3.h>
 #include "VertexArray.h"
 #include "IndexBuffer.h"
+#include "VertexBuffer.h"
 #include "ShaderProgram.h"
 #include "Model.h"
+#include "DebugUtil.h"
 
 using namespace glt;
-
-//***********************************************************************************
-//FUNCTION:
-#ifdef _DEBUG
-static void __glDebugCallback(GLenum vSource, GLenum vType, GLuint vID, GLenum vSeverity, GLsizei vLength, const GLchar *vMessage, const void *vUserParam)
-{
-	// 忽略一些不重要的错误/警告代码
-	if (vID == 131169 || vID == 131185 || vID == 131218 || vID == 131204) return;
-
-	std::cout << "---------------" << std::endl;
-	std::cout << "Debug message (" << vID << "): " << vMessage << std::endl;
-
-	switch (vSource)
-	{
-	case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
-	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
-	case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
-	case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
-	case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
-	case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
-	} std::cout << std::endl;
-
-	switch (vType)
-	{
-	case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
-	case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
-	case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
-	case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
-	case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
-	case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
-	case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
-	} std::cout << std::endl;
-
-	switch (vSeverity)
-	{
-	case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
-	case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
-	case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
-	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
-	} std::cout << std::endl;
-	std::cout << std::endl;
-}
-#endif
 
 //***********************************************************************************************
 //FUNCTION:
@@ -65,7 +22,7 @@ bool CRenderer::init()
 	{
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(__glDebugCallback, nullptr);
+		glDebugMessageCallback(gltDebugCallback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	}
 #endif // DEBUG
@@ -129,6 +86,30 @@ void CRenderer::draw(const CModel& vModel, const CShaderProgram& vShaderProgram)
 
 //***********************************************************************************************
 //FUNCTION:
+void CRenderer::drawScreenQuad(const CShaderProgram& vShaderProgram)
+{
+	if (!m_FullScreenQuadVAO) __initFullScreenQuad();
+
+	vShaderProgram.bind();
+
+	m_FullScreenQuadVAO->bind();
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+#ifdef _DEBUG
+	m_FullScreenQuadVAO->unbind();
+	vShaderProgram.unbind();
+#endif
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::update()
+{
+	m_pCamera->update();
+}
+
+//***********************************************************************************************
+//FUNCTION:
 void CRenderer::__updateShaderUniform(const CShaderProgram& vShaderProgram) const
 {
 	vShaderProgram.updateUniform3f("uViewPos", m_pCamera->getPosition());
@@ -138,7 +119,19 @@ void CRenderer::__updateShaderUniform(const CShaderProgram& vShaderProgram) cons
 
 //***********************************************************************************************
 //FUNCTION:
-void CRenderer::update()
+void CRenderer::__initFullScreenQuad()
 {
-	m_pCamera->update();
+	GLfloat VertexData[] = { -1.0f, -1.0f,	 1.0f, -1.0f,	 -1.0f, 1.0f,	 1.0f, 1.0f };
+
+	m_FullScreenQuadVAO = std::make_unique<CVertexArray>();
+	m_FullScreenQuadVAO->bind();
+
+	m_FullScreenQuadVBO = std::make_unique<CVertexBuffer>(VertexData, sizeof(VertexData));
+	CVertexArrayLayout VertexArrayLayout;
+	VertexArrayLayout.push<float>(2);
+	m_FullScreenQuadVAO->addBuffer(*m_FullScreenQuadVBO, VertexArrayLayout);
+
+#ifdef _DEBUG
+	m_FullScreenQuadVAO->unbind();
+#endif // _DEBUG
 }

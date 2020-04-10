@@ -106,6 +106,12 @@
     <ClInclude Include="Export.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="DebugUtil.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="CpuTimer.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\imgui\imgui.cpp">
@@ -179,6 +185,12 @@
     </ClCompile>
     <ClCompile Include="external\glad\glad.c">
       <Filter>external\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugUtil.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="CpuTimer.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 #include <imgui/imgui.h>
 #include "Common.h"
 #include "Renderer.h"
+#include "CpuTimer.h"
 #include "Export.h"
 
 namespace glt
@@ -18,6 +19,8 @@ namespace glt
 		void run();
 
 		void setDisplayStatusHint() { m_DisplayAppStatus = true; }
+
+		double getTime() { return m_CPUTimer.getTimestamp() / 1000.0; }
 
 	protected:
 		_DISALLOW_COPY_AND_ASSIGN(CApplicationBase);
@@ -39,5 +42,7 @@ namespace glt
 
 		bool m_IsInitialized = false;
 		bool m_DisplayAppStatus = false;
+
+		CCPUTimer m_CPUTimer;
 	};
 }

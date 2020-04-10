@@ -56,6 +56,7 @@ void glt::CApplicationBase::run()
 
 	try
 	{
+		m_CPUTimer.start();
 		while (!glfwWindowShouldClose(_pWindow->getGLFWWindow()))
 		{
 			_updateV();
@@ -69,6 +70,7 @@ void glt::CApplicationBase::run()
 		}
 
 		__destroy();
+		m_CPUTimer.stop();
 
 		_OUTPUT_EVENT("Succeed to end application.");
 	}
