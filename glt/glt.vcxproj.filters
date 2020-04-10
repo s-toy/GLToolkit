@@ -112,6 +112,9 @@
     <ClInclude Include="CpuTimer.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="FrameBuffer.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\imgui\imgui.cpp">
@@ -190,6 +193,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="CpuTimer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameBuffer.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

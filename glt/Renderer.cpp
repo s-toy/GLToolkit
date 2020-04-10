@@ -91,6 +91,7 @@ void CRenderer::drawScreenQuad(const CShaderProgram& vShaderProgram)
 	if (!m_FullScreenQuadVAO) __initFullScreenQuad();
 
 	vShaderProgram.bind();
+	vShaderProgram.updateUniform3f("uViewPos", m_pCamera->getPosition());
 
 	m_FullScreenQuadVAO->bind();
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

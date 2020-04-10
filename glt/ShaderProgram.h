@@ -1,12 +1,15 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include <memory>
 #include <glm/glm.hpp>
 #include <glad/glad.h>
 #include "Export.h"
 
 namespace glt
 {
+	class CTexture;
+
 	enum class EShaderType : char
 	{
 		VERTEX_SHADER = 0,
@@ -29,6 +32,7 @@ namespace glt
 		unsigned int getProgramID() const { return m_ProgramID; }
 
 		void updateUniform1i(const std::string& vName, int vValue) const;
+		void updateUniformTexture(const std::string& vName, std::shared_ptr<CTexture> vTexture) const;
 
 		void updateUniform1f(const std::string& vName, float vValue) const;
 		void updateUniform2f(const std::string& vName, const glm::vec2& vValue) const;

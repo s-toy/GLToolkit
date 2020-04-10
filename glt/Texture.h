@@ -19,6 +19,8 @@ namespace glt
 
 		const std::string& getFilePath() const { return m_FilePath; }
 		const std::string& getTextureName() const { return m_TextureName; }
+		unsigned int getBindPoint() const { return m_BindPoint; }
+		unsigned int getObjectID() const { return m_ObjectID; }
 
 	protected:
 		std::string m_FilePath = {};
@@ -27,7 +29,7 @@ namespace glt
 		mutable unsigned int m_BindPoint = 0;
 	};
 
-	class CTexture2D : public CTexture
+	class GLT_DECLSPEC CTexture2D : public CTexture
 	{
 	public:
 		void load(const char *vPath, GLint vWrapMode = GL_CLAMP_TO_BORDER, GLint vFilterMode = GL_LINEAR, GLenum vFormat = GL_RGB, bool vFlipVertically = false);
@@ -37,7 +39,7 @@ namespace glt
 		void unbindV() const override;
 	};
 
-	class CTextureCube : public CTexture
+	class GLT_DECLSPEC CTextureCube : public CTexture
 	{
 	public:
 		void load(const std::vector<std::string>& vFaces, bool vGenerateMipMap);

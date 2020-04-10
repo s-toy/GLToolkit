@@ -3,6 +3,7 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include "Common.h"
+#include "Texture.h"
 
 using namespace glt;
 
@@ -57,6 +58,11 @@ void CShaderProgram::addShader(const std::string& vShaderName, EShaderType vShad
 void CShaderProgram::updateUniform1i(const std::string& vName, int vValue) const
 {
 	glUniform1i(__getUniformLocation(vName), vValue);
+}
+
+void CShaderProgram::updateUniformTexture(const std::string& vName, std::shared_ptr<CTexture> vTexture) const
+{
+	glUniform1i(__getUniformLocation(vName), vTexture->getBindPoint());
 }
 
 //*********************************************************************
