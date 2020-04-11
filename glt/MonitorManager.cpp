@@ -4,12 +4,16 @@ using namespace glt;
 
 //TODO: 目前的实现假设至少有一个monitor, 需要考虑没有monitor的情况
 
+//********************************************************************
+//FUNCTION:
 CMonitorManager::CMonitorManager()
 {
 	glfwInit();
 	__queryMonitorsInfo();
 }
 
+//********************************************************************
+//FUNCTION:
 CMonitorManager::~CMonitorManager()
 {
 }

@@ -2,6 +2,8 @@
 
 using namespace glt;
 
+//********************************************************************
+//FUNCTION:
 CVertexBuffer::CVertexBuffer(const void* vData, unsigned int vSize, unsigned int vUsage)
 {
 	glGenBuffers(1, &m_BufferID);
@@ -9,6 +11,8 @@ CVertexBuffer::CVertexBuffer(const void* vData, unsigned int vSize, unsigned int
 	glBufferData(GL_ARRAY_BUFFER, vSize, vData, vUsage);
 }
 
+//********************************************************************
+//FUNCTION:
 CVertexBuffer::~CVertexBuffer()
 {
 	glDeleteBuffers(1, &m_BufferID);

@@ -9,6 +9,8 @@ using namespace glt;
 const float MOUSE_SENSITIVTY = 0.05f;
 const float SCROLL_SENSITIVTY = 2.0f;
 
+//********************************************************************
+//FUNCTION:
 CCamera::CCamera(glm::dvec3 vCameraPos, double vAspect, double vYaw, double vPitch, glm::dvec3 vWorldUp) :m_CameraPos(vCameraPos), m_Aspect(vAspect), m_Yaw(vYaw), m_Pitch(vPitch), m_WorldUp(vWorldUp)
 {
 	__updateCameraVectors();
@@ -16,6 +18,8 @@ CCamera::CCamera(glm::dvec3 vCameraPos, double vAspect, double vYaw, double vPit
 	CInputManager::getInstance()->registerScrollCallbackFunc(_CALLBACK_2(CCamera::__mouseScrollCallback, this));
 }
 
+//********************************************************************
+//FUNCTION:
 CCamera::~CCamera()
 {
 }

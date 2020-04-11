@@ -2,6 +2,8 @@
 
 using namespace glt;
 
+//********************************************************************
+//FUNCTION:
 CIndexBuffer::CIndexBuffer(const unsigned int* vData, unsigned int vCount, unsigned int vUsage) : m_Count(vCount)
 {
 	glGenBuffers(1, &m_ObjectID);
@@ -9,6 +11,8 @@ CIndexBuffer::CIndexBuffer(const unsigned int* vData, unsigned int vCount, unsig
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, vCount * sizeof(unsigned int), vData, vUsage);
 }
 
+//********************************************************************
+//FUNCTION:
 CIndexBuffer::~CIndexBuffer()
 {
 	glDeleteBuffers(1, &m_ObjectID);

@@ -52,6 +52,8 @@ const float skyboxVertices[] = {
      1.0f, -1.0f,  1.0f
 };
 
+//*********************************************************************************
+//FUNCTION:
 CSkybox::CSkybox(const std::vector<std::string>& vFaces)
 {
 	m_pTexture = std::make_shared<CTextureCube>();

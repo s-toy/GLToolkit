@@ -2,12 +2,16 @@
 
 using namespace glt;
 
+//********************************************************************
+//FUNCTION:
 CVertexArray::CVertexArray()
 {
 	glGenVertexArrays(1, &m_ObjectID);
 	glBindVertexArray(m_ObjectID);
 }
 
+//********************************************************************
+//FUNCTION:
 CVertexArray::~CVertexArray()
 {
 	glDeleteVertexArrays(1, &m_ObjectID);

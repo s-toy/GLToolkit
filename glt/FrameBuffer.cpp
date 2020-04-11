@@ -3,6 +3,8 @@
 
 using namespace glt;
 
+//********************************************************************
+//FUNCTION:
 CFrameBuffer::CFrameBuffer(int vWidth, int vHeight) : m_Width(vWidth), m_Height(vHeight)
 {
 	glGenFramebuffers(1, &m_ObjectID);
@@ -18,6 +20,8 @@ CFrameBuffer::CFrameBuffer(int vWidth, int vHeight) : m_Width(vWidth), m_Height(
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+//********************************************************************
+//FUNCTION:
 CFrameBuffer::~CFrameBuffer()
 {
 	glDeleteFramebuffers(1, &m_ObjectID);

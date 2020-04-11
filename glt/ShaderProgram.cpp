@@ -8,11 +8,15 @@
 
 using namespace glt;
 
+//********************************************************************
+//FUNCTION:
 CShaderProgram::CShaderProgram()
 {
 	m_ProgramID = glCreateProgram();
 }
 
+//********************************************************************
+//FUNCTION:
 CShaderProgram::~CShaderProgram()
 {
 	glDeleteProgram(m_ProgramID);

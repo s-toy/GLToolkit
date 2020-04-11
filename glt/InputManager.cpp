@@ -16,10 +16,14 @@ namespace glt
 	std::vector<std::function<void(int, int, int, int)>>   CInputManager::m_KeyCallbackResponseFuncSet;
 }
 
+//********************************************************************
+//FUNCTION:
 CInputManager::CInputManager()
 {
 }
 
+//********************************************************************
+//FUNCTION:
 CInputManager::~CInputManager()
 {
 }

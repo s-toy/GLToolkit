@@ -4,10 +4,14 @@
 
 using namespace glt;
 
+//********************************************************************
+//FUNCTION:
 CWindow::CWindow()
 {
 }
 
+//********************************************************************
+//FUNCTION:
 CWindow::~CWindow()
 {
 	glfwDestroyWindow(m_pWindow);

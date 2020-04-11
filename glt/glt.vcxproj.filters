@@ -139,6 +139,9 @@
     <ClInclude Include="FileSystem.h">
       <Filter>src\common</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderStorageBuffer.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\imgui\imgui.cpp">
@@ -230,6 +233,9 @@
     </ClCompile>
     <ClCompile Include="FileSystem.cpp">
       <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderStorageBuffer.cpp">
+      <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

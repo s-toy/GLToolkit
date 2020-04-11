@@ -37,6 +37,4 @@ void main()
 	vec3 FinalColor = vec3(0.0);
 	FinalColor += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(1.0, 1.0, 1.0)), Material);
 	FinalColor += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
-
-	_outFragColor = FinalColor;
 }
