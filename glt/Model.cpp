@@ -9,6 +9,7 @@
 #include <assimp/Importer.hpp>
 #include "Texture.h"
 #include "Common.h"
+#include "FileLocator.h"
 
 using namespace glt;
 
@@ -16,7 +17,13 @@ using namespace glt;
 //FUNCTION:
 CModel::CModel(const std::string& vFilePath)
 {
-	this->load(vFilePath);
+	std::string FilePath = CFileLocator::getInstance()->locateFile(vFilePath);
+	_ASSERTE(!FilePath.empty());
+	if (!__loadModel(FilePath))
+	{
+		_OUTPUT_WARNING("Failed to load model.");
+		_ASSERTE(false);
+	}
 }
 
 //***********************************************************************************************
@@ -24,17 +31,6 @@ CModel::CModel(const std::string& vFilePath)
 CModel::~CModel()
 {
 	for (auto pTexture : m_LoadedTextures) _SAFE_DELETE(pTexture);
-}
-
-//**********************************************************************************************
-//FUNCTION:
-void CModel::load(const std::string& vFilePath)
-{
-	if (!__loadModel(vFilePath))
-	{
-		_OUTPUT_WARNING("Failed to load model.");
-		_ASSERTE(false);
-	}
 }
 
 //**********************************************************************************************
@@ -161,10 +157,10 @@ std::vector<CTexture2D*> CModel::__loadMaterialTextures(const aiMaterial* vMat, 
 
 //***********************************************************************************************
 //FUNCTION:
-void CModel::draw(const CShaderProgram& vShaderProgram) const
+void CModel::_draw(const CShaderProgram& vShaderProgram) const
 {
 	for (const auto& Mesh : m_Meshes)
 	{
-		Mesh.draw(vShaderProgram);
+		Mesh._draw(vShaderProgram);
 	}
 }

@@ -10,10 +10,13 @@
 #define _OUTPUT_WARNING(e)			std::cerr << e << std::endl;
 #define _THROW_RUNTIME_ERROR(e)		throw std::runtime_error(e);
 
-#define _SAFE_DELETE(p)	if(p) { delete p; p = nullptr; }
+#define _SAFE_DELETE(p)									if(p) { delete p; p = nullptr; }
+#define _EARLY_RETURN(condition, prompt, return_value)	if (condition) { _OUTPUT_WARNING(prompt); return return_value; }
+#define _EARLY_EXIT(condition, prompt)					if (condition) { _OUTPUT_WARNING(prompt); return;}
+#define _SIMPLE_IF(condition, opTrue)					if (condition) { opTrue; }
+#define _SIMPLE_IF_ELSE(condition, opTrue, opFalse)		if (condition) { opTrue; } else { opFalse; }
 
-#define _EARLY_RETURN(condition, prompt, return_value) if (condition) { _OUTPUT_WARNING(prompt); return return_value; }
-#define _EARLY_EXIT(condition, prompt)                 if (condition) { _OUTPUT_WARNING(prompt); return;}
+#define _STR_TO_UPPER(s)		std::transform((s).begin(), (s).end(), (s).begin(), ::toupper);
 
 #define _DISALLOW_COPY_AND_ASSIGN(TypeName) \
     TypeName(const TypeName &) = delete; \

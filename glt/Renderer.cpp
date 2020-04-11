@@ -7,6 +7,7 @@
 #include "ShaderProgram.h"
 #include "Model.h"
 #include "DebugUtil.h"
+#include "Skybox.h"
 
 using namespace glt;
 
@@ -74,7 +75,7 @@ void CRenderer::__drawSingleModel(const CModel& vModel, const CShaderProgram& vS
 	ModelMatrix = glm::scale(ModelMatrix, vModel.getScale());
 	vShaderProgram.updateUniformMat4("uModelMatrix", ModelMatrix);
 
-	vModel.draw(vShaderProgram);
+	vModel._draw(vShaderProgram);
 }
 
 //***********************************************************************************************
@@ -125,6 +126,17 @@ void CRenderer::drawScreenQuad(const CShaderProgram& vShaderProgram)
 
 //***********************************************************************************************
 //FUNCTION:
+void CRenderer::drawSkybox(const CSkybox& vSkybox, unsigned int vBindPoint)
+{
+	auto pShaderProgram = vSkybox._getShaderProgram();
+	pShaderProgram->bind();
+	pShaderProgram->updateUniformMat4("uProjectionMatrix", m_pCamera->getProjectionMatrix());
+	pShaderProgram->updateUniformMat4("uViewMatrix", m_pCamera->getViewMatrix());
+	vSkybox._draw(vBindPoint);
+}
+
+//***********************************************************************************************
+//FUNCTION:
 void CRenderer::update()
 {
 	m_pCamera->update();
@@ -145,10 +157,10 @@ void CRenderer::__initFullScreenQuad()
 {
 	GLfloat VertexData[] = { -1.0f, -1.0f,	 1.0f, -1.0f,	 -1.0f, 1.0f,	 1.0f, 1.0f };
 
-	m_FullScreenQuadVAO = std::make_unique<CVertexArray>();
+	m_FullScreenQuadVAO = std::make_shared<CVertexArray>();
 	m_FullScreenQuadVAO->bind();
 
-	m_FullScreenQuadVBO = std::make_unique<CVertexBuffer>(VertexData, sizeof(VertexData));
+	m_FullScreenQuadVBO = std::make_shared<CVertexBuffer>(VertexData, sizeof(VertexData));
 	CVertexArrayLayout VertexArrayLayout;
 	VertexArrayLayout.push<float>(2);
 	m_FullScreenQuadVAO->addBuffer(*m_FullScreenQuadVBO, VertexArrayLayout);

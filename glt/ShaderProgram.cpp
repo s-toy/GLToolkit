@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Common.h"
 #include "Texture.h"
+#include "FileLocator.h"
 
 using namespace glt;
 
@@ -22,7 +23,7 @@ CShaderProgram::~CShaderProgram()
 void CShaderProgram::addShader(const std::string& vShaderName, EShaderType vShaderType)
 {
 	_ASSERT(!vShaderName.empty());
-	const GLchar* pShaderText = __readShaderFile(vShaderName);
+	const GLchar* pShaderText = __readShaderFile(CFileLocator::getInstance()->locateFile(vShaderName));
 	_ASSERT(pShaderText);
 
 	GLuint ShaderID = 0;

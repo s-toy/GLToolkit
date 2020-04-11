@@ -14,14 +14,13 @@ namespace glt
 	class GLT_DECLSPEC CModel : public CEntity
 	{
 	public:
-		CModel() = default;
 		CModel(const std::string& vFilePath);
 		~CModel();
 
 		_DISALLOW_COPY_AND_ASSIGN(CModel);
 
-		void load(const std::string& vFilePath);
-		void draw(const CShaderProgram& vShaderProgram) const;
+	protected:
+		void _draw(const CShaderProgram& vShaderProgram) const;
 
 	private:
 		void __processNode(const aiNode* vNode, const aiScene* vScene);
@@ -35,5 +34,7 @@ namespace glt
 		std::vector<CMesh> m_Meshes;
 		std::string m_Directory;
 		std::vector<CTexture2D*> m_LoadedTextures;
+
+		friend class CRenderer;
 	};
 }

@@ -21,10 +21,10 @@ namespace glt
 
 	class CMesh
 	{
-	public:
+	protected:
 		CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<CTexture2D*>& vTextures);
 
-		void draw(const CShaderProgram& vShaderProgram) const;
+		void _draw(const CShaderProgram& vShaderProgram) const;
 
 	private:
 		void __setupMesh();
@@ -37,5 +37,7 @@ namespace glt
 		std::shared_ptr<CVertexBuffer> m_pVertexBuffer;
 		std::shared_ptr<CIndexBuffer> m_pIndexBuffer;
 		std::shared_ptr<CVertexArray> m_pVertexArray;
+
+		friend class CModel;
 	};
 }

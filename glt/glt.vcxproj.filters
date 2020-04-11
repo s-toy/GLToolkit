@@ -17,6 +17,21 @@
     <Filter Include="external\glad">
       <UniqueIdentifier>{4daf7ed7-2761-4d73-9cbd-7ca3b4308669}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\core">
+      <UniqueIdentifier>{27b09861-0aa8-468a-8c45-6eecd7425bf9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\common">
+      <UniqueIdentifier>{46bed378-d4be-4440-a31b-3f6cd76cf4c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\component">
+      <UniqueIdentifier>{4a9d7d11-4205-476a-a839-4e9082e1c8fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{2418d442-16ed-42e6-af48-f59b977164ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res\shaders">
+      <UniqueIdentifier>{4bc83c30-1c17-41a3-9c7c-b2e9e809c974}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\imconfig.h">
@@ -46,74 +61,83 @@
     <ClInclude Include="external\stb_image\stb_image.h">
       <Filter>external\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="ApplicationBase.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Common.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="IndexBuffer.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="InputManager.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="MonitorManager.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderProgram.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="VertexArray.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="VertexArrayLayout.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="VertexBuffer.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="external\glad\glad.h">
       <Filter>external\glad</Filter>
     </ClInclude>
     <ClInclude Include="external\glad\khrplatform.h">
       <Filter>external\glad</Filter>
     </ClInclude>
-    <ClInclude Include="Export.h">
-      <Filter>src</Filter>
+    <ClInclude Include="ApplicationBase.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>src\core</Filter>
     </ClInclude>
     <ClInclude Include="DebugUtil.h">
-      <Filter>src</Filter>
+      <Filter>src\core</Filter>
     </ClInclude>
-    <ClInclude Include="CpuTimer.h">
-      <Filter>src</Filter>
+    <ClInclude Include="Entity.h">
+      <Filter>src\core</Filter>
     </ClInclude>
     <ClInclude Include="FrameBuffer.h">
-      <Filter>src</Filter>
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBuffer.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="MonitorManager.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderProgram.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexArray.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexArrayLayout.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Export.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="CpuTimer.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>src\component</Filter>
+    </ClInclude>
+    <ClInclude Include="FileLocator.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem.h">
+      <Filter>src\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -138,65 +162,82 @@
     <ClCompile Include="external\stb_image\stb_image.cpp">
       <Filter>external\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="ApplicationBase.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Entity.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="IndexBuffer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="InputManager.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="MonitorManager.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderProgram.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="VertexArray.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="VertexArrayLayout.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="VertexBuffer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="Window.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="external\glad\glad.c">
       <Filter>external\glad</Filter>
     </ClCompile>
-    <ClCompile Include="DebugUtil.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="ApplicationBase.cpp">
+      <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="CpuTimer.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="Camera.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugUtil.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="FrameBuffer.cpp">
-      <Filter>src</Filter>
+      <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="MonitorManager.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderProgram.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexArray.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexArrayLayout.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="CpuTimer.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>src\component</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLocator.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystem.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\draw_skybox_fs.glsl">
+      <Filter>res\shaders</Filter>
+    </None>
+    <None Include="shaders\draw_skybox_vs.glsl">
+      <Filter>res\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

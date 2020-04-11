@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "stb_image/stb_image.h"
 #include "Common.h"
+#include "FileLocator.h"
 
 using namespace glt;
 
@@ -9,7 +10,7 @@ using namespace glt;
 void CTexture2D::load(const char *vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint vFilterMode /*= GL_LINEAR*/, GLenum vFormat /*= GL_RGB*/, bool vFlipVertically /*= false*/)
 {
 	_ASSERTE(vPath);
-	m_FilePath = vPath;
+	m_FilePath =  CFileLocator::getInstance()->locateFile(vPath);
 
 	stbi_set_flip_vertically_on_load(vFlipVertically);
 
@@ -22,15 +23,15 @@ void CTexture2D::load(const char *vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint v
 	switch (vFormat)
 	{
 	case GL_RED:
-		pImageData = stbi_load(vPath, &Width, &Height, &Channels, STBI_grey);
+		pImageData = stbi_load(m_FilePath.c_str(), &Width, &Height, &Channels, STBI_grey);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, Width, Height, 0, GL_RED, GL_UNSIGNED_BYTE, pImageData);
 		break;
 	case GL_RGB:
-		pImageData = stbi_load(vPath, &Width, &Height, &Channels, STBI_rgb);
+		pImageData = stbi_load(m_FilePath.c_str(), &Width, &Height, &Channels, STBI_rgb);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, pImageData);
 		break;
 	case GL_RGBA:
-		pImageData = stbi_load(vPath, &Width, &Height, &Channels, STBI_rgb_alpha);
+		pImageData = stbi_load(m_FilePath.c_str(), &Width, &Height, &Channels, STBI_rgb_alpha);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImageData);
 		break;
 	default:
@@ -102,7 +103,7 @@ void CTextureCube::load(const std::vector<std::string>& vFaces, bool vGenerateMi
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_ObjectID);
 	for (GLuint i = 0; i < vFaces.size(); ++i)
 	{
-		pImageData = stbi_loadf(vFaces[i].c_str(), &Width, &Height, &NrComponents, 0);
+		pImageData = stbi_loadf(CFileLocator::getInstance()->locateFile(vFaces[i]).c_str(), &Width, &Height, &NrComponents, 0);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, pImageData);
 		stbi_image_free(pImageData);
 	}

@@ -12,6 +12,7 @@ namespace glt
 	class CIndexBuffer;
 	class CShaderProgram;
 	class CModel;
+	class CSkybox;
 
 	class GLT_DECLSPEC CRenderer
 	{
@@ -30,6 +31,7 @@ namespace glt
 		void draw(const CModel& vModel, const CShaderProgram& vShaderProgram);
 		void draw(const std::vector<std::shared_ptr<CModel>>& vModels, const CShaderProgram& vShaderProgram);
 		void drawScreenQuad(const CShaderProgram& vShaderProgram);
+		void drawSkybox(const CSkybox& vSkybox, unsigned int vBindPoint);
 
 		CCamera* fetchCamera() const { return m_pCamera; }
 

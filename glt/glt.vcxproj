@@ -206,6 +206,8 @@
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
     <ClInclude Include="external\stb_image\stb_image.h" />
+    <ClInclude Include="FileLocator.h" />
+    <ClInclude Include="FileSystem.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InputManager.h" />
@@ -215,6 +217,7 @@
     <ClInclude Include="MonitorManager.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VertexArray.h" />
     <ClInclude Include="VertexArrayLayout.h" />
@@ -235,6 +238,8 @@
     <ClCompile Include="external\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="external\stb_image\stb_image.cpp" />
+    <ClCompile Include="FileLocator.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -244,11 +249,16 @@
     <ClCompile Include="MonitorManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VertexArray.cpp" />
     <ClCompile Include="VertexArrayLayout.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\draw_skybox_fs.glsl" />
+    <None Include="shaders\draw_skybox_vs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

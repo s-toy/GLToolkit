@@ -35,7 +35,7 @@ void CMesh::__setupMesh()
 
 //***********************************************************************************************
 //FUNCTION:
-void CMesh::draw(const CShaderProgram& vShaderProgram) const
+void CMesh::_draw(const CShaderProgram& vShaderProgram) const
 {
 	m_pVertexArray->bind();
 	m_pIndexBuffer->bind();
