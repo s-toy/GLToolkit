@@ -1,5 +1,4 @@
-#version 460
-#extension GL_ARB_separate_shader_objects : enable
+#version 430 core
 
 uniform sampler2D uMaterialDiffuse;
 uniform sampler2D uMaterialSpecular;
@@ -10,7 +9,7 @@ layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
 layout(location = 2) in vec2 _inTexCoord;
 
-layout(location = 0) out vec4 _outFragColor;
+layout(location = 0) out vec3 _outFragColor;
 
 struct SParallelLight { vec3 Color; vec3 Direction; };
 struct SMaterial { vec3 Diffuse; vec3 Specular; float Shinness; };
@@ -39,5 +38,5 @@ void main()
 	FinalColor += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(1.0, 1.0, 1.0)), Material);
 	FinalColor += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
 
-	_outFragColor = vec4(FinalColor, 1.0);
+	_outFragColor = FinalColor;
 }

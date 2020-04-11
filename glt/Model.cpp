@@ -16,11 +16,7 @@ using namespace glt;
 //FUNCTION:
 CModel::CModel(const std::string& vFilePath)
 {
-	if (!__loadModel(vFilePath))
-	{
-		_OUTPUT_WARNING("Failed to load model.");
-		_ASSERTE(false);
-	}
+	this->load(vFilePath);
 }
 
 //***********************************************************************************************
@@ -28,6 +24,17 @@ CModel::CModel(const std::string& vFilePath)
 CModel::~CModel()
 {
 	for (auto pTexture : m_LoadedTextures) _SAFE_DELETE(pTexture);
+}
+
+//**********************************************************************************************
+//FUNCTION:
+void CModel::load(const std::string& vFilePath)
+{
+	if (!__loadModel(vFilePath))
+	{
+		_OUTPUT_WARNING("Failed to load model.");
+		_ASSERTE(false);
+	}
 }
 
 //**********************************************************************************************

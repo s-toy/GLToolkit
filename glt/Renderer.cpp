@@ -68,16 +68,37 @@ void CRenderer::draw(const CVertexArray& vVertexArray, const CIndexBuffer& vInde
 
 //***********************************************************************************************
 //FUNCTION:
-void CRenderer::draw(const CModel& vModel, const CShaderProgram& vShaderProgram)
+void CRenderer::__drawSingleModel(const CModel& vModel, const CShaderProgram& vShaderProgram)
 {
-	vShaderProgram.bind();
-
-	__updateShaderUniform(vShaderProgram);
 	auto ModelMatrix = glm::translate(glm::mat4(1.0), vModel.getPosition());
 	ModelMatrix = glm::scale(ModelMatrix, vModel.getScale());
 	vShaderProgram.updateUniformMat4("uModelMatrix", ModelMatrix);
 
 	vModel.draw(vShaderProgram);
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::draw(const CModel& vModel, const CShaderProgram& vShaderProgram)
+{
+	vShaderProgram.bind();
+
+	__updateShaderUniform(vShaderProgram);
+	__drawSingleModel(vModel, vShaderProgram);
+
+#ifdef _DEBUG
+	vShaderProgram.unbind();
+#endif
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::draw(const std::vector<std::shared_ptr<CModel>>& vModels, const CShaderProgram& vShaderProgram)
+{
+	vShaderProgram.bind();
+
+	__updateShaderUniform(vShaderProgram);
+	for (const auto& Model : vModels) __drawSingleModel(*Model, vShaderProgram);
 
 #ifdef _DEBUG
 	vShaderProgram.unbind();

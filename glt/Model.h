@@ -14,9 +14,13 @@ namespace glt
 	class GLT_DECLSPEC CModel : public CEntity
 	{
 	public:
+		CModel() = default;
 		CModel(const std::string& vFilePath);
 		~CModel();
 
+		_DISALLOW_COPY_AND_ASSIGN(CModel);
+
+		void load(const std::string& vFilePath);
 		void draw(const CShaderProgram& vShaderProgram) const;
 
 	private:
