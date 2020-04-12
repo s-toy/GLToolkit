@@ -56,5 +56,7 @@ namespace glt
 
 		void bindV(unsigned int vBindPoint) const override;
 		void unbindV() const override;
+
+		void clear();
 	};
 }

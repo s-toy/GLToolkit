@@ -203,3 +203,12 @@ void CImage2D::unbindV() const
 {
 
 }
+
+//***********************************************************************************************
+//FUNCTION:
+void CImage2D::clear()
+{
+	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
+	std::vector<GLuint> emptyData(1024 * 576, 0);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 576, GL_RED, GL_UNSIGNED_INT, &emptyData[0]);
+}
