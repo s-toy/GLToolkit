@@ -9,8 +9,8 @@ namespace glt
 	class GLT_DECLSPEC CTexture
 	{
 	public:
-		CTexture() = default;
-		virtual ~CTexture() = default;
+		CTexture();
+		virtual ~CTexture();
 
 		virtual void bindV(unsigned int vBindPoint) const = 0;
 		virtual void unbindV() const = 0;
@@ -44,6 +44,15 @@ namespace glt
 	public:
 		void load(const std::vector<std::string>& vFaces, bool vGenerateMipMap);
 		void createEmpty(int vWidth, int vHeight, bool vGenerateMipMap);
+
+		void bindV(unsigned int vBindPoint) const override;
+		void unbindV() const override;
+	};
+
+	class GLT_DECLSPEC CImage2D : public CTexture
+	{
+	public:
+		void createEmpty(int vWidth, int vHeight, GLenum vFormat, unsigned int vBindUnit);
 
 		void bindV(unsigned int vBindPoint) const override;
 		void unbindV() const override;

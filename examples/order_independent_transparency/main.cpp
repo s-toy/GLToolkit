@@ -101,13 +101,17 @@ private:
 		Nodes.push_back({ 0, 255, 0 });
 		Nodes.push_back({ 0, 0, 255 });
 		m_pListNodeBuffer = std::make_unique<CShaderStorageBuffer>(Nodes.data(), Nodes.size() * sizeof(SListNode), 0);
+
+		m_pListHeadImage = std::make_unique<CImage2D>();
+		m_pListHeadImage->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R32UI, 0);
 	}
 
 	std::unique_ptr<CShaderProgram> m_pOpaqueShaderProgram;
 	std::unique_ptr<CShaderProgram> m_pColorBlendingProgram;
 	std::unique_ptr<CFrameBuffer>	m_pOpaqueFrameBuffer;
 	std::unique_ptr<CSkybox>		m_pSkybox;
-	std::unique_ptr<CShaderStorageBuffer> m_pListNodeBuffer;
+	std::unique_ptr<CShaderStorageBuffer>	m_pListNodeBuffer;
+	std::unique_ptr<CImage2D>				m_pListHeadImage;
 
 	std::shared_ptr<CTexture2D>		m_pOpaqueColorTexture;
 
