@@ -189,6 +189,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ApplicationBase.h" />
+    <ClInclude Include="AtomicCounterBuffer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="CpuTimer.h" />
@@ -227,6 +228,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ApplicationBase.cpp" />
+    <ClCompile Include="AtomicCounterBuffer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CpuTimer.cpp" />
     <ClCompile Include="DebugUtil.cpp" />
