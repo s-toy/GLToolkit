@@ -44,7 +44,7 @@ void insertionSort(inout NodeData sortedFragments[MAX_FRAGMENTS], int size)
 	{
 		int j = k;
 		NodeData t = sortedFragments[k];
-
+			
 		while (sortedFragments[j - 1].depth < t.depth)
 		{
 			sortedFragments[j] = sortedFragments[j - 1];

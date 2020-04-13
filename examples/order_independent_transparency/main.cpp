@@ -89,7 +89,8 @@ private:
 
 	void __initScenes()
 	{
-		__initScene01();
+		//__initScene01();
+		__initScene02();
 	}
 
 	void __initScene01()
@@ -159,6 +160,85 @@ private:
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), glm::vec3(0.0, 0.0, 0.5), 0.5 };
 	}
 
+	void __initScene02()
+	{
+		std::vector<std::string> Faces = {
+			"textures/skybox/right.jpg",
+			"textures/skybox/left.jpg",
+			"textures/skybox/top.jpg",
+			"textures/skybox/bottom.jpg",
+			"textures/skybox/front.jpg",
+			"textures/skybox/back.jpg"
+		};
+		m_pSkybox = std::make_unique<CSkybox>(Faces);
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0), glm::vec3(0.0), 1.0 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -0.5f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0), 1.0 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0), 1.0 };
+
+
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0), glm::vec3(0.0), 0.8 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, -0.5f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0), 0.5 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0), 0.2 };
+
+
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-4.0f, 0.0f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0), glm::vec3(0.0), 0.2 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-4.0f, 0.0f, -0.5f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0), 0.5 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-4.0f, 0.0f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0), 0.8 };
+
+
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, -2.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0), glm::vec3(0.8), 1.0 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 1.0, 0.0), glm::vec3(0.8, 0.8, 0.0), 1.0 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 0.0, 1.0), glm::vec3(0.8, 0.0, 0.8), 1.0 };
+	}
+
 	void __initTexturesAndBuffers()
 	{
 		m_pOpaqueColorTexture = std::make_shared<CTexture2D>();
@@ -191,7 +271,7 @@ private:
 		m_pOpaqueFrameBuffer->bind();
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(true);
-		CRenderer::getInstance()->drawSkybox(*m_pSkybox, 0);
+		if (m_pSkybox) CRenderer::getInstance()->drawSkybox(*m_pSkybox, 0);
 
 		//draw opaque objects
 		CRenderer::getInstance()->draw(m_OpaqueModels, *m_pOpaqueShaderProgram);
@@ -216,6 +296,7 @@ private:
 		for (auto Model : m_TransparentModels)
 		{
 			auto Material = m_Model2MaterialMap[Model];
+			m_pGenLinkedListProgram->bind();
 			m_pGenLinkedListProgram->updateUniform3f("uDiffuseColor", Material.diffuse);
 			m_pGenLinkedListProgram->updateUniform3f("uTransmittance", Material.transmittance);
 			m_pGenLinkedListProgram->updateUniform1f("uCoverage", Material.coverage);

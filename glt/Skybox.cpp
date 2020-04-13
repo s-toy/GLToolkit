@@ -56,6 +56,8 @@ const float skyboxVertices[] = {
 //FUNCTION:
 CSkybox::CSkybox(const std::vector<std::string>& vFaces)
 {
+    _ASSERTE(!vFaces.empty());
+
 	m_pTexture = std::make_shared<CTextureCube>();
 	m_pTexture->load(vFaces, false);
 
@@ -83,6 +85,8 @@ CSkybox::CSkybox(const std::vector<std::string>& vFaces)
 //FUNCTION:
 void CSkybox::_draw(unsigned int vBindPoint) const
 {
+    if (!m_pShaderProgram) return;
+
 	m_pShaderProgram->bind();
 	m_pTexture->bindV(vBindPoint);
     m_pVAO->bind();

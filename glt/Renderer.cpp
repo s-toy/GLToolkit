@@ -144,6 +144,7 @@ void CRenderer::drawScreenQuad(const CShaderProgram& vShaderProgram)
 void CRenderer::drawSkybox(const CSkybox& vSkybox, unsigned int vBindPoint)
 {
 	auto pShaderProgram = vSkybox._getShaderProgram();
+	_ASSERT(pShaderProgram);
 	pShaderProgram->bind();
 	pShaderProgram->updateUniformMat4("uProjectionMatrix", m_pCamera->getProjectionMatrix());
 	pShaderProgram->updateUniformMat4("uViewMatrix", m_pCamera->getViewMatrix());
