@@ -74,7 +74,7 @@ void main()
 
 	vec3 color = computeColor();
 	//color = vec3(0.5);
-	uint packedColor = packColor(vec4(color, 0.5));
+	uint packedColor = packColor(vec4(color, 0.7));
 
 	beginInvocationInterlockARB();
 

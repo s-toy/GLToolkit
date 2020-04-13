@@ -9,6 +9,7 @@
 #include "FileLocator.h"
 #include "ShaderStorageBuffer.h"
 #include "AtomicCounterBuffer.h"
+#include "InputManager.h"
 
 using namespace glt;
 
@@ -48,6 +49,14 @@ protected:
 		__mergeColor();
 	}
 
+	void _updateV() override
+	{
+		auto KeyStatus = CInputManager::getInstance()->getKeyStatus();
+		if (KeyStatus[GLFW_KEY_0]) m_BlendingStrategy = 0;
+		else if (KeyStatus[GLFW_KEY_1]) m_BlendingStrategy = 1;
+		else if (KeyStatus[GLFW_KEY_2]) m_BlendingStrategy = 2;
+	}
+
 private:
 	void __initShaders()
 	{
@@ -59,9 +68,9 @@ private:
 		m_pGenLinkedListProgram->addShader("shaders/generate_linked_list_vs.glsl", EShaderType::VERTEX_SHADER);
 		m_pGenLinkedListProgram->addShader("shaders/generate_linked_list_fs.glsl", EShaderType::FRAGMENT_SHADER);
 
-		m_pSortLinkedListProgram = std::make_unique<CShaderProgram>();
-		m_pSortLinkedListProgram->addShader("shaders/draw_screen_quad_vs.glsl", EShaderType::VERTEX_SHADER);
-		m_pSortLinkedListProgram->addShader("shaders/sorting_and_blending_fs.glsl", EShaderType::FRAGMENT_SHADER);
+		m_pColorBlendingProgram = std::make_unique<CShaderProgram>();
+		m_pColorBlendingProgram->addShader("shaders/draw_screen_quad_vs.glsl", EShaderType::VERTEX_SHADER);
+		m_pColorBlendingProgram->addShader("shaders/color_blending_fs.glsl", EShaderType::FRAGMENT_SHADER);
 
 		m_pMergeColorProgram = std::make_unique<CShaderProgram>();
 		m_pMergeColorProgram->addShader("shaders/draw_screen_quad_vs.glsl", EShaderType::VERTEX_SHADER);
@@ -140,8 +149,9 @@ private:
 		CRenderer::getInstance()->draw(m_TransparentModels, *m_pGenLinkedListProgram);
 		CRenderer::getInstance()->setDepthMask(true);
 
-		m_pSortLinkedListProgram->bind();
-		CRenderer::getInstance()->drawScreenQuad(*m_pSortLinkedListProgram);
+		m_pColorBlendingProgram->bind();
+		m_pColorBlendingProgram->updateUniform1i("uBlendingStrategy", m_BlendingStrategy);
+		CRenderer::getInstance()->drawScreenQuad(*m_pColorBlendingProgram);
 
 		m_pTransparencyFrameBuffer->unbind();
 	}
@@ -162,7 +172,7 @@ private:
 
 	std::unique_ptr<CShaderProgram> m_pOpaqueShaderProgram;
 	std::unique_ptr<CShaderProgram> m_pGenLinkedListProgram;
-	std::unique_ptr<CShaderProgram> m_pSortLinkedListProgram;
+	std::unique_ptr<CShaderProgram> m_pColorBlendingProgram;
 	std::unique_ptr<CShaderProgram> m_pMergeColorProgram;
 	std::unique_ptr<CFrameBuffer>	m_pOpaqueFrameBuffer;
 	std::unique_ptr<CFrameBuffer>	m_pTransparencyFrameBuffer;
@@ -177,6 +187,8 @@ private:
 
 	std::vector<std::shared_ptr<CModel>> m_OpaqueModels;
 	std::vector<std::shared_ptr<CModel>> m_TransparentModels;
+
+	int m_BlendingStrategy = 0;
 };
 
 int main()
