@@ -8,7 +8,7 @@ namespace glt
 {
 	class CTexture;
 
-	enum class EAttachment : GLenum 
+	enum class EAttachment : GLenum
 	{
 		COLOR0 = GL_COLOR_ATTACHMENT0,
 		COLOR1 = GL_COLOR_ATTACHMENT1,
@@ -17,7 +17,9 @@ namespace glt
 		COLOR4 = GL_COLOR_ATTACHMENT4,
 		COLOR5 = GL_COLOR_ATTACHMENT5,
 		COLOR6 = GL_COLOR_ATTACHMENT6,
-		COLOR7 = GL_COLOR_ATTACHMENT7
+		COLOR7 = GL_COLOR_ATTACHMENT7,
+
+		DEPTH = GL_DEPTH_ATTACHMENT
 	};
 
 	class GLT_DECLSPEC CFrameBuffer

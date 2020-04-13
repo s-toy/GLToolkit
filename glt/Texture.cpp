@@ -66,16 +66,16 @@ void CTexture2D::load(const char *vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint v
 
 //***********************************************************************************************
 //FUNCTION:
-void CTexture2D::createEmpty(unsigned int vWidth, unsigned int vHeight, GLint vInternalFormat /*= GL_RGB32F*/, GLenum vFormat /*= GL_RGB*/, bool vGenerateMipMap /*= GL_FALSE*/)
+void CTexture2D::createEmpty(unsigned int vWidth, unsigned int vHeight, GLint vInternalFormat /*= GL_RGB32F*/, GLenum vFormat, GLenum vType, GLint vWrapMode, GLint vFilterMode, bool vGenerateMipMap)
 {
 	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
-	glTexImage2D(GL_TEXTURE_2D, 0, vInternalFormat, vWidth, vHeight, 0, vFormat, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, vInternalFormat, vWidth, vHeight, 0, vFormat, vType, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, vWrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, vWrapMode);
 	if (vGenerateMipMap == false)
 	{
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, vFilterMode);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, vFilterMode);
 	}
 	else
 	{

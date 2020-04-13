@@ -82,13 +82,17 @@ private:
 	void __initTexturesAndBuffers()
 	{
 		m_pOpaqueColorTexture = std::make_shared<CTexture2D>();
-		m_pOpaqueColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB);
+		m_pOpaqueColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pOpaqueDepthTexture = std::make_shared<CTexture2D>();
+		m_pOpaqueDepthTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_RED, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pOpaqueFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pOpaqueFrameBuffer->set(EAttachment::COLOR0, m_pOpaqueColorTexture);
+		m_pOpaqueFrameBuffer->set(EAttachment::COLOR1, m_pOpaqueDepthTexture);
 
 		m_pTransparentColorTexture = std::make_shared<CTexture2D>();
-		m_pTransparentColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8, GL_RGBA);
+		m_pTransparentColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pTransparencyFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pTransparencyFrameBuffer->set(EAttachment::COLOR0, m_pTransparentColorTexture);
@@ -131,6 +135,8 @@ private:
 		m_pListAtomicCounter->reset();
 
 		m_pGenLinkedListProgram->updateUniform1i("uMaxListNode", MAX_LIST_NODE);
+		m_pOpaqueDepthTexture->bindV(2);
+		m_pGenLinkedListProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTexture);
 		CRenderer::getInstance()->draw(m_TransparentModels, *m_pGenLinkedListProgram);
 		CRenderer::getInstance()->setDepthMask(true);
 
@@ -166,6 +172,7 @@ private:
 	std::unique_ptr<CAtomicCounterBuffer>	m_pListAtomicCounter;
 
 	std::shared_ptr<CTexture2D>		m_pOpaqueColorTexture;
+	std::shared_ptr<CTexture2D>		m_pOpaqueDepthTexture;
 	std::shared_ptr<CTexture2D>		m_pTransparentColorTexture;
 
 	std::vector<std::shared_ptr<CModel>> m_OpaqueModels;

@@ -24,6 +24,7 @@ layout(binding = 2, std430) buffer linkedLists
 uniform int			uMaxListNode;
 uniform sampler2D	uMaterialDiffuse;
 uniform sampler2D	uMaterialSpecular;
+uniform sampler2D   uOpaqueDepthTex;
 uniform vec3		uViewPos = vec3(0.0);
 
 layout(location = 0) in vec4 _inPositionW;
@@ -68,6 +69,9 @@ uint packColor(vec4 color)
 
 void main()
 {
+	float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
+
 	vec3 color = computeColor();
 	//color = vec3(0.5);
 	uint packedColor = packColor(vec4(color, 0.5));
