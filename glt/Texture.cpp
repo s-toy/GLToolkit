@@ -2,6 +2,7 @@
 #include "stb_image/stb_image.h"
 #include "Common.h"
 #include "FileLocator.h"
+#include "ShaderProgram.h"
 
 using namespace glt;
 
@@ -183,11 +184,19 @@ void CTextureCube::unbindV() const
 //FUNCTION:
 void CImage2D::createEmpty(int vWidth, int vHeight, GLenum vFormat, unsigned int vBindUnit)
 {
+	m_Format = vFormat;
+	m_Width = vWidth;
+	m_Height = vHeight;
+
 	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
-	glTexStorage2D(GL_TEXTURE_2D, 1, vFormat, vWidth, vHeight);
+	glTexStorage2D(GL_TEXTURE_2D, 1, m_Format, m_Width, m_Height);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glBindImageTexture(vBindUnit, m_ObjectID, 0, GL_FALSE, 0, GL_READ_WRITE, vFormat);
+	glBindImageTexture(vBindUnit, m_ObjectID, 0, GL_FALSE, 0, GL_READ_WRITE, m_Format);
+
+	m_pShaderProgram = std::make_unique<CShaderProgram>();
+	std::string ShaderFileName = CFileLocator::getInstance()->locateFile("shaders/clear_image2d_cs.glsl");
+	m_pShaderProgram->addShader(ShaderFileName, EShaderType::COMPUTE_SHADER);
 }
 
 //***********************************************************************************************
@@ -208,7 +217,7 @@ void CImage2D::unbindV() const
 //FUNCTION:
 void CImage2D::clear()
 {
-	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
-	std::vector<GLuint> emptyData(1024 * 576, 0);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1024, 576, GL_RED, GL_UNSIGNED_INT, &emptyData[0]);
+	m_pShaderProgram->bind();
+	glDispatchCompute(m_Width / 32, m_Height / 32, 1); //TODO:如何判断使用多少个group最合适
+	m_pShaderProgram->unbind();
 }

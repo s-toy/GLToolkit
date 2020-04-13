@@ -53,9 +53,10 @@ protected:
 		//CRenderer::getInstance()->draw(m_OpaqueModels, *m_pOpaqueShaderProgram);
 
 		//draw transparent objects
+		m_pListHeadImage->clear();
+
 		m_pGenLinkedListProgram->bind();
 		m_pListAtomicCounter->reset();
-		m_pListHeadImage->clear();
 		m_pGenLinkedListProgram->updateUniform1i("uMaxListNode", MAX_LIST_NODE);
 		CRenderer::getInstance()->draw(m_TransparentModels, *m_pGenLinkedListProgram);
 		m_pOpaqueFrameBuffer->unbind();

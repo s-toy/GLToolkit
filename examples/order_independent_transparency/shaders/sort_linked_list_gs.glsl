@@ -1,4 +1,4 @@
-#version 460
+#version 430
 
 #expect WORK_GROUP_SIZE_X
 #expect WORK_GROUP_SIZE_Y
