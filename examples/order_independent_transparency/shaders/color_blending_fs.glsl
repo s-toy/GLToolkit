@@ -3,13 +3,15 @@
 struct ListNode
 {
 	uint packedColor;
-	uint depthAndCoverage;
+	uint transmittance;
+	uint depth;
 	uint next;
 };
 
 struct NodeData
 {
 	uint packedColor;
+	uint transmittance;
 	float depth;
 };
 
@@ -22,7 +24,7 @@ struct NodeData
 uniform int uBlendingStrategy = BLENDING_STRATEGY_PERFECT_SORTING;
 
 layout(binding = 0, r32ui) coherent uniform uimage2D uListHeadPtrTex;
-layout(binding = 2, std430) buffer linkedList { ListNode nodes[]; };
+layout(binding = 0, std430) buffer linkedList { ListNode nodes[]; };
 
 layout(location = 0) out vec4 _outFragColor;
 
@@ -36,9 +38,9 @@ vec4 unpackColor(uint color)
 	return clamp(c, 0.0f, 1.0f);
 }
 
-void insertionSort(inout NodeData sortedFragments[MAX_FRAGMENTS])
+void insertionSort(inout NodeData sortedFragments[MAX_FRAGMENTS], int size)
 {
-	for (int k = 1; k < MAX_FRAGMENTS; k++)
+	for (int k = 1; k < size; k++)
 	{
 		int j = k;
 		NodeData t = sortedFragments[k];
@@ -59,18 +61,16 @@ void main()
 	uint index = imageLoad(uListHeadPtrTex, ivec2(gl_FragCoord.xy)).x;
 	if (index == 0) { _outFragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
 
-	vec3 color = vec3(0);
-	float alpha = 1.0f;
-
 	NodeData fragments[MAX_FRAGMENTS];
 	int counter = 0;
 	for (int i = 0; i < MAX_FRAGMENTS; i++)
 	{
-		fragments[i] = NodeData(0, 0.0f);
+		fragments[i] = NodeData(0, 0, 0.0f);
 		if (index != 0)
 		{
 			fragments[counter].packedColor = nodes[index].packedColor;
-			fragments[counter].depth = unpackHalf2x16(nodes[index].depthAndCoverage).x;
+			fragments[counter].transmittance = nodes[index].transmittance;
+			fragments[counter].depth = unpackHalf2x16(nodes[index].depth).x;
 			counter++;
 			index = nodes[index].next;
 		}
@@ -78,16 +78,20 @@ void main()
 
 	if (uBlendingStrategy == BLENDING_STRATEGY_PERFECT_SORTING)
 	{
-		insertionSort(fragments);
+		insertionSort(fragments, counter);
 	}
+
+	vec3 color = vec3(0.0);
+	vec3 beta = vec3(1.0);
 
 	if (uBlendingStrategy == BLENDING_STRATEGY_NO_SORTING || uBlendingStrategy == BLENDING_STRATEGY_PERFECT_SORTING)
 	{
 		for (int i = 0; i < counter; i++)
 		{
 			vec4 c = unpackColor(fragments[i].packedColor);
-			alpha *= (1.0 - c.a);
-			color = mix(color, c.rgb, c.a);
+			vec3 t = unpackColor(fragments[i].transmittance).rgb;
+			beta *= (1.0 - c.a + c.a * t);
+			color = (1.0 - c.a) * color + c.a * (c.rgb + t * color);
 		}
 	}
 	else if (uBlendingStrategy == BLENDING_STRATEGY_OIT_16)
@@ -96,15 +100,18 @@ void main()
 		for (int i = 0; i < counter; i++)
 		{
 			vec4 c = unpackColor(fragments[i].packedColor);
-			alpha *= (1.0 - c.a);
+			vec3 t = unpackColor(fragments[i].transmittance).rgb;
+			float t_average = (t.r + t.g + t.b) / 3.0;
+			beta *= (1.0 - c.a + c.a * t);
 
-			float weight = clamp(pow(10.0*(1.0-0.99*gl_FragCoord.z)*c.a, 3.0), 0.01, 30.0);
-			color += c.rgb * c.a * weight;
-			totalWeight += c.a * weight;
+			float weight = pow(10.0 * (1.0 - 0.99 * gl_FragCoord.z) * c.a * (1.0 - t_average), 3.0);
+			weight = clamp(weight, 0.01, 30.0);
+			color +=  c.a * weight * c.rgb;
+			totalWeight += c.a * weight * (1.0 - t_average);
 		}
 
-		color = (1.0 - alpha) * color / totalWeight;
+		color = (vec3(1.0) - beta) * color / totalWeight;
 	}
 
-	_outFragColor = vec4(color, alpha);
+	_outFragColor = vec4(color, beta);
 }

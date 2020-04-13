@@ -4,7 +4,8 @@
 struct ListNode
 {
 	uint packedColor;
-	uint depthAndCoverage;
+	uint transmittance;
+	uint depth;
 	uint next;
 };
 
@@ -13,13 +14,8 @@ struct SParallelLight { vec3 Color; vec3 Direction; };
 struct SMaterial { vec3 Diffuse; vec3 Specular; float Shinness; };
 
 layout(binding = 0, r32ui) uniform uimage2D uListHeadPtrTex;
-
-layout(binding = 1, offset = 0) uniform atomic_uint uListNodeCounter;
-
-layout(binding = 2, std430) buffer linkedLists
-{
-	ListNode nodes[];
-};
+layout(binding = 0, offset = 0) uniform atomic_uint uListNodeCounter;
+layout(binding = 0, std430) buffer linkedLists { ListNode nodes[]; };
 
 uniform int			uMaxListNode;
 uniform sampler2D	uMaterialDiffuse;
@@ -43,7 +39,7 @@ vec3 computePhongShading4ParallelLight(vec3 vPositionW, vec3 vNormalW, vec3 vVie
 	return AmbientColor + DiffuseColor + SpecularColor;
 }
 
-vec3 computeColor()
+vec3 computeReflectColor()
 {
 	vec3 ViewDirW = normalize(uViewPos - _inPositionW.xyz);
 	vec3 NormalW = normalize(_inNormalW);
@@ -72,9 +68,9 @@ void main()
 	float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
-	vec3 color = computeColor();
-	//color = vec3(0.5);
-	uint packedColor = packColor(vec4(color, 0.7));
+	vec3 color = computeReflectColor();
+	uint packedColor = packColor(vec4(color, 0.6));
+	uint transmittance = packColor(vec4(0.0));
 
 	beginInvocationInterlockARB();
 
@@ -84,7 +80,7 @@ void main()
 	{
 		uint nextIndex = imageAtomicExchange(uListHeadPtrTex, ivec2(gl_FragCoord.xy), nodeIndex);
 		uint currentDepth = packHalf2x16(vec2(_inPositionW.w, 0));
-		nodes[nodeIndex] = ListNode(packedColor, currentDepth, nextIndex);
+		nodes[nodeIndex] = ListNode(packedColor, transmittance, currentDepth, nextIndex);
 	}
 
 	endInvocationInterlockARB();

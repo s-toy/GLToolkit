@@ -20,7 +20,8 @@ const int MAX_LIST_NODE = WIN_WIDTH * WIN_HEIGHT * 6;
 struct SListNode
 {
 	unsigned packedColor;
-	unsigned depthAndCoverage;
+	unsigned transmittance;
+	unsigned depth;
 	unsigned next;
 };
 
@@ -34,7 +35,7 @@ protected:
 		CFileLocator::getInstance()->addFileSearchPath("../../resource");
 
 		__initShaders();
-		__initModels();
+		__initScenes();
 		__initTexturesAndBuffers();
 
 		CRenderer::getInstance()->fetchCamera()->setPosition(glm::dvec3(0, 0, 5));
@@ -77,8 +78,23 @@ private:
 		m_pMergeColorProgram->addShader("shaders/merge_color_fs.glsl", EShaderType::FRAGMENT_SHADER);
 	}
 
-	void __initModels()
+	void __initScenes()
 	{
+		__initScene01();
+	}
+
+	void __initScene01()
+	{
+		std::vector<std::string> Faces = {
+			"textures/skybox/right.jpg",
+			"textures/skybox/left.jpg",
+			"textures/skybox/top.jpg",
+			"textures/skybox/bottom.jpg",
+			"textures/skybox/front.jpg",
+			"textures/skybox/back.jpg"
+		};
+		m_pSkybox = std::make_unique<CSkybox>(Faces);
+
 		m_OpaqueModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
 		m_OpaqueModels[0]->setPosition(glm::vec3(0.0f, -1.5f, -1.0f));
 		m_OpaqueModels[0]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
@@ -106,17 +122,12 @@ private:
 		m_pTransparencyFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pTransparencyFrameBuffer->set(EAttachment::COLOR0, m_pTransparentColorTexture);
 
-		std::vector<std::string> Faces = {
-			"textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg"
-		};
-		m_pSkybox = std::make_unique<CSkybox>(Faces);
-
 		m_pListHeadImage = std::make_unique<CImage2D>();
 		m_pListHeadImage->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R32UI, 0);
 
-		m_pListAtomicCounter = std::make_unique<CAtomicCounterBuffer>(1);
+		m_pListAtomicCounter = std::make_unique<CAtomicCounterBuffer>(0);
 
-		m_pListNodeBuffer = std::make_unique<CShaderStorageBuffer>(nullptr, MAX_LIST_NODE * sizeof(SListNode), 2);
+		m_pListNodeBuffer = std::make_unique<CShaderStorageBuffer>(nullptr, MAX_LIST_NODE * sizeof(SListNode), 0);
 	}
 
 	void __drawOpaqueObjects()
