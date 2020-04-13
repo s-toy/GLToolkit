@@ -22,7 +22,7 @@ vec3 computePhongShading4ParallelLight(vec3 vPositionW, vec3 vNormalW, vec3 vVie
 	vec3 ReflectDir = normalize(reflect(-vLight.Direction, _inNormalW));
 	vec3 SpecularColor = vLight.Color * vMaterial.Specular * pow(max(dot(vViewDir, ReflectDir), 0.0), vMaterial.Shinness);
 
-	return AmbientColor + DiffuseColor + SpecularColor;
+	return AmbientColor + DiffuseColor/* + SpecularColor*/;
 }
 
 void main()
@@ -31,8 +31,8 @@ void main()
 	vec3 NormalW = normalize(_inNormalW);
 
 	SMaterial Material;
-	Material.Diffuse = texture(uMaterialDiffuse, _inTexCoord).rgb;
-	Material.Specular = texture(uMaterialSpecular, _inTexCoord).rgb;
+	Material.Diffuse = vec3(0.6);// texture(uMaterialDiffuse, _inTexCoord).rgb;
+	Material.Specular = vec3(0.5);//texture(uMaterialSpecular, _inTexCoord).rgb;
 	Material.Shinness = 32.0;
 
 	vec3 FinalColor = vec3(0.0);

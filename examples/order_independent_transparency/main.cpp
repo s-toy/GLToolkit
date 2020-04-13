@@ -1,5 +1,7 @@
 #include <memory>
 #include <vector>
+#include <map>
+#include <glm/glm.hpp>
 #include "ApplicationBase.h"
 #include "ShaderProgram.h"
 #include "Model.h"
@@ -23,6 +25,13 @@ struct SListNode
 	unsigned transmittance;
 	unsigned depth;
 	unsigned next;
+};
+
+struct SMaterial
+{
+	glm::vec3 diffuse;
+	glm::vec3 transmittance;
+	float coverage;
 };
 
 class CMyApplication : public CApplicationBase
@@ -95,13 +104,59 @@ private:
 		};
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
-		m_OpaqueModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
-		m_OpaqueModels[0]->setPosition(glm::vec3(0.0f, -1.5f, -1.0f));
-		m_OpaqueModels[0]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, -1.5f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), glm::vec3(0.0), 0.2 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
-		m_TransparentModels[0]->setPosition(glm::vec3(0.0f, -1.5f, 0.0f));
-		m_TransparentModels[0]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, -1.5f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), glm::vec3(0.0), 0.8 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, -1.5f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), glm::vec3(0.0), 0.5 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, -1.5f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), glm::vec3(0.0), 0.5 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, -1.5f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), glm::vec3(0.0), 0.9 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, -1.5f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), glm::vec3(0.0), 0.1 };
+
+
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-6.0f, -1.5f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), glm::vec3(0.5), 1.0 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(-6.0f, -1.5f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), glm::vec3(0.0, 0.0, 0.5), 1.0 };
+
+
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(6.0f, -1.5f, -1.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), glm::vec3(0.5), 0.5 };
+
+		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(6.0f, -1.5f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), glm::vec3(0.0, 0.0, 0.5), 0.5 };
 	}
 
 	void __initTexturesAndBuffers()
@@ -157,7 +212,16 @@ private:
 		m_pGenLinkedListProgram->updateUniform1i("uMaxListNode", MAX_LIST_NODE);
 		m_pOpaqueDepthTexture->bindV(2);
 		m_pGenLinkedListProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTexture);
-		CRenderer::getInstance()->draw(m_TransparentModels, *m_pGenLinkedListProgram);
+
+		for (auto Model : m_TransparentModels)
+		{
+			auto Material = m_Model2MaterialMap[Model];
+			m_pGenLinkedListProgram->updateUniform3f("uDiffuseColor", Material.diffuse);
+			m_pGenLinkedListProgram->updateUniform3f("uTransmittance", Material.transmittance);
+			m_pGenLinkedListProgram->updateUniform1f("uCoverage", Material.coverage);
+			CRenderer::getInstance()->draw(*Model, *m_pGenLinkedListProgram);
+		}
+
 		CRenderer::getInstance()->setDepthMask(true);
 
 		m_pColorBlendingProgram->bind();
@@ -200,6 +264,8 @@ private:
 	std::vector<std::shared_ptr<CModel>> m_TransparentModels;
 
 	int m_BlendingStrategy = 0;
+
+	std::map<std::shared_ptr<CModel>, SMaterial> m_Model2MaterialMap;
 };
 
 int main()

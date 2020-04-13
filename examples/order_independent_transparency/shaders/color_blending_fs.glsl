@@ -35,7 +35,7 @@ vec4 unpackColor(uint color)
 	c.g = float((color >> 16) & 0x000000ff) / 255.0f;
 	c.b = float((color >> 8) & 0x000000ff) / 255.0f;
 	c.a = float(color & 0x000000ff) / 255.0f;
-	return clamp(c, 0.0f, 1.0f);
+	return c;
 }
 
 void insertionSort(inout NodeData sortedFragments[MAX_FRAGMENTS], int size)

@@ -23,6 +23,10 @@ uniform sampler2D	uMaterialSpecular;
 uniform sampler2D   uOpaqueDepthTex;
 uniform vec3		uViewPos = vec3(0.0);
 
+uniform vec3	uDiffuseColor;
+uniform vec3	uTransmittance;
+uniform float	uCoverage;
+
 layout(location = 0) in vec4 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
 layout(location = 2) in vec2 _inTexCoord;
@@ -36,7 +40,7 @@ vec3 computePhongShading4ParallelLight(vec3 vPositionW, vec3 vNormalW, vec3 vVie
 	vec3 ReflectDir = normalize(reflect(-vLight.Direction, _inNormalW));
 	vec3 SpecularColor = vLight.Color * vMaterial.Specular * pow(max(dot(vViewDir, ReflectDir), 0.0), vMaterial.Shinness);
 
-	return AmbientColor + DiffuseColor + SpecularColor;
+	return AmbientColor + DiffuseColor/* + SpecularColor*/;
 }
 
 vec3 computeReflectColor()
@@ -45,8 +49,8 @@ vec3 computeReflectColor()
 	vec3 NormalW = normalize(_inNormalW);
 
 	SMaterial Material;
-	Material.Diffuse = texture(uMaterialDiffuse, _inTexCoord).rgb;
-	Material.Specular = texture(uMaterialSpecular, _inTexCoord).rgb;
+	Material.Diffuse = uDiffuseColor;//texture(uMaterialDiffuse, _inTexCoord).rgb;
+	Material.Specular = vec3(0.0); //texture(uMaterialSpecular, _inTexCoord).rgb;
 	Material.Shinness = 32.0;
 
 	vec3 color = vec3(0.0);
@@ -69,8 +73,8 @@ void main()
 	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
 	vec3 color = computeReflectColor();
-	uint packedColor = packColor(vec4(color, 0.6));
-	uint transmittance = packColor(vec4(0.0));
+	uint packedColor = packColor(vec4(color, uCoverage));
+	uint transmittance = packColor(vec4(uTransmittance, 0.0));
 
 	beginInvocationInterlockARB();
 
