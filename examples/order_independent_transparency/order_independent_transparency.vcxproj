@@ -162,13 +162,13 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\color_blending_fs.glsl" />
+    <None Include="shaders\merge_color_fs.glsl" />
     <None Include="shaders\draw_screen_quad_vs.glsl" />
     <None Include="shaders\generate_linked_list_fs.glsl" />
     <None Include="shaders\generate_linked_list_vs.glsl" />
     <None Include="shaders\opaque_shading_fs.glsl" />
     <None Include="shaders\opaque_shading_vs.glsl" />
-    <None Include="shaders\sort_linked_list_gs.glsl" />
+    <None Include="shaders\sorting_and_blending_fs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

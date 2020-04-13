@@ -50,6 +50,20 @@ void CRenderer::clear() const
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::enableCullFace(bool vEnable) const
+{
+	vEnable ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::setDepthMask(bool vFlag) const
+{
+	glDepthMask(vFlag);
+}
+
 //*********************************************************************
 //FUNCTION:
 void CRenderer::draw(const CVertexArray& vVertexArray, const CIndexBuffer& vIndexBuffer, const CShaderProgram& vShaderProgram) const

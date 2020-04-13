@@ -26,11 +26,11 @@ uniform sampler2D	uMaterialDiffuse;
 uniform sampler2D	uMaterialSpecular;
 uniform vec3		uViewPos = vec3(0.0);
 
-layout(location = 0) in vec3 _inPositionW;
+layout(location = 0) in vec4 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
 layout(location = 2) in vec2 _inTexCoord;
 
-layout(location = 0) out vec3 _outFragColor;
+layout(location = 0) out vec4 _outFragColor;
 
 vec3 computePhongShading4ParallelLight(vec3 vPositionW, vec3 vNormalW, vec3 vViewDir, SParallelLight vLight, SMaterial vMaterial)
 {
@@ -44,7 +44,7 @@ vec3 computePhongShading4ParallelLight(vec3 vPositionW, vec3 vNormalW, vec3 vVie
 
 vec3 computeColor()
 {
-	vec3 ViewDirW = normalize(uViewPos - _inPositionW);
+	vec3 ViewDirW = normalize(uViewPos - _inPositionW.xyz);
 	vec3 NormalW = normalize(_inNormalW);
 
 	SMaterial Material;
@@ -53,8 +53,8 @@ vec3 computeColor()
 	Material.Shinness = 32.0;
 
 	vec3 color = vec3(0.0);
-	color += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(1.0, 1.0, 1.0)), Material);
-	color += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
+	color += computePhongShading4ParallelLight(_inPositionW.xyz, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(1.0, 1.0, 1.0)), Material);
+	color += computePhongShading4ParallelLight(_inPositionW.xyz, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
 
 	return color;
 }
@@ -69,7 +69,8 @@ uint packColor(vec4 color)
 void main()
 {
 	vec3 color = computeColor();
-	uint packedColor = packColor(vec4(color, 0.0));
+	//color = vec3(0.5);
+	uint packedColor = packColor(vec4(color, 0.5));
 
 	beginInvocationInterlockARB();
 
@@ -78,10 +79,11 @@ void main()
 	if (nodeIndex < uMaxListNode)
 	{
 		uint nextIndex = imageAtomicExchange(uListHeadPtrTex, ivec2(gl_FragCoord.xy), nodeIndex);
-		nodes[nodeIndex] = ListNode(packedColor, 0, nextIndex);
+		uint currentDepth = packHalf2x16(vec2(_inPositionW.w, 0));
+		nodes[nodeIndex] = ListNode(packedColor, currentDepth, nextIndex);
 	}
 
 	endInvocationInterlockARB();
 
-	//_outFragColor = color;
+	//_outFragColor = vec4(color, 1.0);
 }

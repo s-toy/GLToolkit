@@ -27,6 +27,9 @@ namespace glt
 
 		void update();
 
+		void enableCullFace(bool vEnable) const;
+		void setDepthMask(bool vFlag) const;
+
 		void draw(const CVertexArray& vVertexArray, const CIndexBuffer& vIndexBuffer, const CShaderProgram& vShaderProgram) const;
 		void draw(const CModel& vModel, const CShaderProgram& vShaderProgram);
 		void draw(const std::vector<std::shared_ptr<CModel>>& vModels, const CShaderProgram& vShaderProgram);

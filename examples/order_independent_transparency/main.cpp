@@ -43,32 +43,9 @@ protected:
 
 	void _renderV() override
 	{
-		//draw skybox
-		m_pOpaqueFrameBuffer->bind();
-		CRenderer::getInstance()->clear();
-
-		CRenderer::getInstance()->drawSkybox(*m_pSkybox, 0);
-
-		//draw opaque objects
-		//CRenderer::getInstance()->draw(m_OpaqueModels, *m_pOpaqueShaderProgram);
-
-		//draw transparent objects
-		m_pListHeadImage->clear();
-
-		m_pGenLinkedListProgram->bind();
-		m_pListAtomicCounter->reset();
-		m_pGenLinkedListProgram->updateUniform1i("uMaxListNode", MAX_LIST_NODE);
-		CRenderer::getInstance()->draw(m_TransparentModels, *m_pGenLinkedListProgram);
-		m_pOpaqueFrameBuffer->unbind();
-
-		//color blending
-		CRenderer::getInstance()->clear();
-
-		m_pOpaqueColorTexture->bindV(0);
-		m_pColorBlendingProgram->bind();
-		m_pColorBlendingProgram->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTexture);
-
-		CRenderer::getInstance()->drawScreenQuad(*m_pColorBlendingProgram);
+		__drawOpaqueObjects();
+		__drawTransparentObjects();
+		__mergeColor();
 	}
 
 private:
@@ -82,15 +59,19 @@ private:
 		m_pGenLinkedListProgram->addShader("shaders/generate_linked_list_vs.glsl", EShaderType::VERTEX_SHADER);
 		m_pGenLinkedListProgram->addShader("shaders/generate_linked_list_fs.glsl", EShaderType::FRAGMENT_SHADER);
 
-		m_pColorBlendingProgram = std::make_unique<CShaderProgram>();
-		m_pColorBlendingProgram->addShader("shaders/draw_screen_quad_vs.glsl", EShaderType::VERTEX_SHADER);
-		m_pColorBlendingProgram->addShader("shaders/color_blending_fs.glsl", EShaderType::FRAGMENT_SHADER);
+		m_pSortLinkedListProgram = std::make_unique<CShaderProgram>();
+		m_pSortLinkedListProgram->addShader("shaders/draw_screen_quad_vs.glsl", EShaderType::VERTEX_SHADER);
+		m_pSortLinkedListProgram->addShader("shaders/sorting_and_blending_fs.glsl", EShaderType::FRAGMENT_SHADER);
+
+		m_pMergeColorProgram = std::make_unique<CShaderProgram>();
+		m_pMergeColorProgram->addShader("shaders/draw_screen_quad_vs.glsl", EShaderType::VERTEX_SHADER);
+		m_pMergeColorProgram->addShader("shaders/merge_color_fs.glsl", EShaderType::FRAGMENT_SHADER);
 	}
 
 	void __initModels()
 	{
 		m_OpaqueModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
-		m_OpaqueModels[0]->setPosition(glm::vec3(0.0f, -1.5f, 0.0f));
+		m_OpaqueModels[0]->setPosition(glm::vec3(0.0f, -1.5f, -1.0f));
 		m_OpaqueModels[0]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
@@ -106,6 +87,12 @@ private:
 		m_pOpaqueFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pOpaqueFrameBuffer->set(EAttachment::COLOR0, m_pOpaqueColorTexture);
 
+		m_pTransparentColorTexture = std::make_shared<CTexture2D>();
+		m_pTransparentColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8, GL_RGBA);
+
+		m_pTransparencyFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
+		m_pTransparencyFrameBuffer->set(EAttachment::COLOR0, m_pTransparentColorTexture);
+
 		std::vector<std::string> Faces = {
 			"textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg"
 		};
@@ -119,17 +106,67 @@ private:
 		m_pListNodeBuffer = std::make_unique<CShaderStorageBuffer>(nullptr, MAX_LIST_NODE * sizeof(SListNode), 2);
 	}
 
+	void __drawOpaqueObjects()
+	{
+		//draw skybox
+		m_pOpaqueFrameBuffer->bind();
+		CRenderer::getInstance()->clear();
+		CRenderer::getInstance()->enableCullFace(true);
+		CRenderer::getInstance()->drawSkybox(*m_pSkybox, 0);
+
+		//draw opaque objects
+		CRenderer::getInstance()->draw(m_OpaqueModels, *m_pOpaqueShaderProgram);
+		m_pOpaqueFrameBuffer->unbind();
+	}
+
+	void __drawTransparentObjects()
+	{
+		m_pTransparencyFrameBuffer->bind();
+		CRenderer::getInstance()->clear();
+		CRenderer::getInstance()->enableCullFace(false);
+		CRenderer::getInstance()->setDepthMask(false);
+		m_pListHeadImage->clear();
+
+		m_pGenLinkedListProgram->bind();
+		m_pListAtomicCounter->reset();
+
+		m_pGenLinkedListProgram->updateUniform1i("uMaxListNode", MAX_LIST_NODE);
+		CRenderer::getInstance()->draw(m_TransparentModels, *m_pGenLinkedListProgram);
+		CRenderer::getInstance()->setDepthMask(true);
+
+		m_pSortLinkedListProgram->bind();
+		CRenderer::getInstance()->drawScreenQuad(*m_pSortLinkedListProgram);
+
+		m_pTransparencyFrameBuffer->unbind();
+	}
+
+	void __mergeColor()
+	{
+		CRenderer::getInstance()->clear();
+
+		m_pOpaqueColorTexture->bindV(0);
+		m_pTransparentColorTexture->bindV(1);
+
+		m_pMergeColorProgram->bind();
+		m_pMergeColorProgram->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTexture);
+		m_pMergeColorProgram->updateUniformTexture("uTransparentColorTex", m_pTransparentColorTexture);
+
+		CRenderer::getInstance()->drawScreenQuad(*m_pMergeColorProgram);
+	}
+
 	std::unique_ptr<CShaderProgram> m_pOpaqueShaderProgram;
 	std::unique_ptr<CShaderProgram> m_pGenLinkedListProgram;
 	std::unique_ptr<CShaderProgram> m_pSortLinkedListProgram;
-	std::unique_ptr<CShaderProgram> m_pColorBlendingProgram;
+	std::unique_ptr<CShaderProgram> m_pMergeColorProgram;
 	std::unique_ptr<CFrameBuffer>	m_pOpaqueFrameBuffer;
+	std::unique_ptr<CFrameBuffer>	m_pTransparencyFrameBuffer;
 	std::unique_ptr<CSkybox>		m_pSkybox;
 	std::unique_ptr<CShaderStorageBuffer>	m_pListNodeBuffer;
 	std::unique_ptr<CImage2D>				m_pListHeadImage;
 	std::unique_ptr<CAtomicCounterBuffer>	m_pListAtomicCounter;
 
 	std::shared_ptr<CTexture2D>		m_pOpaqueColorTexture;
+	std::shared_ptr<CTexture2D>		m_pTransparentColorTexture;
 
 	std::vector<std::shared_ptr<CModel>> m_OpaqueModels;
 	std::vector<std::shared_ptr<CModel>> m_TransparentModels;

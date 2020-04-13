@@ -29,12 +29,6 @@
     <None Include="shaders\generate_linked_list_vs.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="shaders\sort_linked_list_gs.glsl">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-    <None Include="shaders\color_blending_fs.glsl">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
     <None Include="shaders\draw_screen_quad_vs.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
@@ -42,6 +36,12 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="shaders\opaque_shading_vs.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\sorting_and_blending_fs.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\merge_color_fs.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>
