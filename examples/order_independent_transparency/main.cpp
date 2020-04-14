@@ -147,7 +147,7 @@ private:
 		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), glm::vec3(0.0, 0.0, 0.5), 1.0 };
 
-
+	
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(6.0f, -1.5f, -1.0f));
@@ -175,68 +175,68 @@ private:
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0), glm::vec3(0.0), 1.0 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.5), glm::vec3(0.0), 1.0 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -0.5f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0), 1.0 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.5, 0.0), glm::vec3(0.0), 1.0 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0), 1.0 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.5, 0.0, 0.0), glm::vec3(0.0), 1.0 };
 
 
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, -1.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0), glm::vec3(0.0), 0.8 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.5), glm::vec3(0.0), 0.8 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, -0.5f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0), 0.5 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.5, 0.0), glm::vec3(0.0), 0.5 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0), 0.2 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.5, 0.0, 0.0), glm::vec3(0.0), 0.2 };
 
 
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(-4.0f, 0.0f, -1.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0), glm::vec3(0.0), 0.2 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.5), glm::vec3(0.0), 0.2 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(-4.0f, 0.0f, -0.5f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0), 0.5 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.5, 0.0), glm::vec3(0.0), 0.5 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(-4.0f, 0.0f, 0.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0), 0.8 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.5, 0.0, 0.0), glm::vec3(0.0), 0.8 };
 
 
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, -2.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0), glm::vec3(0.8), 1.0 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.5), glm::vec3(0.8), 1.0 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, -1.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 1.0, 0.0), glm::vec3(0.8, 0.8, 0.0), 1.0 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.5, 0.0), glm::vec3(0.0, 0.8, 0.0), 1.0 };
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(1.0, 0.0, 1.0), glm::vec3(0.8, 0.0, 0.8), 1.0 };
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.5, 0.0, 0.0), glm::vec3(0.8, 0.0, 0.0), 1.0 };
 	}
 
 	void __initTexturesAndBuffers()
