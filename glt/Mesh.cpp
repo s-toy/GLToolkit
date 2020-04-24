@@ -9,7 +9,7 @@ using namespace glt;
 
 //**********************************************************************************************
 //FUNCTION:
-CMesh::CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<CTexture2D*>& vTextures)
+CMesh::CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<std::shared_ptr<CTexture2D>>& vTextures)
 {
 	m_Vertices = vVertices;
 	m_Indices = vIndices;

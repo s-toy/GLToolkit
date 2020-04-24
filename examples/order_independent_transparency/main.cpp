@@ -89,8 +89,8 @@ private:
 
 	void __initScenes()
 	{
-		//__initScene01();
-		__initScene02();
+		__initScene01();
+		//__initScene02();
 	}
 
 	void __initScene01()
@@ -103,7 +103,7 @@ private:
 			"textures/skybox/front.jpg",
 			"textures/skybox/back.jpg"
 		};
-		m_pSkybox = std::make_unique<CSkybox>(Faces);
+		//m_pSkybox = std::make_unique<CSkybox>(Faces);
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, -1.5f, -1.0f));
@@ -170,7 +170,7 @@ private:
 			"textures/skybox/front.jpg",
 			"textures/skybox/back.jpg"
 		};
-		m_pSkybox = std::make_unique<CSkybox>(Faces);
+		//m_pSkybox = std::make_unique<CSkybox>(Faces);
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -1.0f));

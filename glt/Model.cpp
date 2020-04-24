@@ -13,6 +13,8 @@
 
 using namespace glt;
 
+std::unordered_map<std::string, CModel*> CModel::m_ExsitedModelMap;
+
 //***********************************************************************************************
 //FUNCTION:
 CModel::CModel(const std::string& vFilePath)
@@ -30,13 +32,19 @@ CModel::CModel(const std::string& vFilePath)
 //FUNCTION:
 CModel::~CModel()
 {
-	for (auto pTexture : m_LoadedTextures) _SAFE_DELETE(pTexture);
 }
 
 //**********************************************************************************************
 //FUNCTION:
 bool CModel::__loadModel(const std::string& vPath)
 {
+	auto iter = m_ExsitedModelMap.find(vPath);
+	if (iter != m_ExsitedModelMap.end())
+	{
+		if (nullptr == m_ExsitedModelMap[vPath]) m_ExsitedModelMap.erase(iter);
+		else { *this = *m_ExsitedModelMap[vPath]; return true; }
+	}
+
 	Assimp::Importer LocImporter;
 	const aiScene* pScene = LocImporter.ReadFile(vPath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
 
@@ -44,6 +52,8 @@ bool CModel::__loadModel(const std::string& vPath)
 
 	m_Directory = vPath.substr(0, vPath.find_last_of('/'));
 	__processNode(pScene->mRootNode, pScene);
+
+	m_ExsitedModelMap.insert(std::make_pair(vPath, this));
 
 	return true;
 }
@@ -66,11 +76,11 @@ void CModel::__processNode(const aiNode* vNode, const aiScene* vScene)
 
 //**********************************************************************************************
 //FUNCTION:
-CMesh CModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
+std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
 {
 	std::vector<SVertex> Vertices;
 	std::vector<GLuint> Indices;
-	std::vector<CTexture2D*> Textures;
+	std::vector<std::shared_ptr<CTexture2D>> Textures;
 
 	for (GLuint i = 0; i < vMesh->mNumVertices; ++i)
 	{
@@ -111,21 +121,21 @@ CMesh CModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
 	{
 		aiMaterial* pMaterial = vScene->mMaterials[vMesh->mMaterialIndex];
 
-		std::vector<CTexture2D*> DiffuseMaps = __loadMaterialTextures(pMaterial, aiTextureType_DIFFUSE, "uMaterialDiffuse");
+		std::vector<std::shared_ptr<CTexture2D>> DiffuseMaps = __loadMaterialTextures(pMaterial, aiTextureType_DIFFUSE, "uMaterialDiffuse");
 		Textures.insert(Textures.end(), DiffuseMaps.begin(), DiffuseMaps.end());
 
-		std::vector<CTexture2D*> SpecularMaps = __loadMaterialTextures(pMaterial, aiTextureType_SPECULAR, "uMaterialSpecular");
+		std::vector<std::shared_ptr<CTexture2D>> SpecularMaps = __loadMaterialTextures(pMaterial, aiTextureType_SPECULAR, "uMaterialSpecular");
 		Textures.insert(Textures.end(), SpecularMaps.begin(), SpecularMaps.end());
 	}
 
-	return CMesh(Vertices, Indices, Textures);
+	return std::make_shared<CMesh>(Vertices, Indices, Textures);
 }
 
 //**********************************************************************************************
 //FUNCTION:
-std::vector<CTexture2D*> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName)
+std::vector<std::shared_ptr<CTexture2D>> CModel::__loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName)
 {
-	std::vector<CTexture2D*> Textures;
+	std::vector<std::shared_ptr<CTexture2D>> Textures;
 	for (GLuint i = 0; i < vMat->GetTextureCount(vType); ++i)
 	{
 		aiString Str;
@@ -145,7 +155,7 @@ std::vector<CTexture2D*> CModel::__loadMaterialTextures(const aiMaterial* vMat, 
 		{
 			auto TexturePath = this->m_Directory + std::string("/") + std::string(Str.C_Str());
 
-			auto pTempTexture = new CTexture2D;
+			std::shared_ptr<CTexture2D> pTempTexture = std::make_shared<CTexture2D>();
 			pTempTexture->load(TexturePath.c_str(), GL_REPEAT, GL_LINEAR, GL_RGBA);
 			pTempTexture->setTextureName(vTypeName);
 			Textures.push_back(pTempTexture);
@@ -161,6 +171,6 @@ void CModel::_draw(const CShaderProgram& vShaderProgram) const
 {
 	for (const auto& Mesh : m_Meshes)
 	{
-		Mesh._draw(vShaderProgram);
+		Mesh->_draw(vShaderProgram);
 	}
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <memory>
 #include <assimp/scene.h>
 #include "Entity.h"
 #include "Mesh.h"
@@ -17,23 +19,24 @@ namespace glt
 		CModel(const std::string& vFilePath);
 		~CModel();
 
-		_DISALLOW_COPY_AND_ASSIGN(CModel);
-
 	protected:
 		void _draw(const CShaderProgram& vShaderProgram) const;
 
 	private:
 		void __processNode(const aiNode* vNode, const aiScene* vScene);
 
-		CMesh __processMesh(const aiMesh* vMesh, const aiScene* vScene);
+		std::shared_ptr<CMesh> __processMesh(const aiMesh* vMesh, const aiScene* vScene);
 
-		std::vector<CTexture2D*> __loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName);
+		std::vector<std::shared_ptr<CTexture2D>> __loadMaterialTextures(const aiMaterial* vMat, aiTextureType vType, const std::string& vTypeName);
 
 		bool __loadModel(const std::string& vPath);
 
-		std::vector<CMesh> m_Meshes;
 		std::string m_Directory;
-		std::vector<CTexture2D*> m_LoadedTextures;
+
+		std::vector<std::shared_ptr<CMesh>>			m_Meshes;
+		std::vector<std::shared_ptr<CTexture2D>>	m_LoadedTextures;
+
+		static std::unordered_map<std::string, CModel*> m_ExsitedModelMap;
 
 		friend class CRenderer;
 	};
