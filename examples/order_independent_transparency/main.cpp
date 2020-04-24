@@ -103,7 +103,7 @@ private:
 			"textures/skybox/front.jpg",
 			"textures/skybox/back.jpg"
 		};
-		//m_pSkybox = std::make_unique<CSkybox>(Faces);
+		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, -1.5f, -1.0f));
@@ -170,7 +170,7 @@ private:
 			"textures/skybox/front.jpg",
 			"textures/skybox/back.jpg"
 		};
-		//m_pSkybox = std::make_unique<CSkybox>(Faces);
+		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/plane/plane.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
@@ -291,7 +291,7 @@ private:
 
 		m_pGenLinkedListProgram->updateUniform1i("uMaxListNode", MAX_LIST_NODE);
 		m_pOpaqueDepthTexture->bindV(2);
-		m_pGenLinkedListProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTexture);
+		m_pGenLinkedListProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTexture.get());
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -320,8 +320,8 @@ private:
 		m_pTransparentColorTexture->bindV(1);
 
 		m_pMergeColorProgram->bind();
-		m_pMergeColorProgram->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTexture);
-		m_pMergeColorProgram->updateUniformTexture("uTransparentColorTex", m_pTransparentColorTexture);
+		m_pMergeColorProgram->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTexture.get());
+		m_pMergeColorProgram->updateUniformTexture("uTransparentColorTex", m_pTransparentColorTexture.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pMergeColorProgram);
 	}

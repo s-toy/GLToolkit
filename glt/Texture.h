@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <memory>
 #include <GLAD/glad.h>
 #include "Export.h"
 #include "ShaderProgram.h"

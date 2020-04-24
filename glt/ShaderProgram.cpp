@@ -65,7 +65,7 @@ void CShaderProgram::updateUniform1i(const std::string& vName, int vValue) const
 	glUniform1i(__getUniformLocation(vName), vValue);
 }
 
-void CShaderProgram::updateUniformTexture(const std::string& vName, std::shared_ptr<CTexture> vTexture) const
+void CShaderProgram::updateUniformTexture(const std::string& vName, const CTexture* vTexture) const
 {
 	glUniform1i(__getUniformLocation(vName), vTexture->getBindPoint());
 }

@@ -91,7 +91,7 @@ void CSkybox::_draw(unsigned int vBindPoint) const
 	m_pTexture->bindV(vBindPoint);
     m_pVAO->bind();
 
-    m_pShaderProgram->updateUniformTexture("uSkyboxTex", m_pTexture);
+    m_pShaderProgram->updateUniformTexture("uSkyboxTex", m_pTexture.get());
     glDepthMask(GL_FALSE);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glDepthMask(GL_TRUE);

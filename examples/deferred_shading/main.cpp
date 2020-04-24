@@ -66,10 +66,10 @@ public:
 		m_SpecularTex->bindV(3);
 
 		m_pDeferredShadingProgram->bind();
-		m_pDeferredShadingProgram->updateUniformTexture("uPositionTex", m_PositionTex);
-		m_pDeferredShadingProgram->updateUniformTexture("uNormalTex", m_NormalTex);
-		m_pDeferredShadingProgram->updateUniformTexture("uDiffuseTex", m_DiffuseTex);
-		m_pDeferredShadingProgram->updateUniformTexture("uSpecularTex", m_SpecularTex);
+		m_pDeferredShadingProgram->updateUniformTexture("uPositionTex", m_PositionTex.get());
+		m_pDeferredShadingProgram->updateUniformTexture("uNormalTex", m_NormalTex.get());
+		m_pDeferredShadingProgram->updateUniformTexture("uDiffuseTex", m_DiffuseTex.get());
+		m_pDeferredShadingProgram->updateUniformTexture("uSpecularTex", m_SpecularTex.get());
 		pRenderer->drawScreenQuad(*m_pDeferredShadingProgram);
 	}
 
