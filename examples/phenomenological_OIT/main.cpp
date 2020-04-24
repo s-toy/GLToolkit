@@ -238,7 +238,7 @@ private:
 int main()
 {
 	CMyApplication App;
-	if (!App.init(SWindowInfo(WIN_WIDTH, WIN_HEIGHT, "Moment-based OIT"))) return -1;
+	if (!App.init(SWindowInfo(WIN_WIDTH, WIN_HEIGHT, "Order Independent Transparency"))) return -1;
 	App.run();
 
 	return 0;

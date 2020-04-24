@@ -25,6 +25,8 @@ namespace glt
 		void destroy();
 
 		void clear() const;
+		void setClearColor(float vRed, float vGreen, float vBlue, float vAlpha) const;
+		void clearBuffer(GLuint vDrawBuffer, const GLfloat* vData) const;
 
 		void update();
 

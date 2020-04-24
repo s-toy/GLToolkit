@@ -52,6 +52,20 @@ void CRenderer::clear() const
 
 //***********************************************************************************************
 //FUNCTION:
+void CRenderer::setClearColor(float vRed, float vGreen, float vBlue, float vAlpha) const
+{
+	glClearColor(vRed, vGreen, vBlue, vAlpha);
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::clearBuffer(GLuint vDrawBuffer, const GLfloat* vData) const
+{
+	glClearBufferfv(GL_COLOR, vDrawBuffer, vData);
+}
+
+//***********************************************************************************************
+//FUNCTION:
 void CRenderer::enableCullFace(bool vEnable) const
 {
 	vEnable ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
