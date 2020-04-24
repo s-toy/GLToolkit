@@ -64,6 +64,22 @@ void CRenderer::setDepthMask(bool vFlag) const
 	glDepthMask(vFlag);
 }
 
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::enableBlend(bool vEnable) const
+{
+	vEnable ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::setBlendFunc(GLenum vSrc, GLenum vDst, int vBufferIndex) const
+{
+	if (vBufferIndex == -1) glBlendFunc(vSrc, vDst);
+	else if (vBufferIndex >= 0) glBlendFunci(vBufferIndex, vSrc, vDst);
+	else _OUTPUT_WARNING("Invalid buffer index !");
+}
+
 //*********************************************************************
 //FUNCTION:
 void CRenderer::draw(const CVertexArray& vVertexArray, const CIndexBuffer& vIndexBuffer, const CShaderProgram& vShaderProgram) const
