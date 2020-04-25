@@ -50,6 +50,11 @@ protected:
 
 	void _updateV() override
 	{
+		auto KeyStatus = CInputManager::getInstance()->getKeyStatus();
+		if (KeyStatus[GLFW_KEY_0]) m_BlendingStrategy = 0;
+		else if (KeyStatus[GLFW_KEY_1]) m_BlendingStrategy = 1;
+		else if (KeyStatus[GLFW_KEY_2]) m_BlendingStrategy = 2;
+		else if (KeyStatus[GLFW_KEY_3]) m_BlendingStrategy = 3;
 	}
 
 private:
@@ -209,6 +214,7 @@ private:
 			m_pTransparencyShaderProgram2->bind();
 			m_pTransparencyShaderProgram2->updateUniform3f("uDiffuseColor", Material.diffuse);
 			m_pTransparencyShaderProgram2->updateUniform1f("uCoverage", Material.coverage);
+			m_pTransparencyShaderProgram2->updateUniform1i("uBlendingStrategy", m_BlendingStrategy);
 			CRenderer::getInstance()->draw(*Model, *m_pTransparencyShaderProgram2);
 		}
 
@@ -253,6 +259,8 @@ private:
 	std::vector<std::shared_ptr<CModel>> m_TransparentModels;
 
 	std::map<std::shared_ptr<CModel>, SMaterial> m_Model2MaterialMap;
+
+	int m_BlendingStrategy = 0;
 };
 
 int main()

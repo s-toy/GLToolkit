@@ -4,6 +4,13 @@ struct SParallelLight { vec3 Color; vec3 Direction; };
 
 struct SMaterial { vec3 Diffuse; vec3 Specular; float Shinness; };
 
+#define BLENDING_STRATEGY_PERFECT_SORTING		0
+#define BLENDING_STRATEGY_AVERAGE_BLENDING		1
+#define BLENDING_STRATEGY_PHNOMENOLOGICAL_OIT	2
+#define BLENDING_STRATEGY_MOMENT_BASED_OIT		3
+
+uniform int uBlendingStrategy = BLENDING_STRATEGY_AVERAGE_BLENDING;
+
 uniform sampler2D	uMaterialDiffuse;
 uniform sampler2D	uMaterialSpecular;
 uniform sampler2D   uOpaqueDepthTex;
@@ -50,10 +57,29 @@ void main()
 	float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
-	vec3  color = computeReflectColor();
-	float transmittance = pow(10.0 * (1.0 - 0.99 * gl_FragCoord.z) * uCoverage, 3.0);
-	transmittance = clamp(transmittance, 0.01, 30.0);
+	float transmittance_at_depth = 0.0;
 
-	_outTransparencyColor.rgb = transmittance * uCoverage * color;
-	_outTransparencyColor.a = transmittance * uCoverage;
+	if (uBlendingStrategy == BLENDING_STRATEGY_PERFECT_SORTING)
+	{
+		//TODO
+	}
+	else if (uBlendingStrategy == BLENDING_STRATEGY_AVERAGE_BLENDING)
+	{
+		transmittance_at_depth = 1.0;
+	}
+	else if (uBlendingStrategy == BLENDING_STRATEGY_PHNOMENOLOGICAL_OIT)
+	{
+		transmittance_at_depth = pow(10.0 * (1.0 - 0.99 * gl_FragCoord.z) * uCoverage, 3.0);
+		transmittance_at_depth = clamp(transmittance_at_depth, 0.01, 30.0);
+	}
+	else if (uBlendingStrategy == BLENDING_STRATEGY_MOMENT_BASED_OIT)
+	{
+	
+	}
+
+	//transmittance_at_depth = computeTransmittanceAtDepthFrom4PowerMoments(b_0, b_even, b_odd, depth, MomentOIT.moment_bias, MomentOIT.overestimation, bias_vector);
+	
+	vec3 reflectColor = computeReflectColor();
+	_outTransparencyColor.rgb = transmittance_at_depth * uCoverage * reflectColor;
+	_outTransparencyColor.a = transmittance_at_depth * uCoverage;
 }
