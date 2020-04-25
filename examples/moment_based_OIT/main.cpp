@@ -12,20 +12,12 @@
 #include "ShaderStorageBuffer.h"
 #include "AtomicCounterBuffer.h"
 #include "InputManager.h"
+#include "CpuTimer.h"
 
 using namespace glt;
 
 const int WIN_WIDTH = 1024;
 const int WIN_HEIGHT = 576;
-const int MAX_LIST_NODE = WIN_WIDTH * WIN_HEIGHT * 6;
-
-struct SListNode
-{
-	unsigned packedColor;
-	unsigned transmittance;
-	unsigned depth;
-	unsigned next;
-};
 
 struct SMaterial
 {
@@ -71,16 +63,16 @@ private:
 	void __initShaders()
 	{
 		m_pOpaqueShaderProgram = std::make_unique<CShaderProgram>();
-		m_pOpaqueShaderProgram->addShader("shaders/opaque_shading_vs.glsl", EShaderType::VERTEX_SHADER);
-		m_pOpaqueShaderProgram->addShader("shaders/opaque_shading_fs.glsl", EShaderType::FRAGMENT_SHADER);
+		m_pOpaqueShaderProgram->addShader("shaders/draw_opaque_objects.vert", EShaderType::VERTEX_SHADER);
+		m_pOpaqueShaderProgram->addShader("shaders/draw_opaque_objects.frag", EShaderType::FRAGMENT_SHADER);
 
-		m_pTransparencyShaderProgram = std::make_unique<CShaderProgram>();
-		m_pTransparencyShaderProgram->addShader("shaders/transparency_shading_vs.glsl", EShaderType::VERTEX_SHADER);
-		m_pTransparencyShaderProgram->addShader("shaders/transparency_shading_fs.glsl", EShaderType::FRAGMENT_SHADER);
+		m_pTransparencyShaderProgram1 = std::make_unique<CShaderProgram>();
+		m_pTransparencyShaderProgram1->addShader("shaders/transparency_pass_1.vert", EShaderType::VERTEX_SHADER);
+		m_pTransparencyShaderProgram1->addShader("shaders/transparency_pass_1.frag", EShaderType::FRAGMENT_SHADER);
 
 		m_pMergeColorProgram = std::make_unique<CShaderProgram>();
-		m_pMergeColorProgram->addShader("shaders/draw_screen_quad_vs.glsl", EShaderType::VERTEX_SHADER);
-		m_pMergeColorProgram->addShader("shaders/merge_color_fs.glsl", EShaderType::FRAGMENT_SHADER);
+		m_pMergeColorProgram->addShader("shaders/merge_color.vert", EShaderType::VERTEX_SHADER);
+		m_pMergeColorProgram->addShader("shaders/merge_color.frag", EShaderType::FRAGMENT_SHADER);
 	}
 
 	void __initScenes()
@@ -93,6 +85,7 @@ private:
 			"textures/skybox/front.jpg",
 			"textures/skybox/back.jpg"
 		};
+
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
 		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
@@ -129,20 +122,20 @@ private:
 	void __initTexturesAndBuffers()
 	{
 		m_pOpaqueColorTexture = std::make_shared<CTexture2D>();
-		m_pOpaqueColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pOpaqueColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pOpaqueDepthTexture = std::make_shared<CTexture2D>();
-		m_pOpaqueDepthTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_RED, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pOpaqueDepthTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pOpaqueFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pOpaqueFrameBuffer->set(EAttachment::COLOR0, m_pOpaqueColorTexture);
 		m_pOpaqueFrameBuffer->set(EAttachment::COLOR1, m_pOpaqueDepthTexture);
 
 		m_pAccumulatedReflectionColorTex = std::make_shared<CTexture2D>();
-		m_pAccumulatedReflectionColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pAccumulatedReflectionColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pAccumulatedTransmissionTex = std::make_shared<CTexture2D>();
-		m_pAccumulatedTransmissionTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pAccumulatedTransmissionTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pTransparencyFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pTransparencyFrameBuffer->set(EAttachment::COLOR0, m_pAccumulatedReflectionColorTex);
@@ -178,18 +171,18 @@ private:
 		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE, 0);
 		CRenderer::getInstance()->setBlendFunc(GL_ZERO, GL_SRC_COLOR, 1);
 
-		m_pTransparencyShaderProgram->bind();
+		m_pTransparencyShaderProgram1->bind();
 		m_pOpaqueDepthTexture->bindV(2);
-		m_pTransparencyShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTexture.get());
+		m_pTransparencyShaderProgram1->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTexture.get());
 
 		for (auto Model : m_TransparentModels)
 		{
 			auto Material = m_Model2MaterialMap[Model];
-			m_pTransparencyShaderProgram->bind();
-			m_pTransparencyShaderProgram->updateUniform3f("uDiffuseColor", Material.diffuse);
-			m_pTransparencyShaderProgram->updateUniform3f("uTransmittance", Material.transmittance);
-			m_pTransparencyShaderProgram->updateUniform1f("uCoverage", Material.coverage);
-			CRenderer::getInstance()->draw(*Model, *m_pTransparencyShaderProgram);
+			m_pTransparencyShaderProgram1->bind();
+			m_pTransparencyShaderProgram1->updateUniform3f("uDiffuseColor", Material.diffuse);
+			m_pTransparencyShaderProgram1->updateUniform3f("uTransmittance", Material.transmittance);
+			m_pTransparencyShaderProgram1->updateUniform1f("uCoverage", Material.coverage);
+			CRenderer::getInstance()->draw(*Model, *m_pTransparencyShaderProgram1);
 		}
 
 		CRenderer::getInstance()->setDepthMask(true);
@@ -216,7 +209,7 @@ private:
 	}
 
 	std::unique_ptr<CShaderProgram> m_pOpaqueShaderProgram;
-	std::unique_ptr<CShaderProgram> m_pTransparencyShaderProgram;
+	std::unique_ptr<CShaderProgram> m_pTransparencyShaderProgram1;
 	std::unique_ptr<CShaderProgram> m_pMergeColorProgram;
 	std::unique_ptr<CFrameBuffer>	m_pOpaqueFrameBuffer;
 	std::unique_ptr<CFrameBuffer>	m_pTransparencyFrameBuffer;

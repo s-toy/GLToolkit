@@ -16,6 +16,9 @@
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{ccf784ab-d08c-4dde-bd73-80a61d0cf869}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders\MBOIT">
+      <UniqueIdentifier>{b66516ac-b59d-43f2-8a52-30226873d7e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -23,22 +26,34 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\draw_screen_quad_vs.glsl">
+    <None Include="shaders\MomentOIT.hlsli">
+      <Filter>Resource Files\shaders\MBOIT</Filter>
+    </None>
+    <None Include="shaders\MomentMath.hlsli">
+      <Filter>Resource Files\shaders\MBOIT</Filter>
+    </None>
+    <None Include="shaders\ComplexAlgebra.hlsli">
+      <Filter>Resource Files\shaders\MBOIT</Filter>
+    </None>
+    <None Include="shaders\TrigonometricMomentMath.hlsli">
+      <Filter>Resource Files\shaders\MBOIT</Filter>
+    </None>
+    <None Include="shaders\draw_opaque_objects.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="shaders\merge_color_fs.glsl">
+    <None Include="shaders\draw_opaque_objects.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="shaders\opaque_shading_fs.glsl">
+    <None Include="shaders\transparency_pass_1.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="shaders\opaque_shading_vs.glsl">
+    <None Include="shaders\transparency_pass_1.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="shaders\transparency_shading_vs.glsl">
+    <None Include="shaders\merge_color.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="shaders\transparency_shading_fs.glsl">
+    <None Include="shaders\merge_color.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

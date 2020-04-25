@@ -22,15 +22,15 @@ CTexture::~CTexture()
 
 //***********************************************************************************************
 //FUNCTION:
-void CTexture2D::load(const char *vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint vFilterMode /*= GL_LINEAR*/, GLenum vFormat /*= GL_RGB*/, bool vFlipVertically /*= false*/)
+void CTexture2D::load(const char* vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint vFilterMode /*= GL_LINEAR*/, GLenum vFormat /*= GL_RGB*/, bool vFlipVertically /*= false*/)
 {
 	_ASSERTE(vPath);
-	m_FilePath =  CFileLocator::getInstance()->locateFile(vPath);
+	m_FilePath = CFileLocator::getInstance()->locateFile(vPath);
 
 	stbi_set_flip_vertically_on_load(vFlipVertically);
 
 	int Width, Height, Channels;
-	unsigned char *pImageData = nullptr;
+	unsigned char* pImageData = nullptr;
 
 	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
 
@@ -66,21 +66,26 @@ void CTexture2D::load(const char *vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint v
 
 //***********************************************************************************************
 //FUNCTION:
-void CTexture2D::createEmpty(unsigned int vWidth, unsigned int vHeight, GLint vInternalFormat /*= GL_RGB32F*/, GLenum vFormat, GLenum vType, GLint vWrapMode, GLint vFilterMode, bool vGenerateMipMap)
+void CTexture2D::createEmpty(unsigned int vWidth, unsigned int vHeight, GLint vInternalFormat, GLint vWrapMode, GLint vFilterMode, bool vGenerateMipMap)
 {
 	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
-	glTexImage2D(GL_TEXTURE_2D, 0, vInternalFormat, vWidth, vHeight, 0, vFormat, vType, nullptr);
+
+	//NOTE:	1.一般情况下，当pixels为nullptr时，Format和Type的取值可以为任意合法的值。
+	//		2.特例：当internalformat为GL_DEPTH_COMPONENT*时，format必需为GL_DEPTH_COMPONENT。
+	//https://stackoverflow.com/questions/6073707/creating-a-blank-opengl-texture
+	//https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+	GLenum Format = GL_RGB, Type = GL_FLOAT;
+	if (vInternalFormat == GL_DEPTH_COMPONENT || vInternalFormat == GL_DEPTH_COMPONENT16 || vInternalFormat == GL_DEPTH_COMPONENT24 || vInternalFormat == GL_DEPTH_COMPONENT32 || vInternalFormat == GL_DEPTH_COMPONENT32F)
+		Format = GL_DEPTH_COMPONENT;
+
+	glTexImage2D(GL_TEXTURE_2D, 0, vInternalFormat, vWidth, vHeight, 0, Format, Type, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, vWrapMode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, vWrapMode);
-	if (vGenerateMipMap == false)
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, vFilterMode);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, vFilterMode);
+
+	if (vGenerateMipMap)
 	{
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, vFilterMode);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, vFilterMode);
-	}
-	else
-	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_AUTO_GENERATE_MIPMAP, GL_TRUE);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
@@ -109,13 +114,13 @@ void CTexture2D::unbindV() const
 void CTextureCube::load(const std::vector<std::string>& vFaces, bool vGenerateMipMap)
 {
 	int Width, Height, NrComponents;
-	float *pImageData = nullptr;
+	GLubyte* pImageData = nullptr;
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_ObjectID);
 	for (GLuint i = 0; i < vFaces.size(); ++i)
 	{
-		pImageData = stbi_loadf(CFileLocator::getInstance()->locateFile(vFaces[i]).c_str(), &Width, &Height, &NrComponents, 0);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, Width, Height, 0, GL_RGB, GL_FLOAT, pImageData);
+		pImageData = stbi_load(CFileLocator::getInstance()->locateFile(vFaces[i]).c_str(), &Width, &Height, &NrComponents, 0);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB8, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, pImageData);
 		stbi_image_free(pImageData);
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

@@ -150,12 +150,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\draw_screen_quad_vs.glsl" />
-    <None Include="shaders\transparency_shading_fs.glsl" />
-    <None Include="shaders\transparency_shading_vs.glsl" />
-    <None Include="shaders\merge_color_fs.glsl" />
-    <None Include="shaders\opaque_shading_fs.glsl" />
-    <None Include="shaders\opaque_shading_vs.glsl" />
+    <None Include="shaders\ComplexAlgebra.hlsli" />
+    <None Include="shaders\merge_color.vert" />
+    <None Include="shaders\MomentMath.hlsli" />
+    <None Include="shaders\MomentOIT.hlsli" />
+    <None Include="shaders\transparency_pass_1.frag" />
+    <None Include="shaders\transparency_pass_1.vert" />
+    <None Include="shaders\merge_color.frag" />
+    <None Include="shaders\draw_opaque_objects.frag" />
+    <None Include="shaders\draw_opaque_objects.vert" />
+    <None Include="shaders\TrigonometricMomentMath.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

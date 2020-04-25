@@ -129,20 +129,20 @@ private:
 	void __initTexturesAndBuffers()
 	{
 		m_pOpaqueColorTexture = std::make_shared<CTexture2D>();
-		m_pOpaqueColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pOpaqueColorTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pOpaqueDepthTexture = std::make_shared<CTexture2D>();
-		m_pOpaqueDepthTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_RED, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pOpaqueDepthTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pOpaqueFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pOpaqueFrameBuffer->set(EAttachment::COLOR0, m_pOpaqueColorTexture);
 		m_pOpaqueFrameBuffer->set(EAttachment::COLOR1, m_pOpaqueDepthTexture);
 
 		m_pAccumulatedReflectionColorTex = std::make_shared<CTexture2D>();
-		m_pAccumulatedReflectionColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pAccumulatedReflectionColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pAccumulatedTransmissionTex = std::make_shared<CTexture2D>();
-		m_pAccumulatedTransmissionTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pAccumulatedTransmissionTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pTransparencyFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pTransparencyFrameBuffer->set(EAttachment::COLOR0, m_pAccumulatedReflectionColorTex);

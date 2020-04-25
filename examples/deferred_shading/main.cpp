@@ -31,13 +31,13 @@ public:
 		CRenderer::getInstance()->fetchCamera()->setPosition(glm::dvec3(0, 0, 5));
 
 		m_PositionTex = std::make_shared<CTexture2D>();
-		m_PositionTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB16F, GL_RGB);
+		m_PositionTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB16F);
 		m_NormalTex = std::make_shared<CTexture2D>();
-		m_NormalTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB16F, GL_RGB);
+		m_NormalTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB16F);
 		m_DiffuseTex = std::make_shared<CTexture2D>();
-		m_DiffuseTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB);
+		m_DiffuseTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8);
 		m_SpecularTex = std::make_shared<CTexture2D>();
-		m_SpecularTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_RGB);
+		m_SpecularTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8);
 
 		m_pOffscreenFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pOffscreenFrameBuffer->set(EAttachment::COLOR0, m_PositionTex);
