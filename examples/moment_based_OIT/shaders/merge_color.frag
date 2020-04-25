@@ -1,17 +1,18 @@
 #version 430 core
 
 uniform sampler2D uOpaqueColorTex;
-uniform sampler2D uAccumulatedReflectionTex;
-uniform sampler2D uAccumulatedTransmissionTex;
-
-layout(location = 0) in vec2 _inTexCoord;
+uniform sampler2D uTranslucentColorTex;
+uniform sampler2D uMomentB0Tex;
 
 void main()
 {
-	vec3 bgColor = texture(uOpaqueColorTex, _inTexCoord).rgb;
-	vec4 A = texture(uAccumulatedReflectionTex, _inTexCoord).rgba;
-	vec3 B = texture(uAccumulatedTransmissionTex, _inTexCoord).rgb;
-	
-	vec3 color = bgColor * B + (1.0 - B) * A.rgb / (A.a + 1e-5);
-	gl_FragColor = vec4(color, 1.0);
+	ivec2 uv = ivec2(gl_FragCoord.xy);
+	vec3  opaqueColor = texelFetch(uOpaqueColorTex, uv, 0).rgb;
+	vec4  translucentColor = texelFetch(uTranslucentColorTex, uv, 0).rgba;
+	float b0 = texelFetch(uMomentB0Tex, uv, 0).r;
+
+	float totalTransmittance = exp(-b0);
+	vec3 finalColor = mix(translucentColor.rgb / (translucentColor.a + 1e-5), opaqueColor, totalTransmittance);
+
+	gl_FragColor = vec4(finalColor, 1.0);
 }

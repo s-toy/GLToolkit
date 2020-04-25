@@ -159,6 +159,8 @@
     <None Include="shaders\merge_color.frag" />
     <None Include="shaders\draw_opaque_objects.frag" />
     <None Include="shaders\draw_opaque_objects.vert" />
+    <None Include="shaders\transparency_pass_2.frag" />
+    <None Include="shaders\transparency_pass_2.vert" />
     <None Include="shaders\TrigonometricMomentMath.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

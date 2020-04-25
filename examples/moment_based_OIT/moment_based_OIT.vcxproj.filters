@@ -56,5 +56,11 @@
     <None Include="shaders\merge_color.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
+    <None Include="shaders\transparency_pass_2.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\transparency_pass_2.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
