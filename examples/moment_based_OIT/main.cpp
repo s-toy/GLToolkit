@@ -144,8 +144,12 @@ private:
 		m_pMomentB0Tex = std::make_shared<CTexture2D>();
 		m_pMomentB0Tex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
+		m_pMomentsTex = std::make_shared<CTexture2D>();
+		m_pMomentsTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
 		m_pTransparencyFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pTransparencyFrameBuffer1->set(EAttachment::COLOR0, m_pMomentB0Tex);
+		m_pTransparencyFrameBuffer1->set(EAttachment::COLOR1, m_pMomentsTex);
 
 		m_pTransparencyColorTex = std::make_shared<CTexture2D>();
 		m_pTransparencyColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
@@ -206,6 +210,8 @@ private:
 
 		m_pTransparencyShaderProgram2->bind();
 		m_pOpaqueDepthTex->bindV(2);
+		m_pMomentB0Tex->bindV(3);
+		m_pMomentsTex->bindV(4);
 		m_pTransparencyShaderProgram2->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 
 		for (auto Model : m_TransparentModels)
@@ -215,6 +221,8 @@ private:
 			m_pTransparencyShaderProgram2->updateUniform3f("uDiffuseColor", Material.diffuse);
 			m_pTransparencyShaderProgram2->updateUniform1f("uCoverage", Material.coverage);
 			m_pTransparencyShaderProgram2->updateUniform1i("uBlendingStrategy", m_BlendingStrategy);
+			m_pTransparencyShaderProgram2->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
+			m_pTransparencyShaderProgram2->updateUniformTexture("uMomentsTex", m_pMomentsTex.get());
 			CRenderer::getInstance()->draw(*Model, *m_pTransparencyShaderProgram2);
 		}
 
@@ -252,6 +260,7 @@ private:
 	std::shared_ptr<CTexture2D>		m_pOpaqueColorTex;
 	std::shared_ptr<CTexture2D>		m_pOpaqueDepthTex;
 	std::shared_ptr<CTexture2D>		m_pMomentB0Tex;
+	std::shared_ptr<CTexture2D>		m_pMomentsTex;
 	std::shared_ptr<CTexture2D>		m_pTransparencyColorTex;
 
 	std::unique_ptr<CSkybox>		m_pSkybox;
