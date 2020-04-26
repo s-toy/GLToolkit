@@ -5,6 +5,7 @@ uniform float		uCoverage;
 
 layout(location = 0) out float	_outMomentB0;
 layout(location = 1) out vec4	_outMoments;
+layout(location = 2) out vec4	_outExtraMoments;
 
 layout(location = 0) in float _inFragDepth;
 
@@ -17,7 +18,9 @@ void main()
 	float depth = 2.0 * gl_FragCoord.z - 1.0; //_inFragDepth;
 	float depth_pow2 = depth * depth;
 	float depth_pow4 = depth_pow2 * depth_pow2;
+	float depth_pow6 = depth_pow2 * depth_pow4;
 
 	_outMomentB0 = absorbance;
 	_outMoments = vec4(depth, depth_pow2, depth_pow2 * depth, depth_pow4) * absorbance;
+	_outExtraMoments = vec4(depth*depth_pow4, depth_pow6, depth*depth_pow6, depth_pow2*depth_pow6) * absorbance;
 }

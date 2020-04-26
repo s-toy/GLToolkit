@@ -55,6 +55,8 @@ protected:
 		else if (KeyStatus[GLFW_KEY_1]) m_BlendingStrategy = 1;
 		else if (KeyStatus[GLFW_KEY_2]) m_BlendingStrategy = 2;
 		else if (KeyStatus[GLFW_KEY_3]) m_BlendingStrategy = 3;
+		else if (KeyStatus[GLFW_KEY_4]) m_BlendingStrategy = 4;
+		else if (KeyStatus[GLFW_KEY_5]) m_BlendingStrategy = 5;
 	}
 
 private:
@@ -147,9 +149,13 @@ private:
 		m_pMomentsTex = std::make_shared<CTexture2D>();
 		m_pMomentsTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
+		m_pExtraMomentsTex = std::make_shared<CTexture2D>();
+		m_pExtraMomentsTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
 		m_pTransparencyFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pTransparencyFrameBuffer1->set(EAttachment::COLOR0, m_pMomentB0Tex);
 		m_pTransparencyFrameBuffer1->set(EAttachment::COLOR1, m_pMomentsTex);
+		m_pTransparencyFrameBuffer1->set(EAttachment::COLOR2, m_pExtraMomentsTex);
 
 		m_pTransparencyColorTex = std::make_shared<CTexture2D>();
 		m_pTransparencyColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
@@ -212,6 +218,7 @@ private:
 		m_pOpaqueDepthTex->bindV(2);
 		m_pMomentB0Tex->bindV(3);
 		m_pMomentsTex->bindV(4);
+		m_pExtraMomentsTex->bindV(5);
 		m_pTransparencyShaderProgram2->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 
 		for (auto Model : m_TransparentModels)
@@ -223,6 +230,7 @@ private:
 			m_pTransparencyShaderProgram2->updateUniform1i("uBlendingStrategy", m_BlendingStrategy);
 			m_pTransparencyShaderProgram2->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
 			m_pTransparencyShaderProgram2->updateUniformTexture("uMomentsTex", m_pMomentsTex.get());
+			m_pTransparencyShaderProgram2->updateUniformTexture("uExtraMomentsTex", m_pExtraMomentsTex.get());
 			CRenderer::getInstance()->draw(*Model, *m_pTransparencyShaderProgram2);
 		}
 
@@ -261,6 +269,7 @@ private:
 	std::shared_ptr<CTexture2D>		m_pOpaqueDepthTex;
 	std::shared_ptr<CTexture2D>		m_pMomentB0Tex;
 	std::shared_ptr<CTexture2D>		m_pMomentsTex;
+	std::shared_ptr<CTexture2D>		m_pExtraMomentsTex;
 	std::shared_ptr<CTexture2D>		m_pTransparencyColorTex;
 
 	std::unique_ptr<CSkybox>		m_pSkybox;
