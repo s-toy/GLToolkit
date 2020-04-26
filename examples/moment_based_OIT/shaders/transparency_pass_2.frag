@@ -146,8 +146,8 @@ void main()
 		b_odd /= b_0;
 
 		const vec4 bias_vector = vec4(0, 0.375, 0, 0.375);
-		float depth = 2.0*gl_FragCoord.z - 1.0;
-		float moment_bias = 1e-2;
+		float depth = 2.0 * gl_FragCoord.z - 1.0;
+		float moment_bias = 5e-7; //recommended bias from http://momentsingraphics.de/Media/I3D2018/Muenstermann2018-MBOITSupplementary.pdf
 		float overestimation = 0.25;
 
 		transmittance_at_depth = computeTransmittanceAtDepthFrom4PowerMoments(b_0, b_even, b_odd, depth, moment_bias, overestimation, bias_vector);

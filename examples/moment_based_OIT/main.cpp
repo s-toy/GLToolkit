@@ -142,10 +142,10 @@ private:
 		m_pOpaqueFrameBuffer->set(EAttachment::COLOR1, m_pOpaqueDepthTex);
 
 		m_pMomentB0Tex = std::make_shared<CTexture2D>();
-		m_pMomentB0Tex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pMomentB0Tex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pMomentsTex = std::make_shared<CTexture2D>();
-		m_pMomentsTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pMomentsTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pTransparencyFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pTransparencyFrameBuffer1->set(EAttachment::COLOR0, m_pMomentB0Tex);

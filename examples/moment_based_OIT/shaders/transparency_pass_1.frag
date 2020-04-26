@@ -14,7 +14,7 @@ void main()
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
 	float absorbance = -log(1.0 - uCoverage);
-	float depth = _inFragDepth;
+	float depth = 2.0 * gl_FragCoord.z - 1.0; //_inFragDepth;
 	float depth_pow2 = depth * depth;
 	float depth_pow4 = depth_pow2 * depth_pow2;
 
