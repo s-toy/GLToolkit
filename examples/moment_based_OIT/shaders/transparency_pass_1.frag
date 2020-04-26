@@ -6,13 +6,15 @@ uniform float		uCoverage;
 layout(location = 0) out float	_outMomentB0;
 layout(location = 1) out vec4	_outMoments;
 
+layout(location = 0) in float _inFragDepth;
+
 void main()
 {
 	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
 	float absorbance = -log(1.0 - uCoverage);
-	float depth = gl_FragCoord.z;
+	float depth = _inFragDepth;
 	float depth_pow2 = depth * depth;
 	float depth_pow4 = depth_pow2 * depth_pow2;
 
