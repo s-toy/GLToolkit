@@ -475,6 +475,7 @@ void main()
 	else if (uBlendingStrategy == BLENDING_STRATEGY_MBOIT_POWER4)
 	{
 		float b_0 = texelFetch(uMomentB0Tex, ivec2(gl_FragCoord.xy), 0).x;
+		if (b_0 < 0.00100050033f) discard;
 		vec4  b_1234 = texelFetch(uMomentsTex, ivec2(gl_FragCoord.xy), 0).xyzw;
 		vec2  b_even = b_1234.yw;
 		vec2  b_odd = b_1234.xz;
@@ -491,6 +492,7 @@ void main()
 	else if (uBlendingStrategy == BLENDING_STRATEGY_MBOIT_POWER6)
 	{
 		float b_0 = texelFetch(uMomentB0Tex, ivec2(gl_FragCoord.xy), 0).x;
+		if (b_0 < 0.00100050033f) discard;
 		vec4  b_1234 = texelFetch(uMomentsTex, ivec2(gl_FragCoord.xy), 0).xyzw;
 		vec2  b_56 = texelFetch(uExtraMomentsTex, ivec2(gl_FragCoord.xy), 0).xy;
 		vec3  b_even = vec3(b_1234.yw, b_56.y);
@@ -508,6 +510,7 @@ void main()
 	else if (uBlendingStrategy == BLENDING_STRATEGY_MBOIT_POWER8)
 	{
 		float b_0 = texelFetch(uMomentB0Tex, ivec2(gl_FragCoord.xy), 0).x;
+		if (b_0 < 0.00100050033f) discard;
 		vec4  b_1234 = texelFetch(uMomentsTex, ivec2(gl_FragCoord.xy), 0).xyzw;
 		vec4  b_5678 = texelFetch(uExtraMomentsTex, ivec2(gl_FragCoord.xy), 0).xyzw;
 		vec4  b_even = vec4(b_1234.yw, b_5678.yw);
