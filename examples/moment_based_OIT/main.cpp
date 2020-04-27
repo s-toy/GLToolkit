@@ -90,7 +90,7 @@ private:
 
 	void __initScenes()
 	{
-		__initScene03();
+		__initScene01();
 	}
 
 	void __initScene01()
