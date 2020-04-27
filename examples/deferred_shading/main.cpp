@@ -90,7 +90,7 @@ private:
 int main()
 {
 	CMyApplication App;
-	if (!App.init(SWindowInfo(WIN_WIDTH, WIN_HEIGHT, "Per-pixel Shading Demo"))) return -1;
+	if (!App.init(SWindowInfo(WIN_WIDTH, WIN_HEIGHT, "Deferred Shading Demo"))) return -1;
 	App.run();
 
 	return 0;
