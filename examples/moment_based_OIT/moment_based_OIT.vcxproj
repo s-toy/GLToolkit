@@ -150,18 +150,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\ComplexAlgebra.hlsli" />
-    <None Include="shaders\merge_color.vert" />
-    <None Include="shaders\MomentMath.hlsli" />
-    <None Include="shaders\MomentOIT.hlsli" />
-    <None Include="shaders\transparency_pass_1.frag" />
-    <None Include="shaders\transparency_pass_1.vert" />
-    <None Include="shaders\merge_color.frag" />
     <None Include="shaders\draw_opaque_objects.frag" />
     <None Include="shaders\draw_opaque_objects.vert" />
-    <None Include="shaders\transparency_pass_2.frag" />
-    <None Include="shaders\transparency_pass_2.vert" />
-    <None Include="shaders\TrigonometricMomentMath.hlsli" />
+    <None Include="shaders\MBOIT_generate_moments.frag" />
+    <None Include="shaders\MBOIT_generate_moments.vert" />
+    <None Include="shaders\MBOIT_merge_color.frag" />
+    <None Include="shaders\MBOIT_merge_color.vert" />
+    <None Include="shaders\MBOIT_reconstruct_transmittance.frag" />
+    <None Include="shaders\MBOIT_reconstruct_transmittance.vert" />
+    <None Include="shaders\WBOIT_merge_color.frag" />
+    <None Include="shaders\WBOIT_merge_color.vert" />
+    <None Include="shaders\WBOIT_weighted_blending.frag" />
+    <None Include="shaders\WBOIT_weighted_blending.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

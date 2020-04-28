@@ -4,14 +4,11 @@ struct SParallelLight { vec3 Color; vec3 Direction; };
 
 struct SMaterial { vec3 Diffuse; vec3 Specular; float Shinness; };
 
-#define BLENDING_STRATEGY_PERFECT_SORTING		0
-#define BLENDING_STRATEGY_AVERAGE_BLENDING		1
-#define BLENDING_STRATEGY_PHNOMENOLOGICAL_OIT	2
-#define BLENDING_STRATEGY_MBOIT_POWER4			3
-#define BLENDING_STRATEGY_MBOIT_POWER6			4
-#define BLENDING_STRATEGY_MBOIT_POWER8			5
+#define POWER_MOMENT_4		0
+#define POWER_MOMENT_6		1
+#define POWER_MOMENT_8		2
 
-uniform int uBlendingStrategy = BLENDING_STRATEGY_AVERAGE_BLENDING;
+uniform int uReconstructionStrategy = POWER_MOMENT_4;
 
 uniform sampler2D	uMaterialDiffuse;
 uniform sampler2D	uMaterialSpecular;
@@ -458,21 +455,8 @@ void main()
 	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
 	float transmittance_at_depth = 0.0;
-
-	if (uBlendingStrategy == BLENDING_STRATEGY_PERFECT_SORTING)
-	{
-		//TODO
-	}
-	else if (uBlendingStrategy == BLENDING_STRATEGY_AVERAGE_BLENDING)
-	{
-		transmittance_at_depth = 1.0;
-	}
-	else if (uBlendingStrategy == BLENDING_STRATEGY_PHNOMENOLOGICAL_OIT)
-	{
-		transmittance_at_depth = pow(10.0 * (1.0 - 0.99 * gl_FragCoord.z) * uCoverage, 3.0);
-		transmittance_at_depth = clamp(transmittance_at_depth, 0.01, 30.0);
-	}
-	else if (uBlendingStrategy == BLENDING_STRATEGY_MBOIT_POWER4)
+	
+	if (uReconstructionStrategy == POWER_MOMENT_4)
 	{
 		float b_0 = texelFetch(uMomentB0Tex, ivec2(gl_FragCoord.xy), 0).x;
 		if (b_0 < 0.00100050033f) discard;
@@ -489,7 +473,7 @@ void main()
 
 		transmittance_at_depth = computeTransmittanceAtDepthFrom4PowerMoments(b_0, b_even, b_odd, depth, moment_bias, overestimation, bias_vector);
 	}
-	else if (uBlendingStrategy == BLENDING_STRATEGY_MBOIT_POWER6)
+	else if (uReconstructionStrategy == POWER_MOMENT_6)
 	{
 		float b_0 = texelFetch(uMomentB0Tex, ivec2(gl_FragCoord.xy), 0).x;
 		if (b_0 < 0.00100050033f) discard;
@@ -507,7 +491,7 @@ void main()
 
 		transmittance_at_depth = computeTransmittanceAtDepthFrom6PowerMoments(b_0, b_even, b_odd, depth, moment_bias, overestimation, bias_vector);
 	}
-	else if (uBlendingStrategy == BLENDING_STRATEGY_MBOIT_POWER8)
+	else if (uReconstructionStrategy == POWER_MOMENT_8)
 	{
 		float b_0 = texelFetch(uMomentB0Tex, ivec2(gl_FragCoord.xy), 0).x;
 		if (b_0 < 0.00100050033f) discard;

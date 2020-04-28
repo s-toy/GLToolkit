@@ -16,8 +16,11 @@
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{ccf784ab-d08c-4dde-bd73-80a61d0cf869}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\shaders\MBOIT">
+    <Filter Include="Resource Files\shaders\MomentBasedOIT">
       <UniqueIdentifier>{b66516ac-b59d-43f2-8a52-30226873d7e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\shaders\WeightBlendedOIT">
+      <UniqueIdentifier>{eaca1f2e-1cdc-4b57-b69b-5ac445f12176}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -26,41 +29,41 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\MomentOIT.hlsli">
-      <Filter>Resource Files\shaders\MBOIT</Filter>
-    </None>
-    <None Include="shaders\MomentMath.hlsli">
-      <Filter>Resource Files\shaders\MBOIT</Filter>
-    </None>
-    <None Include="shaders\ComplexAlgebra.hlsli">
-      <Filter>Resource Files\shaders\MBOIT</Filter>
-    </None>
-    <None Include="shaders\TrigonometricMomentMath.hlsli">
-      <Filter>Resource Files\shaders\MBOIT</Filter>
-    </None>
     <None Include="shaders\draw_opaque_objects.vert">
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="shaders\draw_opaque_objects.frag">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="shaders\transparency_pass_1.vert">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_generate_moments.frag">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\transparency_pass_1.frag">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_generate_moments.vert">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\merge_color.vert">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_merge_color.frag">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\merge_color.frag">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_merge_color.vert">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\transparency_pass_2.frag">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_reconstruct_transmittance.vert">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\transparency_pass_2.vert">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\WBOIT_merge_color.frag">
+      <Filter>Resource Files\shaders\WeightBlendedOIT</Filter>
+    </None>
+    <None Include="shaders\WBOIT_merge_color.vert">
+      <Filter>Resource Files\shaders\WeightBlendedOIT</Filter>
+    </None>
+    <None Include="shaders\WBOIT_weighted_blending.frag">
+      <Filter>Resource Files\shaders\WeightBlendedOIT</Filter>
+    </None>
+    <None Include="shaders\WBOIT_weighted_blending.vert">
+      <Filter>Resource Files\shaders\WeightBlendedOIT</Filter>
+    </None>
+    <None Include="shaders\MBOIT_reconstruct_transmittance.frag">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
   </ItemGroup>
 </Project>
