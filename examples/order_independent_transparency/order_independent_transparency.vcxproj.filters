@@ -16,6 +16,18 @@
     <Filter Include="Resource Files\shaders">
       <UniqueIdentifier>{14e412d8-929b-460e-88c4-f662058f4bbb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders\MomentBasedOIT">
+      <UniqueIdentifier>{cb617768-0f70-4006-b0fb-6170ec447aeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\shaders\LinkedListOIT">
+      <UniqueIdentifier>{69764e0f-95b0-472d-8d8c-9d964e72937a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\shaders\Common">
+      <UniqueIdentifier>{817b7d45-b5e5-4ba2-a9b4-6203c3765baa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\shaders\WeightedBlendedOIT">
+      <UniqueIdentifier>{79d407bb-26d4-44b2-b700-6275d322c1bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -23,26 +35,50 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\generate_linked_list_fs.glsl">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_generate_moments.frag">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\generate_linked_list_vs.glsl">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_generate_moments.vert">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\draw_screen_quad_vs.glsl">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_merge_color.frag">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\opaque_shading_fs.glsl">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_reconstruct_transmittance.frag">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\opaque_shading_vs.glsl">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\MBOIT_reconstruct_transmittance.vert">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\merge_color_fs.glsl">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\WBOIT_merge_color.frag">
+      <Filter>Resource Files\shaders\WeightedBlendedOIT</Filter>
     </None>
-    <None Include="shaders\color_blending_fs.glsl">
-      <Filter>Resource Files\shaders</Filter>
+    <None Include="shaders\WBOIT_weighted_blending.frag">
+      <Filter>Resource Files\shaders\WeightedBlendedOIT</Filter>
+    </None>
+    <None Include="shaders\WBOIT_weighted_blending.vert">
+      <Filter>Resource Files\shaders\WeightedBlendedOIT</Filter>
+    </None>
+    <None Include="shaders\LLOIT_color_blending.frag">
+      <Filter>Resource Files\shaders\LinkedListOIT</Filter>
+    </None>
+    <None Include="shaders\LLOIT_generate_linked_list.frag">
+      <Filter>Resource Files\shaders\LinkedListOIT</Filter>
+    </None>
+    <None Include="shaders\LLOIT_generate_linked_list.vert">
+      <Filter>Resource Files\shaders\LinkedListOIT</Filter>
+    </None>
+    <None Include="shaders\LLOIT_merge_color.frag">
+      <Filter>Resource Files\shaders\LinkedListOIT</Filter>
+    </None>
+    <None Include="shaders\draw_opaque_objects.frag">
+      <Filter>Resource Files\shaders\Common</Filter>
+    </None>
+    <None Include="shaders\draw_opaque_objects.vert">
+      <Filter>Resource Files\shaders\Common</Filter>
+    </None>
+    <None Include="shaders\draw_screen_coord.vert">
+      <Filter>Resource Files\shaders\Common</Filter>
     </None>
   </ItemGroup>
 </Project>

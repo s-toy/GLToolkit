@@ -3,12 +3,11 @@
 uniform sampler2D uOpaqueColorTex;
 uniform sampler2D uTransparentColorTex;
 
-layout(location = 0) in vec2 _inTexCoord;
-
 void main()
 {
-	vec3 opaqueColor = texture(uOpaqueColorTex, _inTexCoord).rgb;
-	vec4 transparentColor = texture(uTransparentColorTex, _inTexCoord).rgba;
+	ivec2 uv = ivec2(gl_FragCoord.xy);
+	vec3 opaqueColor = texelFetch(uOpaqueColorTex, uv, 0).rgb;
+	vec4 transparentColor = texelFetch(uTransparentColorTex, uv, 0).rgba;
 	
 	vec3 color = transparentColor.rgb + opaqueColor * transparentColor.a;
 

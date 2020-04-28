@@ -17,12 +17,6 @@ struct NodeData
 
 #define MAX_FRAGMENTS 16
 
-#define BLENDING_STRATEGY_NO_SORTING		0
-#define BLENDING_STRATEGY_PERFECT_SORTING	1
-#define BLENDING_STRATEGY_OIT_16			2		
-
-uniform int uBlendingStrategy = BLENDING_STRATEGY_PERFECT_SORTING;
-
 layout(binding = 0, r32ui) coherent uniform uimage2D uListHeadPtrTex;
 layout(binding = 0, std430) buffer linkedList { ListNode nodes[]; };
 
@@ -76,42 +70,18 @@ void main()
 		}
 	}
 
-	if (uBlendingStrategy == BLENDING_STRATEGY_PERFECT_SORTING)
-	{
-		insertionSort(fragments, counter);
-	}
+	insertionSort(fragments, counter);
 
 	vec3 color = vec3(0.0);
-	vec3 beta = vec3(1.0);
+	vec3 totalTransmittance = vec3(1.0);
 
-	if (uBlendingStrategy == BLENDING_STRATEGY_NO_SORTING || uBlendingStrategy == BLENDING_STRATEGY_PERFECT_SORTING)
+	for (int i = 0; i < counter; i++)
 	{
-		for (int i = 0; i < counter; i++)
-		{
-			vec4 c = unpackColor(fragments[i].packedColor);
-			vec3 t = unpackColor(fragments[i].transmittance).rgb;
-			beta *= (1.0 - c.a + c.a * t);
-			color = (1.0 - c.a) * color + c.a * (c.rgb + t * color);
-		}
+		vec4 c = unpackColor(fragments[i].packedColor);
+		vec3 t = unpackColor(fragments[i].transmittance).rgb;
+		totalTransmittance *= (1.0 - c.a + c.a * t);
+		color = (1.0 - c.a) * color + c.a * (c.rgb + t * color);
 	}
-	else if (uBlendingStrategy == BLENDING_STRATEGY_OIT_16)
-	{
-		float totalWeight = 0.0;
-		for (int i = 0; i < counter; i++)
-		{
-			vec4 c = unpackColor(fragments[i].packedColor);
-			vec3 t = unpackColor(fragments[i].transmittance).rgb;
-			float t_average = (t.r + t.g + t.b) / 3.0;
-			beta *= (1.0 - c.a + c.a * t);
-
-			float weight = pow(10.0 * (1.0 - 0.99 * gl_FragCoord.z) * c.a * (1.0 - t_average), 3.0);
-			weight = clamp(weight, 0.01, 30.0);
-			color +=  c.a * weight * c.rgb;
-			totalWeight += c.a * weight * (1.0 - t_average);
-		}
-
-		color = (vec3(1.0) - beta) * color / totalWeight;
-	}
-
-	_outFragColor = vec4(color, beta);
+	
+	_outFragColor = vec4(color, totalTransmittance);
 }
