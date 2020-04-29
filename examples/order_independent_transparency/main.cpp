@@ -105,6 +105,27 @@ protected:
 		if (KeyStatus[GLFW_KEY_0]) m_WeightingStrategy = 0;
 		else if (KeyStatus[GLFW_KEY_1]) m_WeightingStrategy = 1;
 #endif
+
+		//right
+		auto Position = m_TransparentModels[0]->getPosition();
+		m_TransparentModels[0]->setPosition(glm::vec3(Position.x, Position.y, -0.5 + std::sin(getTime())));
+
+		Position = m_TransparentModels[1]->getPosition();
+		m_TransparentModels[1]->setPosition(glm::vec3(Position.x, Position.y, -0.5 - std::sin(getTime())));
+
+		//middle
+		Position = m_TransparentModels[3]->getPosition();
+		m_TransparentModels[3]->setPosition(glm::vec3(std::sin(getTime()), Position.y, Position.z));
+
+		Position = m_TransparentModels[2]->getPosition();
+		m_TransparentModels[2]->setPosition(glm::vec3(-std::sin(getTime()), Position.y, Position.z));
+
+		//left
+		Position = m_TransparentModels[4]->getPosition();
+		m_TransparentModels[4]->setPosition(glm::vec3(Position.x, Position.y, -0.5 + std::sin(getTime())));
+
+		Position = m_TransparentModels[5]->getPosition();
+		m_TransparentModels[5]->setPosition(glm::vec3(Position.x, Position.y, -0.5 - std::sin(getTime())));
 	}
 
 private:
@@ -155,7 +176,7 @@ private:
 
 	void __initScenes()
 	{
-		__initScene02();
+		__initScene01();
 	}
 
 	void __initScene01()
@@ -170,35 +191,44 @@ private:
 		};
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
+		//opaque
+		m_OpaqueModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
+		m_OpaqueModels.back()->setPosition(glm::vec3(1.0f, -1.5f, -0.5f));
+		m_OpaqueModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+
+		m_OpaqueModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
+		m_OpaqueModels.back()->setPosition(glm::vec3(-1.0f, -1.5f, -0.5f));
+		m_OpaqueModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+
 		//right
-		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, -1.5f, -1.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), 0.2 };
 
-		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, -1.5f, 0.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), 0.8 };
 
 		//middle
-		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, -1.5f, -1.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), 0.5 };
 
-		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, -1.5f, 0.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), 0.5 };
 
 		//left
-		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, -1.5f, -1.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), 0.9 };
 
-		m_TransparentModels.push_back(std::make_unique<CModel>("models/nanosuit/nanosuit.obj"));
+		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
 		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, -1.5f, 0.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), 0.1 };
@@ -321,6 +351,24 @@ private:
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.5, 0.0), 0.5);
 
 		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
+		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 0.8);
+	}
+
+	void __initScene04()
+	{
+		std::vector<std::string> Faces = {
+			"textures/skybox/right.jpg",
+			"textures/skybox/left.jpg",
+			"textures/skybox/top.jpg",
+			"textures/skybox/bottom.jpg",
+			"textures/skybox/front.jpg",
+			"textures/skybox/back.jpg"
+		};
+		m_pSkybox = std::make_unique<CSkybox>(Faces);
+
+		m_TransparentModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_2 (COLLAborative Design Activity)).dae"));
 		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
 		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
 		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 0.8);
