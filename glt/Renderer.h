@@ -27,7 +27,6 @@ namespace glt
 		void clear() const;
 		void setClearColor(float vRed, float vGreen, float vBlue, float vAlpha) const;
 		void clearBuffer(GLuint vDrawBuffer, const GLfloat* vData) const;
-
 		void update();
 
 		void enableCullFace(bool vEnable) const;
@@ -35,6 +34,8 @@ namespace glt
 
 		void enableBlend(bool vEnable) const;  //TODO: 无意义的封装
 		void setBlendFunc(GLenum vSrc, GLenum vDst, int vBufferIndex = -1) const; //
+
+		void memoryBarrier(GLbitfield vBarriers) const;
 
 		void draw(const CVertexArray& vVertexArray, const CIndexBuffer& vIndexBuffer, const CShaderProgram& vShaderProgram) const;
 		void draw(const CModel& vModel, const CShaderProgram& vShaderProgram);

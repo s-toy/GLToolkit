@@ -94,6 +94,13 @@ void CRenderer::setBlendFunc(GLenum vSrc, GLenum vDst, int vBufferIndex) const
 	else _OUTPUT_WARNING("Invalid buffer index !");
 }
 
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::memoryBarrier(GLbitfield vBarriers) const
+{
+	glMemoryBarrier(vBarriers); //TODO:
+}
+
 //*********************************************************************
 //FUNCTION:
 void CRenderer::draw(const CVertexArray& vVertexArray, const CIndexBuffer& vIndexBuffer, const CShaderProgram& vShaderProgram) const

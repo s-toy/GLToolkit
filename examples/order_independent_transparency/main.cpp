@@ -105,27 +105,6 @@ protected:
 		if (KeyStatus[GLFW_KEY_0]) m_WeightingStrategy = 0;
 		else if (KeyStatus[GLFW_KEY_1]) m_WeightingStrategy = 1;
 #endif
-
-		//right
-		auto Position = m_TransparentModels[0]->getPosition();
-		m_TransparentModels[0]->setPosition(glm::vec3(Position.x, Position.y, -0.5 + std::sin(getTime())));
-
-		Position = m_TransparentModels[1]->getPosition();
-		m_TransparentModels[1]->setPosition(glm::vec3(Position.x, Position.y, -0.5 - std::sin(getTime())));
-
-		//middle
-		Position = m_TransparentModels[3]->getPosition();
-		m_TransparentModels[3]->setPosition(glm::vec3(std::sin(getTime()), Position.y, Position.z));
-
-		Position = m_TransparentModels[2]->getPosition();
-		m_TransparentModels[2]->setPosition(glm::vec3(-std::sin(getTime()), Position.y, Position.z));
-
-		//left
-		Position = m_TransparentModels[4]->getPosition();
-		m_TransparentModels[4]->setPosition(glm::vec3(Position.x, Position.y, -0.5 + std::sin(getTime())));
-
-		Position = m_TransparentModels[5]->getPosition();
-		m_TransparentModels[5]->setPosition(glm::vec3(Position.x, Position.y, -0.5 - std::sin(getTime())));
 	}
 
 private:
@@ -176,7 +155,7 @@ private:
 
 	void __initScenes()
 	{
-		__initScene01();
+		__initScene04();
 	}
 
 	void __initScene01()
@@ -369,9 +348,8 @@ private:
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
 		m_TransparentModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_2 (COLLAborative Design Activity)).dae"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 0.8);
+		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.4);
 	}
 
 	void __initTexturesAndBuffers()
@@ -491,6 +469,7 @@ private:
 		}
 
 		CRenderer::getInstance()->setDepthMask(true);
+		//CRenderer::getInstance()->memoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT);
 
 		//pass2: color blending
 		m_pColorBlendingShaderProgram->bind();
