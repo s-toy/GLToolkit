@@ -22,11 +22,11 @@
     <Filter Include="Resource Files\shaders\LinkedListOIT">
       <UniqueIdentifier>{69764e0f-95b0-472d-8d8c-9d964e72937a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\shaders\Common">
-      <UniqueIdentifier>{817b7d45-b5e5-4ba2-a9b4-6203c3765baa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\shaders\WeightedBlendedOIT">
       <UniqueIdentifier>{79d407bb-26d4-44b2-b700-6275d322c1bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\shaders\Common">
+      <UniqueIdentifier>{817b7d45-b5e5-4ba2-a9b4-6203c3765baa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -80,5 +80,10 @@
     <None Include="shaders\draw_screen_coord.vert">
       <Filter>Resource Files\shaders\Common</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="shaders\MomentMath.glsl">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

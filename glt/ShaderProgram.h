@@ -46,7 +46,7 @@ namespace glt
 
 		mutable std::unordered_map<std::string, GLint> m_UniformLocCacheMap;
 
-		const GLchar* const __readShaderFile(const std::string& vFileName);
+		std::string __readShaderFile(const std::string& vFileName) const;
 		GLint __getUniformLocation(const std::string& vName) const;
 		void __compileShader(GLuint& vShader);
 		void __linkProgram(GLuint& vProgram);

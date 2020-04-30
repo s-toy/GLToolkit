@@ -221,6 +221,7 @@
     <ClInclude Include="ShaderStorageBuffer.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Utility.h" />
     <ClInclude Include="VertexArray.h" />
     <ClInclude Include="VertexArrayLayout.h" />
     <ClInclude Include="VertexBuffer.h" />

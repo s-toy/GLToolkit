@@ -145,6 +145,9 @@
     <ClInclude Include="AtomicCounterBuffer.h">
       <Filter>src\core</Filter>
     </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\imgui\imgui.cpp">

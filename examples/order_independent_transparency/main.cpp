@@ -155,7 +155,7 @@ private:
 
 	void __initScenes()
 	{
-		__initScene04();
+		__initScene01();
 	}
 
 	void __initScene01()

@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "Texture.h"
 #include "FileLocator.h"
+#include "Utility.h"
 
 using namespace glt;
 
@@ -27,35 +28,23 @@ CShaderProgram::~CShaderProgram()
 void CShaderProgram::addShader(const std::string& vShaderName, EShaderType vShaderType)
 {
 	_ASSERT(!vShaderName.empty());
-	const GLchar* pShaderText = __readShaderFile(CFileLocator::getInstance()->locateFile(vShaderName));
-	_ASSERT(pShaderText);
-
+	std::string ShaderText = __readShaderFile(CFileLocator::getInstance()->locateFile(vShaderName));
 	GLuint ShaderID = 0;
 	switch (vShaderType)
 	{
-	case EShaderType::VERTEX_SHADER:
-		ShaderID = glCreateShader(GL_VERTEX_SHADER);
-		break;
-	case EShaderType::FRAGMENT_SHADER:
-		ShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-		break;
-	case EShaderType::GEOMETRY_SHADER:
-		ShaderID = glCreateShader(GL_GEOMETRY_SHADER);
-		break;
-	case EShaderType::COMPUTE_SHADER:
-		ShaderID = glCreateShader(GL_COMPUTE_SHADER);
-		break;
-	default:
-		break;
+	case EShaderType::VERTEX_SHADER:	ShaderID = glCreateShader(GL_VERTEX_SHADER); break;
+	case EShaderType::FRAGMENT_SHADER:	ShaderID = glCreateShader(GL_FRAGMENT_SHADER); break;
+	case EShaderType::GEOMETRY_SHADER:	ShaderID = glCreateShader(GL_GEOMETRY_SHADER); break;
+	case EShaderType::COMPUTE_SHADER:	ShaderID = glCreateShader(GL_COMPUTE_SHADER); break;
+	default: _ASSERTE(false); break;
 	}
 
+	const char* pShaderText = ShaderText.c_str();
 	glShaderSource(ShaderID, 1, &pShaderText, nullptr);
 	__compileShader(ShaderID);
 
 	glAttachShader(m_ProgramID, ShaderID);
 	__linkProgram(m_ProgramID);
-
-	delete pShaderText;
 }
 
 //*********************************************************************
@@ -114,32 +103,61 @@ void CShaderProgram::updateUniformMat4(const std::string& vName, const glm::mat4
 
 //*********************************************************************************
 //FUNCTION:
-const GLchar* const CShaderProgram::__readShaderFile(const std::string& vFileName)
+static void __getFilePath(const std::string& vFullPath, std::string& voPathWithoutFileName)
 {
-	_ASSERT(vFileName.size() != 0);
-	GLchar* pShaderText = nullptr;
-	std::filebuf* pFileBuffer = nullptr;
-	unsigned int FileSize = 0;
+	size_t Pos = vFullPath.find_last_of("/\\");
+	voPathWithoutFileName = vFullPath.substr(0, Pos + 1);
+}
 
-	std::ifstream FileIn;
-	FileIn.open(vFileName, std::ios::binary);
+//*********************************************************************************
+//FUNCTION:
+std::string CShaderProgram::__readShaderFile(const std::string& vFileName) const
+{
+	std::string FullShaderText = "";
+	std::ifstream ShaderFile(vFileName);
+	_EARLY_RETURN(!ShaderFile.is_open(), format("ERROR: could not open the shader at: %s.", vFileName.c_str()), {});
 
-	if (FileIn.fail())
+	static const std::string IncludeIndentifier = "#include";
+	static bool IsRecursiveCall = false;
+
+	std::string LineBuffer;
+	while (std::getline(ShaderFile, LineBuffer))
 	{
-		std::cout << "Fail to open " << std::endl;
-		return nullptr;
+		// Look for the new shader include identifier
+		if (LineBuffer.find(IncludeIndentifier) != LineBuffer.npos)
+		{
+			// Remove the include identifier, this will cause the path to remain
+			trim(LineBuffer);
+			LineBuffer.erase(0, IncludeIndentifier.size());
+			ltrim(LineBuffer);
+			LineBuffer = LineBuffer.substr(1, LineBuffer.size() - 2);
+
+			// The include path is relative to the current shader file path
+			std::string pathOfThisFile;
+			__getFilePath(vFileName, pathOfThisFile);
+			LineBuffer.insert(0, pathOfThisFile);
+
+			// By using recursion, the new include file can be extracted
+			// and inserted at this location in the shader source code
+			IsRecursiveCall = true;
+			FullShaderText += __readShaderFile(LineBuffer);
+
+			// Do not add this line to the shader source code, as the include
+			// path would generate a compilation issue in the final source code
+			continue;
+		}
+
+		FullShaderText += LineBuffer + '\n';
 	}
 
-	pFileBuffer = FileIn.rdbuf();
-	FileSize = (unsigned int)pFileBuffer->pubseekoff(0, std::ios::end, std::ios::in);
-	pFileBuffer->pubseekpos(0, std::ios::in);
+	// Only add the null terminator at the end of the complete file,
+	// essentially skipping recursive function calls this way
+	if (!IsRecursiveCall)
+		FullShaderText += '\0';
 
-	pShaderText = new GLchar[FileSize + 1];
-	pFileBuffer->sgetn(pShaderText, FileSize);
-	pShaderText[FileSize] = '\0';
-	FileIn.close();
+	ShaderFile.close();
 
-	return pShaderText;
+	return FullShaderText;
 }
 
 //*********************************************************************
