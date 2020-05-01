@@ -126,6 +126,10 @@ void CRenderer::__drawSingleModel(const CModel& vModel, const CShaderProgram& vS
 	auto ModelMatrix = glm::translate(glm::mat4(1.0), vModel.getPosition());
 	ModelMatrix = glm::scale(ModelMatrix, vModel.getScale());
 	vShaderProgram.updateUniformMat4("uModelMatrix", ModelMatrix);
+	vShaderProgram.updateUniform1i("uHasBones", vModel._hasBones());
+
+	std::vector<glm::mat4> Transforms;
+	//vModel.__boneTransform(0.0, Transforms);
 
 	vModel._draw(vShaderProgram);
 }

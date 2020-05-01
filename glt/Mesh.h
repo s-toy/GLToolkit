@@ -11,9 +11,11 @@ namespace glt
 {
 	typedef struct
 	{
-		glm::vec3 Position;
-		glm::vec3 Normal;
-		glm::vec2 TexCoords;
+		glm::vec3  Position;
+		glm::vec3  Normal;
+		glm::vec2  TexCoords;
+		glm::ivec4 BoneIDs;
+		glm::vec4  BoneWeights;
 	} SVertex;
 
 	class CShaderProgram;

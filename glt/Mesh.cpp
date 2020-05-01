@@ -30,6 +30,8 @@ void CMesh::__setupMesh()
 	Layout.push<float>(3);
 	Layout.push<float>(3);
 	Layout.push<float>(2);
+	Layout.push<int>(4);
+	Layout.push<float>(4);
 	m_pVertexArray->addBuffer(*m_pVertexBuffer, Layout);
 }
 

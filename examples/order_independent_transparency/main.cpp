@@ -155,7 +155,11 @@ private:
 
 	void __initScenes()
 	{
-		__initScene01();
+		CCPUTimer timer;
+		timer.start();
+		__initScene04();
+		timer.stop();
+		_OUTPUT_EVENT(format("Total time: %f", timer.getElapsedTimeInMS()));
 	}
 
 	void __initScene01()

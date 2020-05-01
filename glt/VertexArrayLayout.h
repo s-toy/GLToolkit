@@ -17,6 +17,7 @@ namespace glt
 			{
 			case GL_FLOAT: return sizeof(GLfloat);
 			case GL_UNSIGNED_INT: return sizeof(GLuint);
+			case GL_INT: return sizeof(GLint);
 			case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
 			default: _ASSERTE(false);
 			}
@@ -48,6 +49,13 @@ namespace glt
 		{
 			m_VertexArrayElements.push_back({ GL_UNSIGNED_INT, vCount, false });
 			m_Stride += vCount * SVertexArrayElement::getSizeOfType(GL_UNSIGNED_INT);
+		}
+
+		template<>
+		void push<int>(unsigned int vCount)
+		{
+			m_VertexArrayElements.push_back({GL_INT, vCount, false});
+			m_Stride += vCount * SVertexArrayElement::getSizeOfType(GL_INT);
 		}
 
 		unsigned int getStride() const { return m_Stride; }
