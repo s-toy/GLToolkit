@@ -28,7 +28,12 @@ void CVertexArray::addBuffer(const CVertexBuffer& vBuffer, const CVertexArrayLay
 	{
 		auto& Element = vLayout.getElementAt(i);
 		glEnableVertexAttribArray(i);
-		glVertexAttribPointer(i, Element.Count, Element.Type, Element.Normalized, vLayout.getStride(), (void*)Offset);
+
+		if (Element.Type == GL_INT || Element.Type == GL_UNSIGNED_INT) //TODO:
+			glVertexAttribIPointer(i, Element.Count, Element.Type, vLayout.getStride(), (void*)Offset);
+		else 
+			glVertexAttribPointer(i, Element.Count, Element.Type, Element.Normalized, vLayout.getStride(), (void*)Offset);
+
 		Offset += Element.Count * SVertexArrayElement::getSizeOfType(Element.Type);
 	}
 }

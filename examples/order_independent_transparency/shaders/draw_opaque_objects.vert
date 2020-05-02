@@ -22,6 +22,7 @@ void main()
 {
 	vec4 pos = vec4(_inVertexPosition, 1.0);
 	vec4 normal = vec4(_inVertexNormal, 0.0);
+
 	if (uHasBones)
 	{
 		mat4 BoneTransform = uBonesMatrix[_inBoneIDs[0]] * _inBoneWeights[0];

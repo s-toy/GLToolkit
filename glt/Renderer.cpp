@@ -125,9 +125,10 @@ void CRenderer::draw(const CVertexArray& vVertexArray, const CIndexBuffer& vInde
 void CRenderer::__drawSingleModel(const CModel& vModel, const CShaderProgram& vShaderProgram)
 {
 	auto ModelMatrix = glm::translate(glm::mat4(1.0), vModel.getPosition());
+	ModelMatrix = glm::rotate(ModelMatrix, vModel.getRotation().w, glm::vec3(vModel.getRotation()));
 	ModelMatrix = glm::scale(ModelMatrix, vModel.getScale());
 	vShaderProgram.updateUniformMat4("uModelMatrix", ModelMatrix);
-	//vShaderProgram.updateUniform1i("uHasBones", vModel._hasBones());
+	vShaderProgram.updateUniform1i("uHasBones", vModel._hasBones());
 
 	if (vModel._hasBones())
 	{

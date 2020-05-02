@@ -354,6 +354,8 @@ private:
 		//m_OpaqueModels.push_back(std::make_shared<CModel>("C:\\Users\\admin\\Desktop\\ogldev-source\\Content\\boblampclean.md5mesh"));
 		m_OpaqueModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae"));
 		m_OpaqueModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		m_OpaqueModels.back()->setRotation(1.57, glm::vec3(1.0f, 0.0f, 0.0f));
+		m_OpaqueModels.back()->setScale(glm::vec3(0.5));
 		//m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.4);
 	}
 
