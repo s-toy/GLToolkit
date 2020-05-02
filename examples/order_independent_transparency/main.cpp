@@ -14,7 +14,7 @@
 #include "InputManager.h"
 #include "CpuTimer.h"
 
-#define USING_MOMENT_BASED_OIT
+#define USING_ALL_METHODS
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -351,12 +351,11 @@ private:
 		};
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
-		//m_OpaqueModels.push_back(std::make_shared<CModel>("C:\\Users\\admin\\Desktop\\ogldev-source\\Content\\boblampclean.md5mesh"));
-		m_OpaqueModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae"));
-		m_OpaqueModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_OpaqueModels.back()->setRotation(1.57, glm::vec3(1.0f, 0.0f, 0.0f));
-		m_OpaqueModels.back()->setScale(glm::vec3(0.5));
-		//m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.4);
+		m_TransparentModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae"));
+		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
+		m_TransparentModels.back()->setRotation(1.57, glm::vec3(1.0f, 0.0f, 0.0f));
+		m_TransparentModels.back()->setScale(glm::vec3(0.6));
+		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.4);
 	}
 
 	void __initTexturesAndBuffers()

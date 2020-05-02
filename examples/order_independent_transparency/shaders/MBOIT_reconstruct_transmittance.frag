@@ -1,9 +1,6 @@
 #version 430 core
 #include "MomentMath.glsl"
-
-struct SParallelLight { vec3 Color; vec3 Direction; };
-
-struct SMaterial { vec3 Diffuse; vec3 Specular; float Shinness; };
+#include "compute_phong_shading.glsl"
 
 #define POWER_MOMENT_4		0
 #define POWER_MOMENT_6		1
@@ -29,32 +26,7 @@ layout(location = 2) in vec2 _inTexCoord;
 
 layout(location = 0) out vec4 _outTransparencyColor;
 
-vec3 computePhongShading4ParallelLight(vec3 vPositionW, vec3 vNormalW, vec3 vViewDir, SParallelLight vLight, SMaterial vMaterial)
-{
-	vec3 AmbientColor = 0.2 * vLight.Color * vMaterial.Diffuse;
-	vec3 DiffuseColor = vLight.Color * vMaterial.Diffuse * max(dot(vNormalW, vLight.Direction), 0.0);
-	vec3 ReflectDir = normalize(reflect(-vLight.Direction, _inNormalW));
-	vec3 SpecularColor = vLight.Color * vMaterial.Specular * pow(max(dot(vViewDir, ReflectDir), 0.0), vMaterial.Shinness);
-
-	return AmbientColor + DiffuseColor /*+ SpecularColor*/;
-}
-
-vec3 computeReflectColor()
-{
-	vec3 ViewDirW = normalize(uViewPos - _inPositionW);
-	vec3 NormalW = normalize(_inNormalW);
-
-	SMaterial Material;
-	Material.Diffuse = uDiffuseColor; // texture(uMaterialDiffuse, _inTexCoord).rgb;
-	Material.Specular = vec3(0.0); // texture(uMaterialSpecular, _inTexCoord).rgb;
-	Material.Shinness = 32.0;
-
-	vec3 color = vec3(0.0);
-	color += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(1.0, 1.0, 1.0)), Material);
-	color += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
-
-	return color;
-}
+#include "compute_reflection_color.glsl"
 
 void main()
 {

@@ -29,10 +29,12 @@ void CVertexArray::addBuffer(const CVertexBuffer& vBuffer, const CVertexArrayLay
 		auto& Element = vLayout.getElementAt(i);
 		glEnableVertexAttribArray(i);
 
-		if (Element.Type == GL_INT || Element.Type == GL_UNSIGNED_INT) //TODO:
+		if (Element.Type == GL_INT || Element.Type == GL_UNSIGNED_INT)
 			glVertexAttribIPointer(i, Element.Count, Element.Type, vLayout.getStride(), (void*)Offset);
-		else 
+		else if (Element.Type == GL_FLOAT)
 			glVertexAttribPointer(i, Element.Count, Element.Type, Element.Normalized, vLayout.getStride(), (void*)Offset);
+		else
+			_ASSERTE(false);
 
 		Offset += Element.Count * SVertexArrayElement::getSizeOfType(Element.Type);
 	}

@@ -80,6 +80,15 @@
     <None Include="shaders\draw_screen_coord.vert">
       <Filter>Resource Files\shaders\Common</Filter>
     </None>
+    <None Include="shaders\skeletal_animation_input.glsl">
+      <Filter>Resource Files\shaders\Common</Filter>
+    </None>
+    <None Include="shaders\compute_phong_shading.glsl">
+      <Filter>Resource Files\shaders\Common</Filter>
+    </None>
+    <None Include="shaders\compute_reflection_color.glsl">
+      <Filter>Resource Files\shaders\Common</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\MomentMath.glsl">

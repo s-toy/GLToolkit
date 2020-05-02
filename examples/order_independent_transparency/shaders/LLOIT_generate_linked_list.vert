@@ -1,12 +1,5 @@
 #version 430 core
-
-uniform mat4 uModelMatrix;
-uniform mat4 uViewMatrix;
-uniform mat4 uProjectionMatrix;
-
-layout(location = 0) in vec3  _inVertexPosition;
-layout(location = 1) in vec3  _inVertexNormal;
-layout(location = 2) in vec2  _inVertexTexCoord;
+#include "skeletal_animation_input.glsl"
 
 layout(location = 0) out vec4 _outPositionW;
 layout(location = 1) out vec3 _outNormalW;
@@ -16,6 +9,7 @@ void main()
 {
 	vec4 pos = vec4(_inVertexPosition, 1.0);
 	vec4 normal = vec4(_inVertexNormal, 0.0);
+	if (uHasBones) boneTransform(pos, normal);
 
 	_outPositionW.xyz = vec3(uModelMatrix * pos);
 	_outNormalW = mat3(transpose(inverse(uModelMatrix))) * normal.xyz;

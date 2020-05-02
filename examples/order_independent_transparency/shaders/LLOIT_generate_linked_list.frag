@@ -1,5 +1,6 @@
 #version 430 core
 #extension GL_ARB_fragment_shader_interlock : require
+#include "compute_phong_shading.glsl"
 
 struct ListNode
 {
@@ -8,10 +9,6 @@ struct ListNode
 	uint depth;
 	uint next;
 };
-
-struct SParallelLight { vec3 Color; vec3 Direction; };
-
-struct SMaterial { vec3 Diffuse; vec3 Specular; float Shinness; };
 
 layout(binding = 0, r32ui) uniform uimage2D uListHeadPtrTex;
 layout(binding = 0, offset = 0) uniform atomic_uint uListNodeCounter;
@@ -33,39 +30,14 @@ layout(location = 2) in vec2 _inTexCoord;
 
 layout(location = 0) out vec4 _outFragColor;
 
-vec3 computePhongShading4ParallelLight(vec3 vPositionW, vec3 vNormalW, vec3 vViewDir, SParallelLight vLight, SMaterial vMaterial)
-{
-	vec3 AmbientColor = 0.2 * vLight.Color * vMaterial.Diffuse;
-	vec3 DiffuseColor = vLight.Color * vMaterial.Diffuse * max(dot(vNormalW, vLight.Direction), 0.0);
-	vec3 ReflectDir = normalize(reflect(-vLight.Direction, _inNormalW));
-	vec3 SpecularColor = vLight.Color * vMaterial.Specular * pow(max(dot(vViewDir, ReflectDir), 0.0), vMaterial.Shinness);
-
-	return AmbientColor + DiffuseColor + SpecularColor;
-}
-
-vec3 computeReflectColor()
-{
-	vec3 ViewDirW = normalize(uViewPos - _inPositionW.xyz);
-	vec3 NormalW = normalize(_inNormalW);
-
-	SMaterial Material;
-	Material.Diffuse = texture(uMaterialDiffuse, _inTexCoord).rgb;
-	Material.Specular = texture(uMaterialSpecular, _inTexCoord).rgb;
-	Material.Shinness = 32.0;
-
-	vec3 color = vec3(0.0);
-	color += computePhongShading4ParallelLight(_inPositionW.xyz, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(1.0, 1.0, 1.0)), Material);
-	color += computePhongShading4ParallelLight(_inPositionW.xyz, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
-
-	return color;
-}
-
 uint packColor(vec4 color)
 {
 	uvec4 bytes = uvec4(color * 255.0);
 	uint pack = (bytes.r << 24) | (bytes.g << 16) | (bytes.b << 8) | (bytes.a);
 	return pack;
 }
+
+#include "compute_reflection_color.glsl"
 
 void main()
 {

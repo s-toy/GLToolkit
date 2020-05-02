@@ -100,7 +100,8 @@ std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh)
 	}
 
 	if (vMesh->HasBones()) m_HasBones = true; //TODO:不一定所有mesh都有bones
-	for (unsigned i = 0; i < vMesh->mNumBones; ++i) {
+	for (unsigned i = 0; i < vMesh->mNumBones; ++i) 
+	{
 		unsigned BoneIndex = 0;
 		std::string BoneName(vMesh->mBones[i]->mName.data);
 
