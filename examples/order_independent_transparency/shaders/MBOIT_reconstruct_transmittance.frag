@@ -1,5 +1,5 @@
 #version 430 core
-#include "MomentMath.frag"
+#include "MomentMath.glsl"
 #include "compute_phong_shading.glsl"
 
 #define POWER_MOMENT_4		0

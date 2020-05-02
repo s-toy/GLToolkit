@@ -1,19 +1,4 @@
-#define float2		vec2
-#define float3		vec3
-#define float4		vec4
-#define float2x2	mat2
-#define float3x3	mat3
-#define float4x4	mat4
-#define atan2		atan
-#define fmod		mod
-#define lerp		mix
-#define frac		fract
-
-#define mad(m, a, b)		((m) * (a) + (b))
-#define mul(a, b)			((a) * (b))
-#define saturate(s)			clamp((s), 0.0, 1.0)
-
-void sincos(float x, out float s, out float c) { s = sin(x); c = cos(x); }
+#include "TrigonometricMomentMath.glsl"
 
 /*! Given coefficients of a quadratic polynomial A*x^2+B*x+C, this function	
 	outputs its two real roots.*/

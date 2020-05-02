@@ -162,10 +162,12 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\ComplexAlgebra.glsl" />
     <None Include="shaders\compute_reflection_color.glsl" />
     <None Include="shaders\draw_opaque_objects.frag" />
     <None Include="shaders\draw_opaque_objects.vert" />
     <None Include="shaders\draw_screen_coord.vert" />
+    <None Include="shaders\HLSL_to_GLSL.glsl" />
     <None Include="shaders\LLOIT_color_blending.frag" />
     <None Include="shaders\LLOIT_generate_linked_list.frag" />
     <None Include="shaders\LLOIT_generate_linked_list.vert" />
@@ -177,12 +179,13 @@
     <None Include="shaders\MBOIT_reconstruct_transmittance.vert" />
     <None Include="shaders\compute_phong_shading.glsl" />
     <None Include="shaders\skeletal_animation_input.glsl" />
+    <None Include="shaders\TrigonometricMomentMath.glsl" />
     <None Include="shaders\WBOIT_merge_color.frag" />
     <None Include="shaders\WBOIT_weighted_blending.frag" />
     <None Include="shaders\WBOIT_weighted_blending.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shaders\MomentMath.frag" />
+    <ClInclude Include="shaders\MomentMath.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

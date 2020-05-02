@@ -89,9 +89,18 @@
     <None Include="shaders\compute_reflection_color.glsl">
       <Filter>Resource Files\shaders\Common</Filter>
     </None>
+    <None Include="shaders\ComplexAlgebra.glsl">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
+    </None>
+    <None Include="shaders\HLSL_to_GLSL.glsl">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
+    </None>
+    <None Include="shaders\TrigonometricMomentMath.glsl">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shaders\MomentMath.frag">
+    <ClInclude Include="shaders\MomentMath.glsl">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </ClInclude>
   </ItemGroup>
