@@ -45,6 +45,9 @@ namespace glt
 
 		CCamera* fetchCamera() const { return m_pCamera; }
 
+	protected:
+		void _setTime(float vTime) { m_Time = vTime; }
+
 	private:
 		CRenderer() = default;
 		_DISALLOW_COPY_AND_ASSIGN(CRenderer);
@@ -54,8 +57,11 @@ namespace glt
 		void __initFullScreenQuad();
 
 		CCamera* m_pCamera = nullptr;
+		float m_Time = 0.0f;
 
 		std::shared_ptr<CVertexArray>	m_FullScreenQuadVAO;
 		std::shared_ptr<CVertexBuffer>	m_FullScreenQuadVBO;
+
+		friend class CApplicationBase;
 	};
 }

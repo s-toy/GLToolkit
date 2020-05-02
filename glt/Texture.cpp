@@ -22,7 +22,7 @@ CTexture::~CTexture()
 
 //***********************************************************************************************
 //FUNCTION:
-void CTexture2D::load(const char* vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint vFilterMode /*= GL_LINEAR*/, GLenum vFormat /*= GL_RGB*/, bool vFlipVertically /*= false*/)
+void CTexture2D::load(const char* vPath, GLint vWrapMode, GLint vFilterMode, bool vFlipVertically)
 {
 	_ASSERTE(vPath);
 	m_FilePath = CFileLocator::getInstance()->locateFile(vPath);
@@ -30,22 +30,19 @@ void CTexture2D::load(const char* vPath, GLint vWrapMode /*= GL_CLAMP*/, GLint v
 	stbi_set_flip_vertically_on_load(vFlipVertically);
 
 	int Width, Height, Channels;
-	unsigned char* pImageData = nullptr;
+	unsigned char* pImageData = stbi_load(m_FilePath.c_str(), &Width, &Height, &Channels, 0);
 
 	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
 
-	switch (vFormat)
+	switch (Channels)
 	{
-	case GL_RED:
-		pImageData = stbi_load(m_FilePath.c_str(), &Width, &Height, &Channels, STBI_grey);
+	case 1:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, Width, Height, 0, GL_RED, GL_UNSIGNED_BYTE, pImageData);
 		break;
-	case GL_RGB:
-		pImageData = stbi_load(m_FilePath.c_str(), &Width, &Height, &Channels, STBI_rgb);
+	case 3:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, pImageData);
 		break;
-	case GL_RGBA:
-		pImageData = stbi_load(m_FilePath.c_str(), &Width, &Height, &Channels, STBI_rgb_alpha);
+	case 4:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pImageData);
 		break;
 	default:

@@ -20,6 +20,8 @@ std::unordered_map<std::string, CModel*> CModel::m_ExsitedModelMap;
 //FUNCTION:
 CModel::CModel(const std::string& vFilePath)
 {
+	m_pImporter = std::make_shared<Assimp::Importer>();
+	m_pBoneInfo = std::make_shared<std::vector<SBoneInfo>>();
 	if (!__loadModel(vFilePath))
 	{
 		_OUTPUT_WARNING(format("Failed to load model at %s.", vFilePath.c_str()));
@@ -47,15 +49,14 @@ bool CModel::__loadModel(const std::string& vPath)
 		else { *this = *m_ExsitedModelMap[FilePath]; return true; }
 	}
 
-	Assimp::Importer LocImporter;
-	m_pScene = LocImporter.ReadFile(FilePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
+	m_pScene = m_pImporter->ReadFile(FilePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
 
 	if (!m_pScene || m_pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !m_pScene->mRootNode) { return false; }
 	m_GlobalInverseTransform = aiMatrix4x4ToGlm(&(m_pScene->mRootNode->mTransformation));
 	glm::inverse(m_GlobalInverseTransform);
 
 	m_Directory = FilePath.substr(0, FilePath.find_last_of('/'));
-	__processNode(m_pScene->mRootNode, m_pScene);
+	__processNode(m_pScene->mRootNode);
 
 	m_ExsitedModelMap.insert(std::make_pair(FilePath, this));
 
@@ -64,23 +65,23 @@ bool CModel::__loadModel(const std::string& vPath)
 
 //**********************************************************************************************
 //FUNCTION:
-void CModel::__processNode(const aiNode* vNode, const aiScene* vScene)
+void CModel::__processNode(const aiNode* vNode)
 {
 	for (GLuint i = 0; i < vNode->mNumMeshes; ++i)
 	{
-		aiMesh* mesh = vScene->mMeshes[vNode->mMeshes[i]];
-		m_Meshes.push_back(__processMesh(mesh, vScene));
+		aiMesh* mesh = m_pScene->mMeshes[vNode->mMeshes[i]];
+		m_Meshes.push_back(__processMesh(mesh));
 	}
 
 	for (GLuint i = 0; i < vNode->mNumChildren; ++i)
 	{
-		__processNode(vNode->mChildren[i], vScene);
+		__processNode(vNode->mChildren[i]);
 	}
 }
 
 //**********************************************************************************************
 //FUNCTION:
-std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh, const aiScene* vScene)
+std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh)
 {
 	std::vector<SVertex> Vertices(vMesh->mNumVertices);
 	std::vector<unsigned> Indices(3u * vMesh->mNumFaces);
@@ -107,8 +108,8 @@ std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh, const aiScene*
 		{
 			BoneIndex = m_NumBones;
 			m_NumBones++;
-			m_BoneInfo.push_back(SBoneInfo());
-			m_BoneInfo[BoneIndex].BoneOffset = aiMatrix4x4ToGlm(&(vMesh->mBones[i]->mOffsetMatrix));
+			m_pBoneInfo->push_back(SBoneInfo());
+			(*m_pBoneInfo)[BoneIndex].BoneOffset = aiMatrix4x4ToGlm(&(vMesh->mBones[i]->mOffsetMatrix));
 			m_BoneName2IndexMap[BoneName] = BoneIndex;
 		}
 		else
@@ -144,7 +145,7 @@ std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh, const aiScene*
 
 	if (vMesh->mMaterialIndex >= 0)
 	{
-		aiMaterial* pMaterial = vScene->mMaterials[vMesh->mMaterialIndex];
+		aiMaterial* pMaterial = m_pScene->mMaterials[vMesh->mMaterialIndex];
 
 		std::vector<std::shared_ptr<CTexture2D>> DiffuseMaps = __loadMaterialTextures(pMaterial, aiTextureType_DIFFUSE, "uMaterialDiffuse");
 		Textures.insert(Textures.end(), DiffuseMaps.begin(), DiffuseMaps.end());
@@ -181,7 +182,7 @@ std::vector<std::shared_ptr<CTexture2D>> CModel::__loadMaterialTextures(const ai
 			auto TexturePath = this->m_Directory + std::string("/") + std::string(Str.C_Str());
 
 			std::shared_ptr<CTexture2D> pTempTexture = std::make_shared<CTexture2D>();
-			pTempTexture->load(TexturePath.c_str(), GL_REPEAT, GL_LINEAR, GL_RGBA);
+			pTempTexture->load(TexturePath.c_str(), GL_REPEAT, GL_LINEAR);
 			pTempTexture->setTextureName(vTypeName);
 			Textures.push_back(pTempTexture);
 			this->m_LoadedTextures.push_back(pTempTexture);
@@ -202,23 +203,24 @@ void CModel::_draw(const CShaderProgram& vShaderProgram) const
 
 //***********************************************************************************************
 //FUNCTION:
-void CModel::__boneTransform(float vTimeInSeconds, std::vector<glm::mat4>& voTransforms)
+void CModel::_boneTransform(float vTimeInSeconds, std::vector<glm::mat4>& voTransforms) const
 {
 	glm::mat4 Identity = glm::identity<glm::mat4>();
+	_ASSERTE(m_pScene->HasAnimations());
 
 	float TicksPerSecond = m_pScene->mAnimations[0]->mTicksPerSecond != 0 ? m_pScene->mAnimations[0]->mTicksPerSecond : 25.0f;
 	float TimeInTicks = vTimeInSeconds * TicksPerSecond;
-	float AnimationTime = fmod(TimeInTicks, m_pScene->mAnimations[0]->mDuration);
+	float AnimationTime = std::fmod(TimeInTicks, m_pScene->mAnimations[0]->mDuration);
 
 	__readNodeHeirarchy(AnimationTime, m_pScene->mRootNode, Identity);
 
 	voTransforms.resize(m_NumBones);
-	for (unsigned i = 0; i < m_NumBones; i++) voTransforms[i] = m_BoneInfo[i].FinalTransformation;
+	for (unsigned i = 0; i < m_NumBones; i++) voTransforms[i] = (*m_pBoneInfo)[i].FinalTransformation;
 }
 
 //***********************************************************************************************
 //FUNCTION:
-void CModel::__readNodeHeirarchy(float vAnimationTime, const aiNode* vNode, const glm::mat4& vParentTransform)
+void CModel::__readNodeHeirarchy(float vAnimationTime, const aiNode* vNode, const glm::mat4& vParentTransform) const
 {
 	std::string NodeName(vNode->mName.data);
 
@@ -253,8 +255,8 @@ void CModel::__readNodeHeirarchy(float vAnimationTime, const aiNode* vNode, cons
 
 	if (m_BoneName2IndexMap.find(NodeName) != m_BoneName2IndexMap.end())
 	{
-		unsigned BoneIndex = m_BoneName2IndexMap[NodeName];
-		m_BoneInfo[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation * m_BoneInfo[BoneIndex].BoneOffset;
+		unsigned BoneIndex = m_BoneName2IndexMap.at(NodeName);
+		(*m_pBoneInfo)[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation * (*m_pBoneInfo)[BoneIndex].BoneOffset;
 	}
 
 	for (unsigned i = 0; i < vNode->mNumChildren; ++i)
@@ -263,7 +265,7 @@ void CModel::__readNodeHeirarchy(float vAnimationTime, const aiNode* vNode, cons
 
 //***********************************************************************************************
 //FUNCTION:
-const aiNodeAnim* CModel::__findNodeAnim(const aiAnimation* vAnimation, const std::string vNodeName)
+const aiNodeAnim* CModel::__findNodeAnim(const aiAnimation* vAnimation, const std::string vNodeName) const
 {
 	for (unsigned i = 0; i < vAnimation->mNumChannels; i++)
 	{
@@ -275,7 +277,7 @@ const aiNodeAnim* CModel::__findNodeAnim(const aiAnimation* vAnimation, const st
 
 //***********************************************************************************************
 //FUNCTION:
-void CModel::__calcInterpolatedPosition(aiVector3D& voVector, float vAnimationTime, const aiNodeAnim* vNodeAnim)
+void CModel::__calcInterpolatedPosition(aiVector3D& voVector, float vAnimationTime, const aiNodeAnim* vNodeAnim) const
 {
 	if (vNodeAnim->mNumPositionKeys == 1)
 	{
@@ -297,7 +299,7 @@ void CModel::__calcInterpolatedPosition(aiVector3D& voVector, float vAnimationTi
 
 //***********************************************************************************************
 //FUNCTION:
-void CModel::__calcInterpolatedScaling(aiVector3D& voVector, float vAnimationTime, const aiNodeAnim* vNodeAnim)
+void CModel::__calcInterpolatedScaling(aiVector3D& voVector, float vAnimationTime, const aiNodeAnim* vNodeAnim) const
 {
 	if (vNodeAnim->mNumScalingKeys == 1)
 	{
@@ -319,7 +321,7 @@ void CModel::__calcInterpolatedScaling(aiVector3D& voVector, float vAnimationTim
 
 //***********************************************************************************************
 //FUNCTION:
-void CModel::__calcInterpolatedRotation(aiQuaternion& voQuaternion, float vAnimationTime, const aiNodeAnim* vNodeAnim)
+void CModel::__calcInterpolatedRotation(aiQuaternion& voQuaternion, float vAnimationTime, const aiNodeAnim* vNodeAnim) const
 {
 	// we need at least two values to interpolate...
 	if (vNodeAnim->mNumRotationKeys == 1)
@@ -342,7 +344,7 @@ void CModel::__calcInterpolatedRotation(aiQuaternion& voQuaternion, float vAnima
 
 //***********************************************************************************************
 //FUNCTION:
-unsigned CModel::__findRotation(float vAnimationTime, const aiNodeAnim* vNodeAnim)
+unsigned CModel::__findRotation(float vAnimationTime, const aiNodeAnim* vNodeAnim) const
 {
 	_ASSERTE(vNodeAnim->mNumRotationKeys > 0);
 
@@ -355,7 +357,7 @@ unsigned CModel::__findRotation(float vAnimationTime, const aiNodeAnim* vNodeAni
 
 //***********************************************************************************************
 //FUNCTION:
-unsigned CModel::__findPosition(float vAnimationTime, const aiNodeAnim* vNodeAnim)
+unsigned CModel::__findPosition(float vAnimationTime, const aiNodeAnim* vNodeAnim) const
 {
 	_ASSERTE(vNodeAnim->mNumPositionKeys > 0);
 
@@ -368,7 +370,7 @@ unsigned CModel::__findPosition(float vAnimationTime, const aiNodeAnim* vNodeAni
 
 //***********************************************************************************************
 //FUNCTION:
-unsigned CModel::__findScaling(float vAnimationTime, const aiNodeAnim* vNodeAnim)
+unsigned CModel::__findScaling(float vAnimationTime, const aiNodeAnim* vNodeAnim) const
 {
 	_ASSERTE(vNodeAnim->mNumScalingKeys > 0);
 

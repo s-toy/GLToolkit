@@ -14,7 +14,7 @@
 #include "InputManager.h"
 #include "CpuTimer.h"
 
-#define USING_ALL_METHODS
+#define USING_MOMENT_BASED_OIT
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -351,9 +351,10 @@ private:
 		};
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_2 (COLLAborative Design Activity)).dae"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.4);
+		//m_OpaqueModels.push_back(std::make_shared<CModel>("C:\\Users\\admin\\Desktop\\ogldev-source\\Content\\boblampclean.md5mesh"));
+		m_OpaqueModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae"));
+		m_OpaqueModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		//m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.4);
 	}
 
 	void __initTexturesAndBuffers()
@@ -421,7 +422,7 @@ private:
 		if (m_pSkybox) CRenderer::getInstance()->drawSkybox(*m_pSkybox, 0);
 
 		//draw opaque objects
-		CRenderer::getInstance()->draw(m_OpaqueModels, *m_pOpaqueShaderProgram);
+		if (!m_OpaqueModels.empty()) CRenderer::getInstance()->draw(m_OpaqueModels, *m_pOpaqueShaderProgram);
 		m_pOpaqueFrameBuffer->unbind();
 	}
 
@@ -635,7 +636,7 @@ private:
 	std::shared_ptr<CTexture2D>		m_pTransparencyColorTex;
 
 #ifdef USING_ALL_METHODS
-	EOITMethod m_OITMethod = EOITMethod::LINKED_LIST_OIT;
+	EOITMethod m_OITMethod = EOITMethod::MOMENT_BASE_OIT;
 #endif
 
 #ifdef USING_MOMENT_BASED_OIT

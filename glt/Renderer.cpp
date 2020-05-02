@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
@@ -126,10 +127,14 @@ void CRenderer::__drawSingleModel(const CModel& vModel, const CShaderProgram& vS
 	auto ModelMatrix = glm::translate(glm::mat4(1.0), vModel.getPosition());
 	ModelMatrix = glm::scale(ModelMatrix, vModel.getScale());
 	vShaderProgram.updateUniformMat4("uModelMatrix", ModelMatrix);
-	vShaderProgram.updateUniform1i("uHasBones", vModel._hasBones());
+	//vShaderProgram.updateUniform1i("uHasBones", vModel._hasBones());
 
-	std::vector<glm::mat4> Transforms;
-	//vModel.__boneTransform(0.0, Transforms);
+	if (vModel._hasBones())
+	{
+		std::vector<glm::mat4> Transforms;
+		vModel._boneTransform(m_Time, Transforms);
+		glUniformMatrix4fv(glGetUniformLocation(vShaderProgram.getProgramID(), "uBonesMatrix"), Transforms.size(), GL_FALSE, glm::value_ptr(Transforms[0]));
+	}
 
 	vModel._draw(vShaderProgram);
 }

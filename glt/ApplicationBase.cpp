@@ -60,6 +60,7 @@ void glt::CApplicationBase::run()
 		while (!glfwWindowShouldClose(_pWindow->getGLFWWindow()))
 		{
 			_updateV();
+			CRenderer::getInstance()->_setTime(getTime());
 			CRenderer::getInstance()->update();
 
 			_renderV();
