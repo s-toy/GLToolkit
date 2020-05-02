@@ -182,7 +182,7 @@
     <None Include="shaders\WBOIT_weighted_blending.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shaders\MomentMath.glsl" />
+    <ClInclude Include="shaders\MomentMath.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

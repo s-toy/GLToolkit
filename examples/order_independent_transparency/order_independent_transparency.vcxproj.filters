@@ -91,7 +91,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shaders\MomentMath.glsl">
+    <ClInclude Include="shaders\MomentMath.frag">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </ClInclude>
   </ItemGroup>

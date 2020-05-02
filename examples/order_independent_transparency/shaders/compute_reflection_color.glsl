@@ -4,8 +4,8 @@ vec3 computeReflectColor()
 	vec3 NormalW = normalize(_inNormalW);
 
 	SMaterial Material;
-	Material.Diffuse = uDiffuseColor; //texture(uMaterialDiffuse, _inTexCoord).rgb;
-	Material.Specular = vec3(0.0); // texture(uMaterialSpecular, _inTexCoord).rgb;
+	Material.Diffuse = texture(uMaterialDiffuse, _inTexCoord).rgb;
+	Material.Specular = texture(uMaterialSpecular, _inTexCoord).rgb;
 	Material.Shinness = 32.0;
 
 	vec3 color = vec3(0.0);
