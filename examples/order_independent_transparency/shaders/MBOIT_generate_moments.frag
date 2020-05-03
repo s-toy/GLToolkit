@@ -1,4 +1,5 @@
 #version 430 core
+#include "reconstruction_strategy.glsl"
 
 uniform sampler2D   uOpaqueDepthTex;
 uniform float		uCoverage;
@@ -22,5 +23,7 @@ void main()
 
 	_outMomentB0 = absorbance;
 	_outMoments = vec4(depth, depth_pow2, depth_pow2 * depth, depth_pow4) * absorbance;
-	_outExtraMoments = vec4(depth*depth_pow4, depth_pow6, depth*depth_pow6, depth_pow2*depth_pow6) * absorbance;
+
+	if (uReconstructionStrategy == POWER_MOMENT_6 || uReconstructionStrategy == POWER_MOMENT_8)
+		_outExtraMoments = vec4(depth*depth_pow4, depth_pow6, depth*depth_pow6, depth_pow2*depth_pow6) * absorbance;
 }

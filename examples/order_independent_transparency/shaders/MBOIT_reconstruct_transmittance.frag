@@ -1,12 +1,7 @@
 #version 430 core
-#include "MomentMath.glsl"
+#include "moment_math.glsl"
 #include "compute_phong_shading.glsl"
-
-#define POWER_MOMENT_4		0
-#define POWER_MOMENT_6		1
-#define POWER_MOMENT_8		2
-
-uniform int uReconstructionStrategy = POWER_MOMENT_4;
+#include "reconstruction_strategy.glsl"
 
 uniform sampler2D	uMaterialDiffuse;
 uniform sampler2D	uMaterialSpecular;

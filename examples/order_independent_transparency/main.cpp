@@ -14,7 +14,7 @@
 #include "InputManager.h"
 #include "CpuTimer.h"
 
-#define USING_ALL_METHODS
+#define USING_MOMENT_BASED_OIT
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -157,7 +157,7 @@ private:
 	{
 		CCPUTimer timer;
 		timer.start();
-		__initScene04();
+		__initScene01();
 		timer.stop();
 		_OUTPUT_EVENT(format("Total time: %f", timer.getElapsedTimeInMS()));
 	}
@@ -525,6 +525,7 @@ private:
 		m_pGenerateMomentShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pGenerateMomentShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		m_pGenerateMomentShaderProgram->updateUniform1i("uReconstructionStrategy", m_ReconstructionStrategy);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -554,6 +555,10 @@ private:
 		m_pMomentsTex->bindV(4);
 		m_pExtraMomentsTex->bindV(5);
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
+		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentsTex", m_pMomentsTex.get());
+		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uExtraMomentsTex", m_pExtraMomentsTex.get());
+		m_pReconstructTransmittanceShaderProgram->updateUniform1i("uReconstructionStrategy", m_ReconstructionStrategy);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -561,10 +566,6 @@ private:
 			m_pReconstructTransmittanceShaderProgram->bind();
 			m_pReconstructTransmittanceShaderProgram->updateUniform3f("uDiffuseColor", Material.diffuse);
 			m_pReconstructTransmittanceShaderProgram->updateUniform1f("uCoverage", Material.coverage);
-			m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
-			m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentsTex", m_pMomentsTex.get());
-			m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uExtraMomentsTex", m_pExtraMomentsTex.get());
-			m_pReconstructTransmittanceShaderProgram->updateUniform1i("uReconstructionStrategy", m_ReconstructionStrategy);
 			CRenderer::getInstance()->draw(*Model, *m_pReconstructTransmittanceShaderProgram);
 		}
 

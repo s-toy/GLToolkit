@@ -1,4 +1,4 @@
-#include "ComplexAlgebra.glsl"
+#include "complex_algebra.glsl"
 
 /*! This utility function turns a point on the unit circle into a scalar 
 	parameter. It is guaranteed to grow monotonically for (cos(phi),sin(phi)) 

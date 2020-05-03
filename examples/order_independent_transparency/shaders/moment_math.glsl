@@ -1,4 +1,4 @@
-#include "TrigonometricMomentMath.glsl"
+#include "trigonometric_moment_math.glsl"
 
 /*! Given coefficients of a quadratic polynomial A*x^2+B*x+C, this function	
 	outputs its two real roots.*/
