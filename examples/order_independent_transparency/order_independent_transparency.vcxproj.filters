@@ -92,13 +92,13 @@
     <None Include="shaders\HLSL_to_GLSL.glsl">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="shaders\reconstruction_strategy.glsl">
-      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
-    </None>
     <None Include="shaders\trigonometric_moment_math.glsl">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
     <None Include="shaders\complex_algebra.glsl">
+      <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
+    </None>
+    <None Include="shaders\reconstruction_config.glsl">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
   </ItemGroup>

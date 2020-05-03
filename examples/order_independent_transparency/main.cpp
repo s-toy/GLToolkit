@@ -95,12 +95,6 @@ protected:
 		else if (KeyStatus[GLFW_KEY_B]) m_OITMethod = EOITMethod::WEIGHTED_BLENDED_OIT;
 #endif
 
-#ifdef USING_MOMENT_BASED_OIT
-		if (KeyStatus[GLFW_KEY_4]) m_ReconstructionStrategy = 0;
-		else if (KeyStatus[GLFW_KEY_6]) m_ReconstructionStrategy = 1;
-		else if (KeyStatus[GLFW_KEY_8]) m_ReconstructionStrategy = 2;
-#endif
-
 #ifdef USING_WEIGHTED_BLENDED_OIT
 		if (KeyStatus[GLFW_KEY_0]) m_WeightingStrategy = 0;
 		else if (KeyStatus[GLFW_KEY_1]) m_WeightingStrategy = 1;
@@ -525,7 +519,6 @@ private:
 		m_pGenerateMomentShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pGenerateMomentShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-		m_pGenerateMomentShaderProgram->updateUniform1i("uReconstructionStrategy", m_ReconstructionStrategy);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -558,7 +551,6 @@ private:
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentsTex", m_pMomentsTex.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uExtraMomentsTex", m_pExtraMomentsTex.get());
-		m_pReconstructTransmittanceShaderProgram->updateUniform1i("uReconstructionStrategy", m_ReconstructionStrategy);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -662,8 +654,6 @@ private:
 	std::shared_ptr<CTexture2D>		m_pMomentB0Tex;
 	std::shared_ptr<CTexture2D>		m_pMomentsTex;
 	std::shared_ptr<CTexture2D>		m_pExtraMomentsTex;
-
-	int m_ReconstructionStrategy = 0;
 #endif
 
 #ifdef USING_WEIGHTED_BLENDED_OIT
