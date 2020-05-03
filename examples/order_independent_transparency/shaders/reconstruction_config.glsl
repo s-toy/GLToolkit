@@ -1,3 +1,3 @@
-#define NUM_MOMENTS			8
+#define NUM_MOMENTS			4
 #define SINGLE_PRECISION	1	//TODO
 #define TRIGONOMETRIC		0

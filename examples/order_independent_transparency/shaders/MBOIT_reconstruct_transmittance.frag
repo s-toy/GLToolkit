@@ -53,7 +53,7 @@ void main()
 	trig_b[1] = b_tmp.zw;
 	trig_b[0] /= b_0;
 	trig_b[1] /= b_0;
-	float moment_bias = 4e-7;
+	float moment_bias = 4e-4;
 	transmittance_at_depth = computeTransmittanceAtDepthFrom2TrigonometricMoments(b_0, trig_b, depth, moment_bias, overestimation, uWrappingZoneParameters);
  #endif
 #elif NUM_MOMENTS == 6
@@ -77,7 +77,7 @@ void main()
 	trig_b[0] /= b_0;
 	trig_b[1] /= b_0;
 	trig_b[2] /= b_0;
-	float moment_bias = 8e-7;
+	float moment_bias = 2e-4;
 	transmittance_at_depth = computeTransmittanceAtDepthFrom3TrigonometricMoments(b_0, trig_b, depth, moment_bias, overestimation, uWrappingZoneParameters);
  #endif
 #elif NUM_MOMENTS == 8
@@ -103,7 +103,7 @@ void main()
 	trig_b[1] /= b_0;
 	trig_b[2] /= b_0;
 	trig_b[3] /= b_0;
-	float moment_bias = 1.5e-6;
+	float moment_bias = 2e-4;
 	transmittance_at_depth = computeTransmittanceAtDepthFrom4TrigonometricMoments(b_0, trig_b, depth, moment_bias, overestimation, uWrappingZoneParameters);
  #endif
 #endif

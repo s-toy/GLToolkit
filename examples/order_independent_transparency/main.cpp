@@ -1,6 +1,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <cmath>
 #include <glm/glm.hpp>
 #include "ApplicationBase.h"
 #include "ShaderProgram.h"
@@ -14,7 +15,11 @@
 #include "InputManager.h"
 #include "CpuTimer.h"
 
-#define USING_MOMENT_BASED_OIT
+#ifndef M_PI
+#define M_PI 3.14159265358979323f
+#endif
+
+#define USING_ALL_METHODS
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -73,6 +78,7 @@ protected:
 		__initShaders();
 		__initScenes();
 		__initTexturesAndBuffers();
+		__extraInit();
 
 		CRenderer::getInstance()->fetchCamera()->setPosition(glm::dvec3(0, 0, 4));
 
@@ -151,7 +157,7 @@ private:
 	{
 		CCPUTimer timer;
 		timer.start();
-		__initScene01();
+		__initScene04();
 		timer.stop();
 		_OUTPUT_EVENT(format("Total time: %f", timer.getElapsedTimeInMS()));
 	}
@@ -420,6 +426,15 @@ private:
 #endif
 	}
 
+	void __extraInit()
+	{
+#ifdef USING_MOMENT_BASED_OIT
+		float Temp[4];
+		__computeWrappingZoneParameters(Temp);
+		m_WrappingZoneParameters = glm::vec4(Temp[0], Temp[1], Temp[2], Temp[3]);
+#endif
+	}
+
 	void __drawOpaqueObjects()
 	{
 		//draw skybox
@@ -519,6 +534,7 @@ private:
 		m_pGenerateMomentShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pGenerateMomentShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		m_pGenerateMomentShaderProgram->updateUniform4f("uWrappingZoneParameters", m_WrappingZoneParameters);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -551,6 +567,7 @@ private:
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentsTex", m_pMomentsTex.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uExtraMomentsTex", m_pExtraMomentsTex.get());
+		m_pReconstructTransmittanceShaderProgram->updateUniform4f("uWrappingZoneParameters", m_WrappingZoneParameters);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -579,6 +596,37 @@ private:
 		m_pMBOITMergeColorShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pMBOITMergeColorShaderProgram);
+	}
+
+	//code from http://momentsingraphics.de/MissingTMBOITCode.html
+	float __circleToParameter(float vAngle, float* voMaxParameter = nullptr) 
+	{
+		float x = std::cos(vAngle);
+		float y = std::sin(vAngle);
+		float result = std::abs(y) - std::abs(x);
+		result = (x < 0.0f) ? (2.0f - result) : result;
+		result = (y < 0.0f) ? (6.0f - result) : result;
+		result += (vAngle >= 2.0f * M_PI) ? 8.0f : 0.0f;
+		if (voMaxParameter) {
+			(*voMaxParameter) = 7.0f;
+		}
+		return result;
+	}
+
+	void __computeWrappingZoneParameters(float voWrappingZoneParameters[4], float vNewWrappingZoneAngle = 0.1f * M_PI) 
+	{
+		voWrappingZoneParameters[0] = vNewWrappingZoneAngle;
+		voWrappingZoneParameters[1] = M_PI - 0.5f * vNewWrappingZoneAngle;
+		if (vNewWrappingZoneAngle <= 0.0f) {
+			voWrappingZoneParameters[2] = 0.0f;
+			voWrappingZoneParameters[3] = 0.0f;
+		}
+		else {
+			float zone_end_parameter;
+			float zone_begin_parameter = __circleToParameter(2.0f * M_PI - vNewWrappingZoneAngle, &zone_end_parameter);
+			voWrappingZoneParameters[2] = 1.0f / (zone_end_parameter - zone_begin_parameter);
+			voWrappingZoneParameters[3] = 1.0f - zone_end_parameter * voWrappingZoneParameters[2];
+		}
 	}
 #endif
 
@@ -654,6 +702,7 @@ private:
 	std::shared_ptr<CTexture2D>		m_pMomentB0Tex;
 	std::shared_ptr<CTexture2D>		m_pMomentsTex;
 	std::shared_ptr<CTexture2D>		m_pExtraMomentsTex;
+	glm::vec4	m_WrappingZoneParameters;
 #endif
 
 #ifdef USING_WEIGHTED_BLENDED_OIT
