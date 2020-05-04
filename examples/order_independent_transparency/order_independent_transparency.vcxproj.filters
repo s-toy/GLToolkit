@@ -28,6 +28,9 @@
     <Filter Include="Resource Files\shaders\Common">
       <UniqueIdentifier>{817b7d45-b5e5-4ba2-a9b4-6203c3765baa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\scenes">
+      <UniqueIdentifier>{ee5756ae-810a-4234-8953-a9ec5f05c45e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -100,6 +103,15 @@
     </None>
     <None Include="shaders\reconstruction_config.glsl">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
+    </None>
+    <None Include="scene_03.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="scene_01.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="scene_02.json">
+      <Filter>Resource Files\scenes</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

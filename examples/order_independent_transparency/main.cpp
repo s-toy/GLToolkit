@@ -14,6 +14,7 @@
 #include "FileLocator.h"
 #include "InputManager.h"
 #include "CpuTimer.h"
+#include "Scene.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323f
@@ -76,7 +77,7 @@ protected:
 		CFileLocator::getInstance()->addFileSearchPath("../../resource");
 
 		__initShaders();
-		__initScenes();
+		__initScene();
 		__initTexturesAndBuffers();
 		__extraInit();
 
@@ -153,221 +154,32 @@ private:
 #endif
 	}
 
-	void __initScenes()
+	void __initScene()
 	{
 		CCPUTimer timer;
 		timer.start();
-		__initScene04();
+
+		std::vector<std::string> Faces = {
+			"textures/skybox/right.jpg",
+			"textures/skybox/left.jpg",
+			"textures/skybox/top.jpg",
+			"textures/skybox/bottom.jpg",
+			"textures/skybox/front.jpg",
+			"textures/skybox/back.jpg"
+		};
+		m_pSkybox = std::make_unique<CSkybox>(Faces);
+
+		m_Scene.load("scene_03.json");
+		m_OpaqueModels = m_Scene.getModelGroup("opaqueModels");
+		m_TransparentModels = m_Scene.getModelGroup("transparentModels");
+		for (auto pModel : m_TransparentModels)
+		{
+			glm::vec4 Params = pModel->getParameters();
+			m_Model2MaterialMap[pModel] = SMaterial(glm::vec3(Params.x, Params.y, Params.z), Params.w);
+		}
+
 		timer.stop();
 		_OUTPUT_EVENT(format("Total time: %f", timer.getElapsedTimeInMS()));
-	}
-
-	void __initScene01()
-	{
-		std::vector<std::string> Faces = {
-			"textures/skybox/right.jpg",
-			"textures/skybox/left.jpg",
-			"textures/skybox/top.jpg",
-			"textures/skybox/bottom.jpg",
-			"textures/skybox/front.jpg",
-			"textures/skybox/back.jpg"
-		};
-		m_pSkybox = std::make_unique<CSkybox>(Faces);
-
-		//opaque
-		m_OpaqueModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
-		m_OpaqueModels.back()->setPosition(glm::vec3(1.0f, -1.5f, -0.5f));
-		m_OpaqueModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-
-		m_OpaqueModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
-		m_OpaqueModels.back()->setPosition(glm::vec3(-1.0f, -1.5f, -0.5f));
-		m_OpaqueModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-
-		//right
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, -1.5f, -1.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), 0.2 };
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, -1.5f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), 0.8 };
-
-		//middle
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, -1.5f, -1.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), 0.5 };
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, -1.5f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), 0.5 };
-
-		//left
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, -1.5f, -1.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.6), 0.9 };
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/nanosuit/nanosuit.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, -1.5f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial{ glm::vec3(0.0, 0.0, 0.6), 0.1 };
-	}
-
-	void __initScene02()
-	{
-		std::vector<std::string> Faces = {
-			"textures/skybox/right.jpg",
-			"textures/skybox/left.jpg",
-			"textures/skybox/top.jpg",
-			"textures/skybox/bottom.jpg",
-			"textures/skybox/front.jpg",
-			"textures/skybox/back.jpg"
-		};
-		m_pSkybox = std::make_unique<CSkybox>(Faces);
-
-		//middle
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 1.0);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -0.5f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.5, 0.0), 1.0);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 1.0);
-
-		//left
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, -1.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.8);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, -0.5f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.5, 0.0), 0.5);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 0.2);
-
-		//right
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, -1.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.2);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, -0.5f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.5, 0.0), 0.5);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 0.8);
-	}
-
-	void __initScene03()
-	{
-		std::vector<std::string> Faces = {
-			"textures/skybox/right.jpg",
-			"textures/skybox/left.jpg",
-			"textures/skybox/top.jpg",
-			"textures/skybox/bottom.jpg",
-			"textures/skybox/front.jpg",
-			"textures/skybox/back.jpg"
-		};
-		m_pSkybox = std::make_unique<CSkybox>(Faces);
-
-		//middle
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -0.02f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 1.0);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, -0.01f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.5, 0.0), 1.0);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 1.0);
-
-		//left
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, -0.02f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.8);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, -0.01f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.5, 0.0), 0.5);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 0.2);
-
-		//right
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, -0.02f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5), 0.2);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, -0.01f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.5, 0.0), 0.5);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/plane/plane.obj"));
-		m_TransparentModels.back()->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 0.8);
-	}
-
-	void __initScene04()
-	{
-		std::vector<std::string> Faces = {
-			"textures/skybox/right.jpg",
-			"textures/skybox/left.jpg",
-			"textures/skybox/top.jpg",
-			"textures/skybox/bottom.jpg",
-			"textures/skybox/front.jpg",
-			"textures/skybox/back.jpg"
-		};
-		m_pSkybox = std::make_unique<CSkybox>(Faces);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae"));
-		m_TransparentModels.back()->setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
-		m_TransparentModels.back()->setRotation(1.57, glm::vec3(1.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.5, 0.0), 0.2);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae"));
-		m_TransparentModels.back()->setPosition(glm::vec3(1.15f, -1.0f, -2.0f));
-		m_TransparentModels.back()->setRotation(1.57, glm::vec3(1.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.5, 0.0, 0.0), 0.5);
-
-		m_TransparentModels.push_back(std::make_shared<CModel>("models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae"));
-		m_TransparentModels.back()->setPosition(glm::vec3(-1.15f, -1.0f, -2.0f));
-		m_TransparentModels.back()->setRotation(1.57, glm::vec3(1.0f, 0.0f, 0.0f));
-		m_TransparentModels.back()->setScale(glm::vec3(0.6));
-		m_Model2MaterialMap[m_TransparentModels.back()] = SMaterial(glm::vec3(0.0, 0.0, 0.5), 0.8);
 	}
 
 	void __initTexturesAndBuffers()
@@ -682,6 +494,7 @@ private:
 	std::vector<std::shared_ptr<CModel>>			m_OpaqueModels;
 	std::vector<std::shared_ptr<CModel>>			m_TransparentModels;
 	std::map<std::shared_ptr<CModel>, SMaterial>	m_Model2MaterialMap;
+	CScene m_Scene;
 
 	std::unique_ptr<CShaderProgram> m_pOpaqueShaderProgram;
 	std::unique_ptr<CFrameBuffer>	m_pOpaqueFrameBuffer;

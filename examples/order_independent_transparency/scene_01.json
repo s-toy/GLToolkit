@@ -1,0 +1,58 @@
+{
+  "skybox": {
+    "filePath": ""
+  },
+
+  "models": {
+    "opaqueModels": [
+      {
+        "filePath": "models/nanosuit/nanosuit.obj",
+        "position": [ 1.0, -1.5, -0.5 ],
+        "scale": [ 0.2, 0.2, 0.2 ]
+      },
+      {
+        "filePath": "models/nanosuit/nanosuit.obj",
+        "position": [ -1.0, -1.5, -0.5 ],
+        "scale": [ 0.2, 0.2, 0.2 ]
+      }
+    ],
+    "transparentModels": [
+      {
+        "filePath": "models/nanosuit/nanosuit.obj",
+        "position": [ 2.0, -1.5, -1.0 ],
+        "scale": [ 0.2, 0.2, 0.2 ],
+        "parameters": [ 0.6, 0.6, 0.6, 0.2 ]
+      },
+      {
+        "filePath": "models/nanosuit/nanosuit.obj",
+        "position": [ 2.0, -1.5, 0.0 ],
+        "scale": [ 0.2, 0.2, 0.2 ],
+        "parameters": [ 0.0, 0.0, 0.6, 0.8 ]
+      },
+      {
+        "filePath": "models/nanosuit/nanosuit.obj",
+        "position": [ 0.0, -1.5, -1.0 ],
+        "scale": [ 0.2, 0.2, 0.2 ],
+        "parameters": [ 0.6, 0.6, 0.6, 0.5 ]
+      },
+      {
+        "filePath": "models/nanosuit/nanosuit.obj",
+        "position": [ 0.0, -1.5, 0.0 ],
+        "scale": [ 0.2, 0.2, 0.2 ],
+        "parameters": [ 0.0, 0.0, 0.6, 0.5 ]
+      },
+      {
+        "filePath": "models/nanosuit/nanosuit.obj",
+        "position": [ -2.0, -1.5, -1.0 ],
+        "scale": [ 0.2, 0.2, 0.2 ],
+        "parameters": [ 0.6, 0.6, 0.6, 0.9 ]
+      },
+      {
+        "filePath": "models/nanosuit/nanosuit.obj",
+        "position": [ -2.0, -1.5, 0.0 ],
+        "scale": [ 0.2, 0.2, 0.2 ],
+        "parameters": [ 0.0, 0.0, 0.6, 0.1 ]
+      }
+    ]
+  }
+}
