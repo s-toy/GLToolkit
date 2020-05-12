@@ -169,7 +169,7 @@ private:
 		};
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
-		m_Scene.load("scene_03.json");
+		m_Scene.load("scene_02.json");
 		m_OpaqueModels = m_Scene.getModelGroup("opaqueModels");
 		m_TransparentModels = m_Scene.getModelGroup("transparentModels");
 		for (auto pModel : m_TransparentModels)

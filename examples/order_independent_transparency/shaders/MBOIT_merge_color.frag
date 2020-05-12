@@ -13,6 +13,7 @@ void main()
 
 	float totalTransmittance = exp(-b0);
 	vec3 finalColor = mix(translucentColor.rgb / (translucentColor.a + 1e-5), opaqueColor, totalTransmittance);
+	//vec3 finalColor = totalTransmittance * opaqueColor + translucentColor.rgb;
 
 	gl_FragColor = vec4(finalColor, 1.0);
 }

@@ -75,12 +75,20 @@ void main()
 	vec3 color = vec3(0.0);
 	vec3 totalTransmittance = vec3(1.0);
 
+//	for (int i = 0; i < counter; i++)
+//	{
+//		vec4 c = unpackColor(fragments[i].packedColor);
+//		vec3 t = unpackColor(fragments[i].transmittance).rgb;
+//		totalTransmittance *= (1.0 - c.a + c.a * t);
+//		color = (1.0 - c.a) * color + c.a * (c.rgb + t * color);
+//	}
+
 	for (int i = 0; i < counter; i++)
 	{
 		vec4 c = unpackColor(fragments[i].packedColor);
-		vec3 t = unpackColor(fragments[i].transmittance).rgb;
-		totalTransmittance *= (1.0 - c.a + c.a * t);
-		color = (1.0 - c.a) * color + c.a * (c.rgb + t * color);
+		float t = i%2==0 ? exp(-20*abs(fragments[i].depth-fragments[i+1].depth)) : 1.0;
+		totalTransmittance *= t;
+		color = c.rgb + color * t;
 	}
 	
 	_outFragColor = vec4(color, totalTransmittance);

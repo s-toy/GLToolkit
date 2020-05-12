@@ -113,6 +113,9 @@
     <None Include="scene_02.json">
       <Filter>Resource Files\scenes</Filter>
     </None>
+    <None Include="scene_04.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\moment_math.glsl">
