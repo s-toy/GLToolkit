@@ -1,7 +1,7 @@
 #version 430 core
 #include "skeletal_animation_input.glsl"
 
-layout(location = 0) out vec4 _outPositionW;
+layout(location = 0) out vec3 _outPositionW;
 layout(location = 1) out vec3 _outNormalW;
 layout(location = 2) out vec2 _outTexCoord;
 
@@ -15,5 +15,4 @@ void main()
 	_outNormalW = mat3(transpose(inverse(uModelMatrix))) * normal.xyz;
 	_outTexCoord = _inVertexTexCoord;
 	gl_Position = uProjectionMatrix * uViewMatrix * vec4(_outPositionW.xyz, 1.0);
-	_outPositionW.w = gl_Position.z;
 }

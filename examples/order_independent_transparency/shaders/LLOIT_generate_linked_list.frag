@@ -19,12 +19,14 @@ uniform sampler2D	uMaterialDiffuse;
 uniform sampler2D	uMaterialSpecular;
 uniform sampler2D   uOpaqueDepthTex;
 uniform vec3		uViewPos = vec3(0.0);
+uniform float		uNearPlane;
+uniform float		uFarPlane;
 
 uniform vec3	uDiffuseColor;
 uniform vec3	uTransmittance;
 uniform float	uCoverage;
 
-layout(location = 0) in vec4 _inPositionW;
+layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
 layout(location = 2) in vec2 _inTexCoord;
 
@@ -38,6 +40,20 @@ uint packColor(vec4 color)
 }
 
 #include "compute_reflection_color.glsl"
+
+float __returnNegativeZe(float depth, float near, float far)
+{
+	float z = depth * 2.0 - 1.0; // back to NDC 
+	z = (2.0 * near * far) / (far + near - z * (far - near)); // range: near...far,这个就是-ze
+	return z;
+}
+
+float __linearizeDepth(float depth, float near, float far)
+{
+	float z = __returnNegativeZe(depth, near, far);
+	z = (z - near) / (far - near); // range: 0...1
+	return z;
+}
 
 void main()
 {
@@ -55,7 +71,7 @@ void main()
 	if (nodeIndex < uMaxListNode)
 	{
 		uint nextIndex = imageAtomicExchange(uListHeadPtrTex, ivec2(gl_FragCoord.xy), nodeIndex);
-		uint currentDepth = packHalf2x16(vec2(_inPositionW.w, 0));
+		uint currentDepth = packHalf2x16(vec2(__linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane), 0));
 		nodes[nodeIndex] = ListNode(packedColor, transmittance, currentDepth, nextIndex);
 	}
 

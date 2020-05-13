@@ -17,6 +17,8 @@ namespace glt
 		glm::dvec3	getPosition() const { return m_CameraPos; }
 		double		getFovy() const { return m_Fovy; }
 		double		getAspect() const { return m_Aspect; }
+		double		getNear() const { return m_Near; }
+		double		getFar() const { return m_Far; }
 
 		void setPosition(glm::dvec3 vCameraPos) { m_CameraPos = vCameraPos; }
 		void setMoveSpeed(double vMoveSpeed) { m_MoveSpeed = vMoveSpeed; }

@@ -20,7 +20,7 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define USING_ALL_METHODS
+#define USING_LINKED_LIST_OIT
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -81,8 +81,6 @@ protected:
 		__initTexturesAndBuffers();
 		__extraInit();
 
-		CRenderer::getInstance()->fetchCamera()->setPosition(glm::dvec3(0, 0, 4));
-
 		return true;
 	}
 
@@ -105,6 +103,11 @@ protected:
 #ifdef USING_WEIGHTED_BLENDED_OIT
 		if (KeyStatus[GLFW_KEY_0]) m_WeightingStrategy = 0;
 		else if (KeyStatus[GLFW_KEY_1]) m_WeightingStrategy = 1;
+#endif
+
+#ifdef USING_LINKED_LIST_OIT
+		if (KeyStatus[GLFW_KEY_0]) m_UseThickness = false;
+		else if (KeyStatus[GLFW_KEY_1]) m_UseThickness = true;
 #endif
 	}
 
@@ -159,6 +162,11 @@ private:
 		CCPUTimer timer;
 		timer.start();
 
+		auto pCamera = CRenderer::getInstance()->fetchCamera();
+		pCamera->setPosition(glm::dvec3(0, 0, 4));
+		pCamera->setNearPlane(0.1);
+		pCamera->setFarPlane(10.0);
+
 		std::vector<std::string> Faces = {
 			"textures/skybox/right.jpg",
 			"textures/skybox/left.jpg",
@@ -169,7 +177,7 @@ private:
 		};
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
-		m_Scene.load("scene_02.json");
+		m_Scene.load("scene_04.json");
 		m_OpaqueModels = m_Scene.getModelGroup("opaqueModels");
 		m_TransparentModels = m_Scene.getModelGroup("transparentModels");
 		for (auto pModel : m_TransparentModels)
@@ -297,6 +305,10 @@ private:
 		m_pOpaqueDepthTex->bindV(2);
 		m_pGenLinkedListShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 
+		auto pCamera = CRenderer::getInstance()->fetchCamera();
+		m_pGenLinkedListShaderProgram->updateUniform1f("uNearPlane", pCamera->getNear());
+		m_pGenLinkedListShaderProgram->updateUniform1f("uFarPlane", pCamera->getFar());
+
 		for (auto Model : m_TransparentModels)
 		{
 			auto Material = m_Model2MaterialMap[Model];
@@ -312,6 +324,7 @@ private:
 
 		//pass2: color blending
 		m_pColorBlendingShaderProgram->bind();
+		m_pColorBlendingShaderProgram->updateUniform1i("uUseThickness", m_UseThickness);
 		CRenderer::getInstance()->drawScreenQuad(*m_pColorBlendingShaderProgram);
 
 		m_pLLOITFrameBuffer->unbind();
@@ -536,6 +549,8 @@ private:
 	std::unique_ptr<CShaderStorageBuffer>	m_pListNodeBuffer;
 	std::unique_ptr<CImage2D>				m_pListHeadImage;
 	std::unique_ptr<CAtomicCounterBuffer>	m_pListAtomicCounter;
+
+	bool m_UseThickness = false;
 #endif
 };
 

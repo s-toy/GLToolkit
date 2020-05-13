@@ -1,5 +1,7 @@
 #version 430 core
 
+uniform bool uUseThickness = false;
+
 struct ListNode
 {
 	uint packedColor;
@@ -75,20 +77,52 @@ void main()
 	vec3 color = vec3(0.0);
 	vec3 totalTransmittance = vec3(1.0);
 
-//	for (int i = 0; i < counter; i++)
-//	{
-//		vec4 c = unpackColor(fragments[i].packedColor);
-//		vec3 t = unpackColor(fragments[i].transmittance).rgb;
-//		totalTransmittance *= (1.0 - c.a + c.a * t);
-//		color = (1.0 - c.a) * color + c.a * (c.rgb + t * color);
-//	}
-
-	for (int i = 0; i < counter; i++)
+	if (!uUseThickness)
 	{
-		vec4 c = unpackColor(fragments[i].packedColor);
-		float t = i%2==0 ? exp(-20*abs(fragments[i].depth-fragments[i+1].depth)) : 1.0;
-		totalTransmittance *= t;
-		color = c.rgb + color * t;
+		for (int i = 0; i < counter; i++)
+		{
+			vec4 c = unpackColor(fragments[i].packedColor);
+			vec3 t = unpackColor(fragments[i].transmittance).rgb;
+			totalTransmittance *= (1.0 - c.a + c.a * t);
+			color = (1.0 - c.a) * color + c.a * (c.rgb + t * color);
+		}
+	}
+	else
+	{
+		const float absorbance = 60.0;
+		if (counter % 2 == 0)
+		{
+			for (int i = 0; i < counter; i += 2)
+			{
+				vec4 c1 = unpackColor(fragments[i].packedColor);
+				vec4 c2 = unpackColor(fragments[i+1].packedColor);
+				float a_average = 0.5 * (c1.a + c2.a);
+				float thickness = fragments[i].depth - fragments[i+1].depth;
+				float transmittance = exp(-absorbance * a_average * thickness);
+				totalTransmittance *= transmittance;
+				color = c1.rgb * (1.0 - transmittance) + color;
+				color = c2.rgb * (1.0 - transmittance) + color * transmittance;
+			}
+		}
+		else
+		{
+			int i;
+			for (i = 0; i < counter - 1; i += 2)
+			{
+				vec4 c1 = unpackColor(fragments[i].packedColor);
+				vec4 c2 = unpackColor(fragments[i+1].packedColor);
+				float a_average = 0.5 * (c1.a + c2.a);
+				float thickness = fragments[i].depth - fragments[i+1].depth;
+				float transmittance = exp(-absorbance * a_average * thickness);
+				totalTransmittance *= transmittance;
+				color = c1.rgb * (1.0 - transmittance) + color;
+				color = c2.rgb * (1.0 - transmittance) + color * transmittance;
+			}
+			vec4 c = unpackColor(fragments[i].packedColor);
+			float transmittance = exp(-absorbance * c.a * fragments[i].depth);
+			totalTransmittance *= transmittance;
+			color = c.rgb * (1.0 - transmittance) + color * transmittance;
+		}
 	}
 	
 	_outFragColor = vec4(color, totalTransmittance);
