@@ -41,16 +41,16 @@ uint packColor(vec4 color)
 
 #include "compute_reflection_color.glsl"
 
-float __returnNegativeZe(float depth, float near, float far)
+float _returnNegativeZe(float depth, float near, float far)
 {
 	float z = depth * 2.0 - 1.0; // back to NDC 
 	z = (2.0 * near * far) / (far + near - z * (far - near)); // range: near...far,这个就是-ze
 	return z;
 }
 
-float __linearizeDepth(float depth, float near, float far)
+float _linearizeDepth(float depth, float near, float far)
 {
-	float z = __returnNegativeZe(depth, near, far);
+	float z = _returnNegativeZe(depth, near, far);
 	z = (z - near) / (far - near); // range: 0...1
 	return z;
 }
@@ -71,7 +71,7 @@ void main()
 	if (nodeIndex < uMaxListNode)
 	{
 		uint nextIndex = imageAtomicExchange(uListHeadPtrTex, ivec2(gl_FragCoord.xy), nodeIndex);
-		uint currentDepth = packHalf2x16(vec2(__linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane), 0));
+		uint currentDepth = packHalf2x16(vec2(_linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane), 0));
 		nodes[nodeIndex] = ListNode(packedColor, transmittance, currentDepth, nextIndex);
 	}
 
