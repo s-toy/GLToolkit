@@ -1,5 +1,4 @@
-#version 460 core
-#extension GL_ARB_shader_image_load_store : require
+#version 430 core
 #extension GL_ARB_fragment_shader_interlock : require
 #include "reconstruction_config.glsl"
 #include "moment_math.glsl"
@@ -8,7 +7,7 @@ uniform sampler2D   uOpaqueDepthTex;
 uniform float		uCoverage;
 uniform vec4		uWrappingZoneParameters;
 
-layout(binding = 1, rgba32f, sample_interlock_ordered) uniform image2D uMomentsImage;
+layout(binding = 1, rgba32f) uniform image2D uMomentsImage;
 
 layout(location = 0) in float _inFragDepth;
 
@@ -28,10 +27,13 @@ void main()
 	float depth_pow2 = depth * depth;
 	float depth_pow4 = depth_pow2 * depth_pow2;
 	float depth_pow6 = depth_pow2 * depth_pow4;
+
 	beginInvocationInterlockARB();
+
 	vec4 Moments = imageLoad(uMomentsImage, ivec2(gl_FragCoord.xy)).xyzw;
 	Moments += vec4(depth, depth_pow2, depth_pow2 * depth, depth_pow4) * absorbance;
 	imageStore(uMomentsImage, ivec2(gl_FragCoord.xy), Moments); 
+
 	endInvocationInterlockARB();
 #else
 	float phase = fma(depth, uWrappingZoneParameters.y, uWrappingZoneParameters.y);

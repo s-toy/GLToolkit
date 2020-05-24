@@ -1,4 +1,4 @@
-#version 460 core
+#version 430 core
 #include "skeletal_animation_input.glsl"
 
 layout(location = 0) out float _outFragDepth;
