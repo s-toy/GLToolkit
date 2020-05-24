@@ -209,16 +209,11 @@ private:
 		m_pMomentB0Tex = std::make_shared<CTexture2D>();
 		m_pMomentB0Tex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
-		m_pMomentsTex = std::make_shared<CTexture2D>();
-		m_pMomentsTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
-
-		m_pExtraMomentsTex = std::make_shared<CTexture2D>();
-		m_pExtraMomentsTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pMomentsImage = std::make_shared<CImage2D>();
+		m_pMomentsImage->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, 1);
 
 		m_pMBOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pMBOITFrameBuffer1->set(EAttachment::COLOR0, m_pMomentB0Tex);
-		m_pMBOITFrameBuffer1->set(EAttachment::COLOR1, m_pMomentsTex);
-		m_pMBOITFrameBuffer1->set(EAttachment::COLOR2, m_pExtraMomentsTex);
 
 		m_pMBOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pMBOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
@@ -355,6 +350,7 @@ private:
 		CRenderer::getInstance()->setDepthMask(false);
 		CRenderer::getInstance()->enableBlend(true);
 		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE);
+		m_pMomentsImage->clear();
 
 		m_pGenerateMomentShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
@@ -386,12 +382,8 @@ private:
 		m_pReconstructTransmittanceShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pMomentB0Tex->bindV(3);
-		m_pMomentsTex->bindV(4);
-		m_pExtraMomentsTex->bindV(5);
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
-		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentsTex", m_pMomentsTex.get());
-		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uExtraMomentsTex", m_pExtraMomentsTex.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniform4f("uWrappingZoneParameters", m_WrappingZoneParameters);
 
 		for (auto Model : m_TransparentModels)
@@ -526,8 +518,7 @@ private:
 	std::unique_ptr<CFrameBuffer>	m_pMBOITFrameBuffer1;
 	std::unique_ptr<CFrameBuffer>	m_pMBOITFrameBuffer2;
 	std::shared_ptr<CTexture2D>		m_pMomentB0Tex;
-	std::shared_ptr<CTexture2D>		m_pMomentsTex;
-	std::shared_ptr<CTexture2D>		m_pExtraMomentsTex;
+	std::shared_ptr<CImage2D>		m_pMomentsImage;
 	glm::vec4	m_WrappingZoneParameters;
 #endif
 

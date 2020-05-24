@@ -8,8 +8,7 @@ uniform sampler2D	uMaterialSpecular;
 uniform sampler2D   uOpaqueDepthTex;
 
 uniform sampler2D	uMomentB0Tex;
-uniform sampler2D	uMomentsTex;
-uniform sampler2D	uExtraMomentsTex;
+layout(binding = 1, rgba32f) uniform image2D uMomentsImage;
 
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
@@ -38,7 +37,7 @@ void main()
 
 #if NUM_MOMENTS == 4
  #if !TRIGONOMETRIC
-	vec4 b_1234 = texelFetch(uMomentsTex, ivec2(gl_FragCoord.xy), 0).xyzw;
+	vec4 b_1234 = imageLoad(uMomentsImage, ivec2(gl_FragCoord.xy)).xyzw;
 	vec2 b_even = b_1234.yw;
 	vec2 b_odd = b_1234.xz;
 	b_even /= b_0;
