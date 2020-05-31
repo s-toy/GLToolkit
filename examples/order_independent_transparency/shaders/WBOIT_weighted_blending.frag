@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 #include "compute_phong_shading.glsl"
 
 #define WEIGHTED_BLENDING 0

@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 #extension GL_ARB_fragment_shader_interlock : require
 #include "reconstruction_config.glsl"
 #include "moment_math.glsl"
@@ -8,7 +8,6 @@ uniform float		uCoverage;
 uniform vec4		uWrappingZoneParameters;
 
 layout(binding = 1, rgba32f) uniform image2D uMomentsImage;
-
 layout(location = 0) in float _inFragDepth;
 
 layout(location = 0) out float	_outMomentB0;

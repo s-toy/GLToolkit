@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 #include "skeletal_animation_input.glsl"
 
 layout(location = 0) out vec3 _outPositionW;

@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 #include "moment_math.glsl"
 #include "compute_phong_shading.glsl"
 #include "reconstruction_config.glsl"

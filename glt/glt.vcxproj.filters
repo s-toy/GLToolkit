@@ -14,9 +14,6 @@
     <Filter Include="external\stb_image">
       <UniqueIdentifier>{aa6fe6e4-d1c6-41c5-b0b5-15145cc1ad11}</UniqueIdentifier>
     </Filter>
-    <Filter Include="external\glad">
-      <UniqueIdentifier>{4daf7ed7-2761-4d73-9cbd-7ca3b4308669}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\core">
       <UniqueIdentifier>{27b09861-0aa8-468a-8c45-6eecd7425bf9}</UniqueIdentifier>
     </Filter>
@@ -60,12 +57,6 @@
     </ClInclude>
     <ClInclude Include="external\stb_image\stb_image.h">
       <Filter>external\stb_image</Filter>
-    </ClInclude>
-    <ClInclude Include="external\glad\glad.h">
-      <Filter>external\glad</Filter>
-    </ClInclude>
-    <ClInclude Include="external\glad\khrplatform.h">
-      <Filter>external\glad</Filter>
     </ClInclude>
     <ClInclude Include="src\ApplicationBase.h">
       <Filter>src\core</Filter>
@@ -176,9 +167,6 @@
     </ClCompile>
     <ClCompile Include="external\stb_image\stb_image.cpp">
       <Filter>external\stb_image</Filter>
-    </ClCompile>
-    <ClCompile Include="external\glad\glad.c">
-      <Filter>external\glad</Filter>
     </ClCompile>
     <ClCompile Include="src\ApplicationBase.cpp">
       <Filter>src\core</Filter>

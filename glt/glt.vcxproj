@@ -89,10 +89,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions> _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_GLAD;GLT_EXPORTS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions> _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;GLAD_GLAPI_EXPORT;IMGUI_IMPL_OPENGL_LOADER_GLAD;GLT_EXPORTS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)external;$(GLFW)\include;$(GLM)\include;$(ASSIMP)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)external;$(GLAD)\include;$(GLFW)\include;$(GLM)\include;$(ASSIMP)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>26495;4251;4267;4018</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>true</OpenMPSupport>
@@ -100,8 +100,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(GLFW)\lib;$(ASSIMP)\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GLFW)\lib;$(ASSIMP)\lib;$(GLAD)\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glad_d.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt-d.lib;</AdditionalDependencies>
@@ -114,10 +114,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions> _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_GLAD;GLT_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions> _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;GLAD_GLAPI_EXPORT;IMGUI_IMPL_OPENGL_LOADER_GLAD;GLT_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)external;$(GLFW)\include;$(GLM)\include;$(ASSIMP)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)external;$(GLAD)\include;$(GLFW)\include;$(GLM)\include;$(ASSIMP)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>26495;4251;4267;4018</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>true</OpenMPSupport>
@@ -125,8 +125,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(GLFW)\lib;$(ASSIMP)\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GLFW)\lib;$(ASSIMP)\lib;$(GLAD)\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glad_d.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt-d.lib;</AdditionalDependencies>
@@ -141,10 +141,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions> _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_GLAD;GLT_EXPORTS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions> _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;GLAD_GLAPI_EXPORT;IMGUI_IMPL_OPENGL_LOADER_GLAD;GLT_EXPORTS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)external;$(GLFW)\include;$(GLM)\include;$(ASSIMP)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)external;$(GLAD)\include;$(GLFW)\include;$(GLM)\include;$(ASSIMP)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>26495;4251;4267;4018</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>true</OpenMPSupport>
@@ -154,8 +154,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(GLFW)\lib;$(ASSIMP)\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GLFW)\lib;$(ASSIMP)\lib;$(GLAD)\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glad.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;</AdditionalDependencies>
@@ -170,10 +170,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions> _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_GLAD;GLT_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions> _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;GLAD_GLAPI_EXPORT;IMGUI_IMPL_OPENGL_LOADER_GLAD;GLT_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)external;$(GLFW)\include;$(GLM)\include;$(ASSIMP)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)external;$(GLAD)\include;$(GLFW)\include;$(GLM)\include;$(ASSIMP)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>26495;4251;4267;4018</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>true</OpenMPSupport>
@@ -183,8 +183,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(GLFW)\lib;$(ASSIMP)\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GLFW)\lib;$(ASSIMP)\lib;$(GLAD)\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glad.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;</AdditionalDependencies>
@@ -192,8 +192,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="external\glad\glad.h" />
-    <ClInclude Include="external\glad\khrplatform.h" />
     <ClInclude Include="external\imgui\imconfig.h" />
     <ClInclude Include="external\imgui\imgui.h" />
     <ClInclude Include="external\imgui\imgui_impl_glfw.h" />
@@ -234,7 +232,6 @@
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="external\glad\glad.c" />
     <ClCompile Include="external\imgui\imgui.cpp" />
     <ClCompile Include="external\imgui\imgui_demo.cpp" />
     <ClCompile Include="external\imgui\imgui_draw.cpp" />

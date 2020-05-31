@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 #extension GL_ARB_fragment_shader_interlock : require
 #include "compute_phong_shading.glsl"
 

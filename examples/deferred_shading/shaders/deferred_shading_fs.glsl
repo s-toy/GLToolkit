@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 
 uniform sampler2D uPositionTex;
 uniform sampler2D uNormalTex;

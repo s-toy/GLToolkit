@@ -54,7 +54,7 @@
 //  4.0       400       "#version 400 core"
 //  4.1       410       "#version 410 core"
 //  4.2       420       "#version 410 core"
-//  4.3       430       "#version 430 core"
+//  4.3       430       "#version 460 core"
 //  ES 2.0    100       "#version 100"      = WebGL 1.0
 //  ES 3.0    300       "#version 300 es"   = WebGL 2.0
 //----------------------------------------
