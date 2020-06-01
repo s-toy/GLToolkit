@@ -195,10 +195,6 @@ void CImage2D::createEmpty(int vWidth, int vHeight, GLenum vFormat, unsigned int
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindImageTexture(vBindUnit, m_ObjectID, 0, GL_FALSE, 0, GL_READ_WRITE, m_Format);
-
-	m_pShaderProgram = std::make_unique<CShaderProgram>();
-	std::string ShaderFileName = CFileLocator::getInstance()->locateFile("shaders/clear_image2d_cs.glsl");
-	m_pShaderProgram->addShader(ShaderFileName, EShaderType::COMPUTE_SHADER);
 }
 
 //***********************************************************************************************
@@ -213,13 +209,4 @@ void CImage2D::bindV(unsigned int vBindPoint) const
 void CImage2D::unbindV() const
 {
 
-}
-
-//***********************************************************************************************
-//FUNCTION:
-void CImage2D::clear()
-{
-	m_pShaderProgram->bind();
-	glDispatchCompute(m_Width / 32, m_Height / 32, 1); //TODO:如何判断使用多少个group最合适
-	m_pShaderProgram->unbind();
 }

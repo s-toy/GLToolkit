@@ -268,7 +268,6 @@
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resource\shaders\clear_image2d_cs.glsl" />
     <None Include="..\resource\shaders\draw_skybox_fs.glsl" />
     <None Include="..\resource\shaders\draw_skybox_vs.glsl" />
   </ItemGroup>

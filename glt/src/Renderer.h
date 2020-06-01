@@ -24,7 +24,7 @@ namespace glt
 		bool init();
 		void destroy();
 
-		void clear() const;
+		void clear(GLbitfield vBuffers = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) const;
 		void setClearColor(float vRed, float vGreen, float vBlue, float vAlpha) const;
 		void clearBuffer(GLuint vDrawBuffer, const GLfloat* vData) const;
 		void update();

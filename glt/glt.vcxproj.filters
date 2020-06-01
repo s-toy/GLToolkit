@@ -251,9 +251,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resource\shaders\clear_image2d_cs.glsl">
-      <Filter>res\shaders</Filter>
-    </None>
     <None Include="..\resource\shaders\draw_skybox_fs.glsl">
       <Filter>res\shaders</Filter>
     </None>

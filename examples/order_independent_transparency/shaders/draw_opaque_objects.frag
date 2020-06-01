@@ -11,7 +11,6 @@ layout(location = 1) in vec3 _inNormalW;
 layout(location = 2) in vec2 _inTexCoord;
 
 layout(location = 0) out vec3 _outFragColor;
-layout(location = 1) out float _outFragDepth;
 
 void main()
 {
@@ -28,5 +27,4 @@ void main()
 	color += computePhongShading4ParallelLight(_inPositionW, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
 
 	_outFragColor = color;
-	_outFragDepth = gl_FragCoord.z;
 }

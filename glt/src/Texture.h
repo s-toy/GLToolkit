@@ -59,13 +59,9 @@ namespace glt
 		void bindV(unsigned int vBindPoint) const override;
 		void unbindV() const override;
 
-		void clear();
-
 	private:
 		GLenum m_Format = 0;
 		int m_Width = 0;
 		int m_Height = 0;
-
-		std::unique_ptr<CShaderProgram> m_pShaderProgram;
 	};
 }

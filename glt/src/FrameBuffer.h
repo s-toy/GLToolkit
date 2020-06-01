@@ -25,7 +25,7 @@ namespace glt
 	class GLT_DECLSPEC CFrameBuffer
 	{
 	public:
-		CFrameBuffer(int vWidth, int vHeight);
+		CFrameBuffer(int vWidth, int vHeight, bool vEnableDepthStencilAttachment = true);
 		~CFrameBuffer();
 
 		void set(EAttachment vAttachment, std::shared_ptr<CTexture> vTexture);

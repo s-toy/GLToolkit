@@ -20,7 +20,7 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define USING_MOMENT_BASED_OIT
+#define USING_ALL_METHODS
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -196,11 +196,11 @@ private:
 		m_pOpaqueColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGB8, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pOpaqueDepthTex = std::make_shared<CTexture2D>();
-		m_pOpaqueDepthTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pOpaqueDepthTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_DEPTH_COMPONENT16, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
-		m_pOpaqueFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
+		m_pOpaqueFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
 		m_pOpaqueFrameBuffer->set(EAttachment::COLOR0, m_pOpaqueColorTex);
-		m_pOpaqueFrameBuffer->set(EAttachment::COLOR1, m_pOpaqueDepthTex);
+		m_pOpaqueFrameBuffer->set(EAttachment::DEPTH, m_pOpaqueDepthTex);
 
 		m_pTransparencyColorTex = std::make_shared<CTexture2D>();
 		m_pTransparencyColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
@@ -212,7 +212,7 @@ private:
 		m_pMomentsImage = std::make_shared<CImage2D>();
 		m_pMomentsImage->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, 1);
 
-		m_pMBOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
+		m_pMBOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
 		m_pMBOITFrameBuffer1->set(EAttachment::COLOR0, m_pMomentB0Tex);
 
 		m_pMBOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
@@ -238,6 +238,10 @@ private:
 		m_pListAtomicCounter = std::make_unique<CAtomicCounterBuffer>(0);
 
 		m_pListNodeBuffer = std::make_unique<CShaderStorageBuffer>(nullptr, MAX_LIST_NODE * sizeof(SListNode), 0);
+#endif
+
+#if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT)
+		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 #endif
 	}
 
@@ -287,11 +291,16 @@ private:
 #ifdef USING_LINKED_LIST_OIT
 	void __renderUsingLinkedListOIT()
 	{
+		m_pClearImageFrameBuffer->bind();
+		m_pClearImageFrameBuffer->set(EAttachment::COLOR0, m_pListHeadImage);
+		CRenderer::getInstance()->clear();
+		m_pClearImageFrameBuffer->unbind();
+
+		//pass1: generate linked list
 		m_pLLOITFrameBuffer->bind();
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(false);
 		CRenderer::getInstance()->setDepthMask(false);
-		m_pListHeadImage->clear();
 
 		m_pGenLinkedListShaderProgram->bind();
 		m_pListAtomicCounter->reset();
@@ -342,6 +351,11 @@ private:
 #ifdef USING_MOMENT_BASED_OIT
 	void __renderUsingMomentBasedOIT()
 	{
+		m_pClearImageFrameBuffer->bind();
+		m_pClearImageFrameBuffer->set(EAttachment::COLOR0, m_pMomentsImage);
+		CRenderer::getInstance()->clear();
+		m_pClearImageFrameBuffer->unbind();
+
 		//pass1: generate moments
 		m_pMBOITFrameBuffer1->bind();
 
@@ -350,7 +364,6 @@ private:
 		CRenderer::getInstance()->setDepthMask(false);
 		CRenderer::getInstance()->enableBlend(true);
 		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE);
-		m_pMomentsImage->clear();
 
 		m_pGenerateMomentShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
@@ -538,10 +551,14 @@ private:
 	std::unique_ptr<CFrameBuffer>	m_pLLOITFrameBuffer;
 
 	std::unique_ptr<CShaderStorageBuffer>	m_pListNodeBuffer;
-	std::unique_ptr<CImage2D>				m_pListHeadImage;
+	std::shared_ptr<CImage2D>				m_pListHeadImage;
 	std::unique_ptr<CAtomicCounterBuffer>	m_pListAtomicCounter;
 
 	bool m_UseThickness = false;
+#endif
+
+#if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT)
+	std::unique_ptr<CFrameBuffer> m_pClearImageFrameBuffer;
 #endif
 };
 
