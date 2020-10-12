@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <algorithm>
+#include <cctype>
 #include <glm/glm.hpp>
 #include <assimp/matrix4x4.h>
 #include <glad/glad.h>
