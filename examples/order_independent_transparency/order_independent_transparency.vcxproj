@@ -162,11 +162,17 @@
     <None Include="scene_02.json" />
     <None Include="scene_03.json" />
     <None Include="scene_04.json" />
+    <None Include="shaders\common.glsl" />
     <None Include="shaders\complex_algebra.glsl" />
     <None Include="shaders\compute_reflection_color.glsl" />
     <None Include="shaders\draw_opaque_objects.frag" />
     <None Include="shaders\draw_opaque_objects.vert" />
     <None Include="shaders\draw_screen_coord.vert" />
+    <None Include="shaders\FOIT_generate_fourier_opacity_map.frag" />
+    <None Include="shaders\FOIT_generate_fourier_opacity_map.vert" />
+    <None Include="shaders\FOIT_merge_color.frag" />
+    <None Include="shaders\FOIT_reconstruct_transmittance.frag" />
+    <None Include="shaders\FOIT_reconstruct_transmittance.vert" />
     <None Include="shaders\HLSL_to_GLSL.glsl" />
     <None Include="shaders\LLOIT_color_blending.frag" />
     <None Include="shaders\LLOIT_generate_linked_list.frag" />

@@ -1,4 +1,5 @@
 #version 460 core
+#include "common.glsl"
 #include "moment_math.glsl"
 #include "compute_phong_shading.glsl"
 #include "reconstruction_config.glsl"
@@ -13,6 +14,8 @@ layout(binding = 1, rgba32f) uniform image2D uMomentsImage;
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
 uniform float	uCoverage;
+uniform float	uNearPlane;
+uniform float	uFarPlane;
 uniform vec4	uWrappingZoneParameters;
 
 layout(location = 0) in vec3 _inPositionW;
@@ -33,7 +36,8 @@ void main()
 	if (b_0 < 0.00100050033f) discard;
 
 	float overestimation = 0.25;
-	depth = 2.0 * gl_FragCoord.z - 1.0;
+	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+	depth = 2.0 * depth - 1.0;
 
 #if NUM_MOMENTS == 4
  #if !TRIGONOMETRIC

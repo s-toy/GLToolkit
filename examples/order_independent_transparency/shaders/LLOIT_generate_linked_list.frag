@@ -1,5 +1,6 @@
 #version 460 core
 #extension GL_ARB_fragment_shader_interlock : require
+#include "common.glsl"
 #include "compute_phong_shading.glsl"
 
 struct ListNode
@@ -40,20 +41,6 @@ uint packColor(vec4 color)
 }
 
 #include "compute_reflection_color.glsl"
-
-float _returnNegativeZe(float depth, float near, float far)
-{
-	float z = depth * 2.0 - 1.0; // back to NDC 
-	z = (2.0 * near * far) / (far + near - z * (far - near)); // range: near...far,这个就是-ze
-	return z;
-}
-
-float _linearizeDepth(float depth, float near, float far)
-{
-	float z = _returnNegativeZe(depth, near, far);
-	z = (z - near) / (far - near); // range: 0...1
-	return z;
-}
 
 void main()
 {

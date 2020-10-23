@@ -26,13 +26,15 @@
 #define USING_MOMENT_BASED_OIT
 #define USING_WEIGHTED_BLENDED_OIT
 #define USING_LINKED_LIST_OIT
+#define USING_FOURIER_OIT
 #endif
 
 enum class EOITMethod : unsigned char
 {
 	LINKED_LIST_OIT = 0,
 	MOMENT_BASE_OIT,
-	WEIGHTED_BLENDED_OIT
+	WEIGHTED_BLENDED_OIT,
+	FOURIER_OIT
 };
 
 using namespace glt;
@@ -98,6 +100,7 @@ protected:
 		if (KeyStatus[GLFW_KEY_L]) m_OITMethod = EOITMethod::LINKED_LIST_OIT;
 		else if (KeyStatus[GLFW_KEY_M]) m_OITMethod = EOITMethod::MOMENT_BASE_OIT;
 		else if (KeyStatus[GLFW_KEY_B]) m_OITMethod = EOITMethod::WEIGHTED_BLENDED_OIT;
+		else if (KeyStatus[GLFW_KEY_F]) m_OITMethod = EOITMethod::FOURIER_OIT;
 #endif
 
 #ifdef USING_WEIGHTED_BLENDED_OIT
@@ -154,6 +157,20 @@ private:
 		m_pLLOITMergeColorShaderProgram = std::make_unique<CShaderProgram>();
 		m_pLLOITMergeColorShaderProgram->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
 		m_pLLOITMergeColorShaderProgram->addShader("shaders/LLOIT_merge_color.frag", EShaderType::FRAGMENT_SHADER);
+#endif
+
+#ifdef USING_FOURIER_OIT
+		m_pGenFourierOpacityMapSP = std::make_unique<CShaderProgram>();
+		m_pGenFourierOpacityMapSP->addShader("shaders/FOIT_generate_fourier_opacity_map.vert", EShaderType::VERTEX_SHADER);
+		m_pGenFourierOpacityMapSP->addShader("shaders/FOIT_generate_fourier_opacity_map.frag", EShaderType::FRAGMENT_SHADER);
+
+		m_pFOITReconstructTransmittanceSP = std::make_unique<CShaderProgram>();
+		m_pFOITReconstructTransmittanceSP->addShader("shaders/FOIT_reconstruct_transmittance.vert", EShaderType::VERTEX_SHADER);
+		m_pFOITReconstructTransmittanceSP->addShader("shaders/FOIT_reconstruct_transmittance.frag", EShaderType::FRAGMENT_SHADER);
+
+		m_pFOITMergerColorSP = std::make_unique<CShaderProgram>();
+		m_pFOITMergerColorSP->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
+		m_pFOITMergerColorSP->addShader("shaders/FOIT_merge_color.frag", EShaderType::FRAGMENT_SHADER);
 #endif
 	}
 
@@ -240,6 +257,29 @@ private:
 		m_pListNodeBuffer = std::make_unique<CShaderStorageBuffer>(nullptr, MAX_LIST_NODE * sizeof(SListNode), 0);
 #endif
 
+#ifdef USING_FOURIER_OIT
+		m_pFourierOpacityMap1 = std::make_shared<CTexture2D>();
+		m_pFourierOpacityMap1->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pFourierOpacityMap2 = std::make_shared<CTexture2D>();
+		m_pFourierOpacityMap2->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pFourierOpacityMap3 = std::make_shared<CTexture2D>();
+		m_pFourierOpacityMap3->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pFourierOpacityMap4 = std::make_shared<CTexture2D>();
+		m_pFourierOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pFOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT,false);
+		m_pFOITFrameBuffer1->set(EAttachment::COLOR0, m_pFourierOpacityMap1);
+		m_pFOITFrameBuffer1->set(EAttachment::COLOR1, m_pFourierOpacityMap2);
+		m_pFOITFrameBuffer1->set(EAttachment::COLOR2, m_pFourierOpacityMap3);
+		m_pFOITFrameBuffer1->set(EAttachment::COLOR3, m_pFourierOpacityMap4);
+
+		m_pFOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
+		m_pFOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
+#endif
+
 #if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT)
 		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 #endif
@@ -278,6 +318,8 @@ private:
 			__renderUsingMomentBasedOIT(); break;
 		case EOITMethod::WEIGHTED_BLENDED_OIT:
 			__renderUsingWeightedBlendedOIT(); break;
+		case EOITMethod::FOURIER_OIT:
+			__renderUsingFourierOIT(); break;
 		}
 #elif defined(USING_MOMENT_BASED_OIT)
 		__renderUsingMomentBasedOIT();
@@ -285,6 +327,8 @@ private:
 		__renderUsingLinkedListOIT();
 #elif defined(USING_WEIGHTED_BLENDED_OIT)
 		__renderUsingWeightedBlendedOIT();
+#elif defined(USING_FOURIER_OIT)
+		__renderUsingFourierOIT();
 #endif
 	}
 
@@ -370,6 +414,10 @@ private:
 		m_pGenerateMomentShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 		m_pGenerateMomentShaderProgram->updateUniform4f("uWrappingZoneParameters", m_WrappingZoneParameters);
 
+		auto pCamera = CRenderer::getInstance()->fetchCamera();
+		m_pGenerateMomentShaderProgram->updateUniform1f("uNearPlane", pCamera->getNear());
+		m_pGenerateMomentShaderProgram->updateUniform1f("uFarPlane", pCamera->getFar());
+
 		for (auto Model : m_TransparentModels)
 		{
 			auto Material = m_Model2MaterialMap[Model];
@@ -398,6 +446,9 @@ private:
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniform4f("uWrappingZoneParameters", m_WrappingZoneParameters);
+
+		m_pReconstructTransmittanceShaderProgram->updateUniform1f("uNearPlane", pCamera->getNear());
+		m_pReconstructTransmittanceShaderProgram->updateUniform1f("uFarPlane", pCamera->getFar());
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -457,6 +508,93 @@ private:
 			voWrappingZoneParameters[2] = 1.0f / (zone_end_parameter - zone_begin_parameter);
 			voWrappingZoneParameters[3] = 1.0f - zone_end_parameter * voWrappingZoneParameters[2];
 		}
+	}
+#endif
+
+#ifdef USING_FOURIER_OIT
+	void __renderUsingFourierOIT()
+	{
+		//pass1: generate fourier opacity map
+		m_pFOITFrameBuffer1->bind();
+
+		CRenderer::getInstance()->clear();
+		CRenderer::getInstance()->enableCullFace(false);
+		CRenderer::getInstance()->setDepthMask(false);
+		CRenderer::getInstance()->enableBlend(true);
+		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE);
+
+		m_pGenFourierOpacityMapSP->bind();
+		m_pOpaqueDepthTex->bindV(2);
+		m_pGenFourierOpacityMapSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+
+		auto pCamera = CRenderer::getInstance()->fetchCamera();
+		m_pGenFourierOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
+		m_pGenFourierOpacityMapSP->updateUniform1f("uFarPlane", pCamera->getFar());
+
+		for (auto Model : m_TransparentModels)
+		{
+			auto Material = m_Model2MaterialMap[Model];
+			m_pGenFourierOpacityMapSP->bind();
+			m_pGenFourierOpacityMapSP->updateUniform1f("uCoverage", Material.coverage);
+			CRenderer::getInstance()->draw(*Model, *m_pGenFourierOpacityMapSP);
+		}
+
+		CRenderer::getInstance()->setDepthMask(true);
+		CRenderer::getInstance()->enableBlend(false);
+
+		m_pFOITFrameBuffer1->unbind();
+
+		//pass2: reconstruct transmittance
+		m_pFOITFrameBuffer2->bind();
+
+		CRenderer::getInstance()->clear();
+		CRenderer::getInstance()->enableCullFace(false);
+		CRenderer::getInstance()->setDepthMask(false);
+		CRenderer::getInstance()->enableBlend(true);
+		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE);
+
+		m_pFOITReconstructTransmittanceSP->bind();
+		m_pOpaqueDepthTex->bindV(2);
+		m_pFourierOpacityMap1->bindV(3);
+		m_pFourierOpacityMap2->bindV(4);
+		m_pFourierOpacityMap3->bindV(5);
+		m_pFourierOpacityMap4->bindV(6);
+		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uFourierOpacityMap1", m_pFourierOpacityMap1.get());
+		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uFourierOpacityMap2", m_pFourierOpacityMap2.get());
+		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uFourierOpacityMap3", m_pFourierOpacityMap3.get());
+		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uFourierOpacityMap4", m_pFourierOpacityMap4.get());
+
+		m_pFOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
+		m_pFOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
+
+		for (auto Model : m_TransparentModels)
+		{
+			auto Material = m_Model2MaterialMap[Model];
+			m_pFOITReconstructTransmittanceSP->bind();
+			m_pFOITReconstructTransmittanceSP->updateUniform3f("uDiffuseColor", Material.diffuse);
+			m_pFOITReconstructTransmittanceSP->updateUniform1f("uCoverage", Material.coverage);
+			CRenderer::getInstance()->draw(*Model, *m_pFOITReconstructTransmittanceSP);
+		}
+
+		CRenderer::getInstance()->setDepthMask(true);
+		CRenderer::getInstance()->enableBlend(false);
+
+		m_pFOITFrameBuffer2->unbind();
+
+		//pass3: merge color
+		CRenderer::getInstance()->clear();
+
+		m_pOpaqueColorTex->bindV(0);
+		m_pTransparencyColorTex->bindV(1);
+		m_pFourierOpacityMap1->bindV(2);
+
+		m_pFOITMergerColorSP->bind();
+		m_pFOITMergerColorSP->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTex.get());
+		m_pFOITMergerColorSP->updateUniformTexture("uTranslucentColorTex", m_pTransparencyColorTex.get());
+		m_pFOITMergerColorSP->updateUniformTexture("uFourierOpacityMap1", m_pFourierOpacityMap1.get());
+
+		CRenderer::getInstance()->drawScreenQuad(*m_pFOITMergerColorSP);
 	}
 #endif
 
@@ -521,7 +659,7 @@ private:
 	std::shared_ptr<CTexture2D>		m_pTransparencyColorTex;
 
 #ifdef USING_ALL_METHODS
-	EOITMethod m_OITMethod = EOITMethod::MOMENT_BASE_OIT;
+	EOITMethod m_OITMethod = EOITMethod::LINKED_LIST_OIT;
 #endif
 
 #ifdef USING_MOMENT_BASED_OIT
@@ -559,6 +697,18 @@ private:
 
 #if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT)
 	std::unique_ptr<CFrameBuffer> m_pClearImageFrameBuffer;
+#endif
+
+#ifdef USING_FOURIER_OIT
+	std::unique_ptr<CShaderProgram> m_pGenFourierOpacityMapSP;
+	std::unique_ptr<CShaderProgram> m_pFOITReconstructTransmittanceSP;
+	std::unique_ptr<CShaderProgram> m_pFOITMergerColorSP;
+	std::unique_ptr<CFrameBuffer>	m_pFOITFrameBuffer1;
+	std::unique_ptr<CFrameBuffer>	m_pFOITFrameBuffer2;
+	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap1;
+	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap2;
+	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap3;
+	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap4;
 #endif
 };
 

@@ -31,6 +31,9 @@
     <Filter Include="Resource Files\scenes">
       <UniqueIdentifier>{ee5756ae-810a-4234-8953-a9ec5f05c45e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders\FourierOIT">
+      <UniqueIdentifier>{196b0013-d3a3-4854-914d-60bfa1d2419e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -115,6 +118,24 @@
     </None>
     <None Include="scene_04.json">
       <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="shaders\FOIT_generate_fourier_opacity_map.frag">
+      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    </None>
+    <None Include="shaders\FOIT_generate_fourier_opacity_map.vert">
+      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    </None>
+    <None Include="shaders\FOIT_merge_color.frag">
+      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    </None>
+    <None Include="shaders\common.glsl">
+      <Filter>Resource Files\shaders\Common</Filter>
+    </None>
+    <None Include="shaders\FOIT_reconstruct_transmittance.frag">
+      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    </None>
+    <None Include="shaders\FOIT_reconstruct_transmittance.vert">
+      <Filter>Resource Files\shaders\FourierOIT</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

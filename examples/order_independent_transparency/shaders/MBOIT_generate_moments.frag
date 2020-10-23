@@ -1,10 +1,13 @@
 #version 460 core
 #extension GL_ARB_fragment_shader_interlock : require
+#include "common.glsl"
 #include "reconstruction_config.glsl"
 #include "moment_math.glsl"
 
 uniform sampler2D   uOpaqueDepthTex;
 uniform float		uCoverage;
+uniform float		uNearPlane;
+uniform float		uFarPlane;
 uniform vec4		uWrappingZoneParameters;
 
 layout(binding = 1, rgba32f) uniform image2D uMomentsImage;
@@ -18,7 +21,8 @@ void main()
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
 	float absorbance = -log(1.0 - uCoverage + 1e-5);
-	float depth = 2.0 * gl_FragCoord.z - 1.0; //_inFragDepth;
+	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+	depth = 2.0 * depth - 1.0;
 
 	_outMomentB0 = absorbance;
 
