@@ -20,8 +20,12 @@ void main()
 	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
-	float absorbance = -log(1.0 - uCoverage + 1e-5);
 	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+
+	//float absorbance = -log(1.0 - uCoverage + 1e-5);
+	float opticalDepth = 100.0 * uCoverage * depth;
+	float absorbance = gl_FrontFacing ? -opticalDepth : opticalDepth;
+
 	depth = 2.0 * depth - 1.0;
 
 	_outMomentB0 = absorbance;

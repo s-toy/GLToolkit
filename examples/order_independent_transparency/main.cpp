@@ -104,13 +104,20 @@ protected:
 #endif
 
 #ifdef USING_WEIGHTED_BLENDED_OIT
-		if (KeyStatus[GLFW_KEY_0]) m_WeightingStrategy = 0;
-		else if (KeyStatus[GLFW_KEY_1]) m_WeightingStrategy = 1;
+		if (KeyStatus[GLFW_KEY_0]) m_WOITStrategy = 0;
+		else if (KeyStatus[GLFW_KEY_1]) m_WOITStrategy = 1;
 #endif
 
 #ifdef USING_LINKED_LIST_OIT
 		if (KeyStatus[GLFW_KEY_0]) m_UseThickness = false;
 		else if (KeyStatus[GLFW_KEY_1]) m_UseThickness = true;
+#endif
+
+#ifdef USING_FOURIER_OIT
+		if (KeyStatus[GLFW_KEY_0]) m_FOITStrategy = 0;
+		else if (KeyStatus[GLFW_KEY_1]) m_FOITStrategy = 1;
+		else if (KeyStatus[GLFW_KEY_2]) m_FOITStrategy = 2;
+		else if (KeyStatus[GLFW_KEY_3]) m_FOITStrategy = 3;
 #endif
 	}
 
@@ -182,7 +189,7 @@ private:
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 		pCamera->setPosition(glm::dvec3(0, 0, 4));
 		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(10.0);
+		pCamera->setFarPlane(20.0);
 
 		std::vector<std::string> Faces = {
 			"textures/skybox/right.jpg",
@@ -514,6 +521,22 @@ private:
 #ifdef USING_FOURIER_OIT
 	void __renderUsingFourierOIT()
 	{
+		int FOITCoeffNum = 0;
+		switch (m_FOITStrategy)
+		{
+		case 0:
+			FOITCoeffNum = 15;
+			break;
+		case 1:
+			FOITCoeffNum = 11;
+			break;
+		case 2:
+			FOITCoeffNum = 7;
+			break;
+		case 3:
+			FOITCoeffNum = 3;
+		}
+
 		//pass1: generate fourier opacity map
 		m_pFOITFrameBuffer1->bind();
 
@@ -530,6 +553,8 @@ private:
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 		m_pGenFourierOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pGenFourierOpacityMapSP->updateUniform1f("uFarPlane", pCamera->getFar());
+
+		m_pGenFourierOpacityMapSP->updateUniform1i("uFOITCoeffNum", FOITCoeffNum);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -567,6 +592,8 @@ private:
 
 		m_pFOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pFOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
+
+		m_pFOITReconstructTransmittanceSP->updateUniform1i("uFOITCoeffNum", FOITCoeffNum);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -613,7 +640,7 @@ private:
 		m_pWeightedBlendingShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pWeightedBlendingShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-		m_pWeightedBlendingShaderProgram->updateUniform1i("uWeightingStragety", m_WeightingStrategy);
+		m_pWeightedBlendingShaderProgram->updateUniform1i("uWeightingStragety", m_WOITStrategy);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -679,7 +706,7 @@ private:
 	std::unique_ptr<CFrameBuffer>	m_pWBOITFrameBuffer;
 	std::shared_ptr<CTexture2D>		m_pAccumulatedTransmittanceTex;
 
-	int m_WeightingStrategy = 0;
+	int m_WOITStrategy = 0;
 #endif
 
 #ifdef USING_LINKED_LIST_OIT
@@ -709,6 +736,8 @@ private:
 	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap2;
 	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap3;
 	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap4;
+
+	int m_FOITStrategy = 0;
 #endif
 };
 
