@@ -21,9 +21,9 @@ void main()
 
 	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
 
-	//float absorbance = -log(1.0 - uCoverage + 1e-5);
-	float opticalDepth = 100.0 * uCoverage * depth;
-	float absorbance = gl_FrontFacing ? -opticalDepth : opticalDepth;
+	float absorbance = -log(1.0 - uCoverage + 1e-5);
+	//float opticalDepth = 100.0 * uCoverage * depth;
+	//float absorbance = gl_FrontFacing ? -opticalDepth : opticalDepth;
 
 	float cos2 = cos(2 * PI * depth);
 	float sin2 = sin(2 * PI * depth);
