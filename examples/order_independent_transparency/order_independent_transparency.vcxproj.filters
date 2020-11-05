@@ -34,6 +34,9 @@
     <Filter Include="Resource Files\shaders\FourierOIT">
       <UniqueIdentifier>{196b0013-d3a3-4854-914d-60bfa1d2419e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders\WaveletOIT">
+      <UniqueIdentifier>{7ae1b129-31f7-4c01-bb4d-19eec2bf6ad8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -136,6 +139,27 @@
     </None>
     <None Include="shaders\FOIT_reconstruct_transmittance.vert">
       <Filter>Resource Files\shaders\FourierOIT</Filter>
+    </None>
+    <None Include="scene_05.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="shaders\WOIT_merge_color.frag">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
+    <None Include="shaders\WOIT_reconstruct_transmittance.frag">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
+    <None Include="shaders\WOIT_reconstruct_transmittance.vert">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
+    <None Include="shaders\WOIT_generate_wavelet_opacity_map.vert">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
+    <None Include="shaders\WOIT_generate_wavelet_opacity_map.frag">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
+    <None Include="shaders\WOIT_common.glsl">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

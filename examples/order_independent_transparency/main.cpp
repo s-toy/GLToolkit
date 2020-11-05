@@ -20,13 +20,14 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define USING_ALL_METHODS
+#define USING_FOURIER_OIT
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
 #define USING_WEIGHTED_BLENDED_OIT
 #define USING_LINKED_LIST_OIT
 #define USING_FOURIER_OIT
+#define USING_WAVELET_OIT
 #endif
 
 enum class EOITMethod : unsigned char
@@ -34,7 +35,8 @@ enum class EOITMethod : unsigned char
 	LINKED_LIST_OIT = 0,
 	MOMENT_BASE_OIT,
 	WEIGHTED_BLENDED_OIT,
-	FOURIER_OIT
+	FOURIER_OIT,
+	WAVELET_OIT
 };
 
 using namespace glt;
@@ -101,11 +103,12 @@ protected:
 		else if (KeyStatus[GLFW_KEY_M]) m_OITMethod = EOITMethod::MOMENT_BASE_OIT;
 		else if (KeyStatus[GLFW_KEY_B]) m_OITMethod = EOITMethod::WEIGHTED_BLENDED_OIT;
 		else if (KeyStatus[GLFW_KEY_F]) m_OITMethod = EOITMethod::FOURIER_OIT;
+		else if (KeyStatus[GLFW_KEY_V]) m_OITMethod = EOITMethod::WAVELET_OIT;
 #endif
 
 #ifdef USING_WEIGHTED_BLENDED_OIT
-		if (KeyStatus[GLFW_KEY_0]) m_WOITStrategy = 0;
-		else if (KeyStatus[GLFW_KEY_1]) m_WOITStrategy = 1;
+		if (KeyStatus[GLFW_KEY_0]) m_WBOITStrategy = 0;
+		else if (KeyStatus[GLFW_KEY_1]) m_WBOITStrategy = 1;
 #endif
 
 #ifdef USING_LINKED_LIST_OIT
@@ -118,6 +121,11 @@ protected:
 		else if (KeyStatus[GLFW_KEY_1]) m_FOITStrategy = 1;
 		else if (KeyStatus[GLFW_KEY_2]) m_FOITStrategy = 2;
 		else if (KeyStatus[GLFW_KEY_3]) m_FOITStrategy = 3;
+#endif
+
+#ifdef USING_WAVELET_OIT
+		if (KeyStatus[GLFW_KEY_0]) m_WOITStrategy = 0;
+		else if (KeyStatus[GLFW_KEY_1]) m_WOITStrategy = 1;
 #endif
 	}
 
@@ -179,6 +187,20 @@ private:
 		m_pFOITMergerColorSP->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
 		m_pFOITMergerColorSP->addShader("shaders/FOIT_merge_color.frag", EShaderType::FRAGMENT_SHADER);
 #endif
+
+#ifdef USING_WAVELET_OIT
+		m_pGenWaveletOpacityMapSP = std::make_unique<CShaderProgram>();
+		m_pGenWaveletOpacityMapSP->addShader("shaders/WOIT_generate_wavelet_opacity_map.vert", EShaderType::VERTEX_SHADER);
+		m_pGenWaveletOpacityMapSP->addShader("shaders/WOIT_generate_wavelet_opacity_map.frag", EShaderType::FRAGMENT_SHADER);
+
+		m_pWOITReconstructTransmittanceSP = std::make_unique<CShaderProgram>();
+		m_pWOITReconstructTransmittanceSP->addShader("shaders/WOIT_reconstruct_transmittance.vert", EShaderType::VERTEX_SHADER);
+		m_pWOITReconstructTransmittanceSP->addShader("shaders/WOIT_reconstruct_transmittance.frag", EShaderType::FRAGMENT_SHADER);
+
+		m_pWOITMergerColorSP = std::make_unique<CShaderProgram>();
+		m_pWOITMergerColorSP->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
+		m_pWOITMergerColorSP->addShader("shaders/WOIT_merge_color.frag", EShaderType::FRAGMENT_SHADER);
+#endif
 	}
 
 	void __initScene()
@@ -189,7 +211,7 @@ private:
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 		pCamera->setPosition(glm::dvec3(0, 0, 4));
 		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(20.0);
+		pCamera->setFarPlane(200.0);
 
 		std::vector<std::string> Faces = {
 			"textures/skybox/right.jpg",
@@ -287,6 +309,29 @@ private:
 		m_pFOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
 #endif
 
+#ifdef USING_WAVELET_OIT
+		m_pWaveletOpacityMap1 = std::make_shared<CTexture2D>();
+		m_pWaveletOpacityMap1->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pWaveletOpacityMap2 = std::make_shared<CTexture2D>();
+		m_pWaveletOpacityMap2->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pWaveletOpacityMap3 = std::make_shared<CTexture2D>();
+		m_pWaveletOpacityMap3->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pWaveletOpacityMap4 = std::make_shared<CTexture2D>();
+		m_pWaveletOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pWOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
+		m_pWOITFrameBuffer1->set(EAttachment::COLOR0, m_pWaveletOpacityMap1);
+		m_pWOITFrameBuffer1->set(EAttachment::COLOR1, m_pWaveletOpacityMap2);
+		m_pWOITFrameBuffer1->set(EAttachment::COLOR2, m_pWaveletOpacityMap3);
+		m_pWOITFrameBuffer1->set(EAttachment::COLOR3, m_pWaveletOpacityMap4);
+
+		m_pWOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
+		m_pWOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
+#endif
+
 #if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT)
 		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 #endif
@@ -327,6 +372,8 @@ private:
 			__renderUsingWeightedBlendedOIT(); break;
 		case EOITMethod::FOURIER_OIT:
 			__renderUsingFourierOIT(); break;
+		case EOITMethod::WAVELET_OIT:
+			__renderUsingWaveletOIT(); break;
 		}
 #elif defined(USING_MOMENT_BASED_OIT)
 		__renderUsingMomentBasedOIT();
@@ -336,6 +383,8 @@ private:
 		__renderUsingWeightedBlendedOIT();
 #elif defined(USING_FOURIER_OIT)
 		__renderUsingFourierOIT();
+#elif defined(USING_WAVELET_OIT)
+		__renderUsingWaveletOIT();
 #endif
 	}
 
@@ -397,7 +446,6 @@ private:
 		CRenderer::getInstance()->drawScreenQuad(*m_pLLOITMergeColorShaderProgram);
 	}
 #endif
-
 
 #ifdef USING_MOMENT_BASED_OIT
 	void __renderUsingMomentBasedOIT()
@@ -625,6 +673,108 @@ private:
 	}
 #endif
 
+#ifdef USING_WAVELET_OIT
+	void __renderUsingWaveletOIT()
+	{
+		int WOITCoeffNum = 0;
+		switch (m_WOITStrategy)
+		{
+		case 0:
+			WOITCoeffNum = 16;
+			break;
+		case 1:
+			WOITCoeffNum = 8;
+			break;
+		}
+
+		//pass1: generate wavelet opacity map
+		m_pWOITFrameBuffer1->bind();
+
+		CRenderer::getInstance()->clear();
+		CRenderer::getInstance()->enableCullFace(false);
+		CRenderer::getInstance()->setDepthMask(false);
+		CRenderer::getInstance()->enableBlend(true);
+		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE);
+
+		m_pGenWaveletOpacityMapSP->bind();
+		m_pOpaqueDepthTex->bindV(2);
+		m_pGenWaveletOpacityMapSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+
+		auto pCamera = CRenderer::getInstance()->fetchCamera();
+		m_pGenWaveletOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
+		m_pGenWaveletOpacityMapSP->updateUniform1f("uFarPlane", pCamera->getFar());
+
+		m_pGenWaveletOpacityMapSP->updateUniform1i("uWOITCoeffNum", WOITCoeffNum);
+
+		for (auto Model : m_TransparentModels)
+		{
+			auto Material = m_Model2MaterialMap[Model];
+			m_pGenWaveletOpacityMapSP->bind();
+			m_pGenWaveletOpacityMapSP->updateUniform1f("uCoverage", Material.coverage);
+			CRenderer::getInstance()->draw(*Model, *m_pGenWaveletOpacityMapSP);
+		}
+
+		CRenderer::getInstance()->setDepthMask(true);
+		CRenderer::getInstance()->enableBlend(false);
+
+		m_pWOITFrameBuffer1->unbind();
+
+		//pass2: reconstruct transmittance
+		m_pWOITFrameBuffer2->bind();
+
+		CRenderer::getInstance()->clear();
+		CRenderer::getInstance()->enableCullFace(false);
+		CRenderer::getInstance()->setDepthMask(false);
+		CRenderer::getInstance()->enableBlend(true);
+		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE);
+
+		m_pWOITReconstructTransmittanceSP->bind();
+		m_pOpaqueDepthTex->bindV(2);
+		m_pWaveletOpacityMap1->bindV(3);
+		m_pWaveletOpacityMap2->bindV(4);
+		m_pWaveletOpacityMap3->bindV(5);
+		m_pWaveletOpacityMap4->bindV(6);
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletOpacityMap1", m_pWaveletOpacityMap1.get());
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletOpacityMap2", m_pWaveletOpacityMap2.get());
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletOpacityMap3", m_pWaveletOpacityMap3.get());
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletOpacityMap4", m_pWaveletOpacityMap4.get());
+
+		m_pWOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
+		m_pWOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
+
+		m_pWOITReconstructTransmittanceSP->updateUniform1i("uWOITCoeffNum", WOITCoeffNum);
+
+		for (auto Model : m_TransparentModels)
+		{
+			auto Material = m_Model2MaterialMap[Model];
+			m_pWOITReconstructTransmittanceSP->bind();
+			m_pWOITReconstructTransmittanceSP->updateUniform3f("uDiffuseColor", Material.diffuse);
+			m_pWOITReconstructTransmittanceSP->updateUniform1f("uCoverage", Material.coverage);
+			CRenderer::getInstance()->draw(*Model, *m_pWOITReconstructTransmittanceSP);
+		}
+
+		CRenderer::getInstance()->setDepthMask(true);
+		CRenderer::getInstance()->enableBlend(false);
+
+		m_pWOITFrameBuffer2->unbind();
+
+		//pass3: merge color
+		CRenderer::getInstance()->clear();
+
+		m_pOpaqueColorTex->bindV(0);
+		m_pTransparencyColorTex->bindV(1);
+		m_pWaveletOpacityMap1->bindV(2);
+
+		m_pWOITMergerColorSP->bind();
+		m_pWOITMergerColorSP->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTex.get());
+		m_pWOITMergerColorSP->updateUniformTexture("uTranslucentColorTex", m_pTransparencyColorTex.get());
+		m_pWOITMergerColorSP->updateUniformTexture("uWaveletOpacityMap1", m_pWaveletOpacityMap1.get());
+
+		CRenderer::getInstance()->drawScreenQuad(*m_pWOITMergerColorSP);
+	}
+#endif
+
 #ifdef USING_WEIGHTED_BLENDED_OIT
 	void __renderUsingWeightedBlendedOIT()
 	{
@@ -640,7 +790,7 @@ private:
 		m_pWeightedBlendingShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pWeightedBlendingShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-		m_pWeightedBlendingShaderProgram->updateUniform1i("uWeightingStragety", m_WOITStrategy);
+		m_pWeightedBlendingShaderProgram->updateUniform1i("uWeightingStragety", m_WBOITStrategy);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -706,7 +856,7 @@ private:
 	std::unique_ptr<CFrameBuffer>	m_pWBOITFrameBuffer;
 	std::shared_ptr<CTexture2D>		m_pAccumulatedTransmittanceTex;
 
-	int m_WOITStrategy = 0;
+	int m_WBOITStrategy = 0;
 #endif
 
 #ifdef USING_LINKED_LIST_OIT
@@ -738,6 +888,20 @@ private:
 	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap4;
 
 	int m_FOITStrategy = 0;
+#endif
+
+#ifdef USING_WAVELET_OIT
+	std::unique_ptr<CShaderProgram> m_pGenWaveletOpacityMapSP;
+	std::unique_ptr<CShaderProgram> m_pWOITReconstructTransmittanceSP;
+	std::unique_ptr<CShaderProgram> m_pWOITMergerColorSP;
+	std::unique_ptr<CFrameBuffer>	m_pWOITFrameBuffer1;
+	std::unique_ptr<CFrameBuffer>	m_pWOITFrameBuffer2;
+	std::shared_ptr<CTexture2D>		m_pWaveletOpacityMap1;
+	std::shared_ptr<CTexture2D>		m_pWaveletOpacityMap2;
+	std::shared_ptr<CTexture2D>		m_pWaveletOpacityMap3;
+	std::shared_ptr<CTexture2D>		m_pWaveletOpacityMap4;
+
+	int m_WOITStrategy = 0;
 #endif
 };
 

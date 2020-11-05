@@ -162,6 +162,7 @@
     <None Include="scene_02.json" />
     <None Include="scene_03.json" />
     <None Include="scene_04.json" />
+    <None Include="scene_05.json" />
     <None Include="shaders\common.glsl" />
     <None Include="shaders\complex_algebra.glsl" />
     <None Include="shaders\compute_reflection_color.glsl" />
@@ -190,6 +191,12 @@
     <None Include="shaders\WBOIT_merge_color.frag" />
     <None Include="shaders\WBOIT_weighted_blending.frag" />
     <None Include="shaders\WBOIT_weighted_blending.vert" />
+    <None Include="shaders\WOIT_common.glsl" />
+    <None Include="shaders\WOIT_generate_wavelet_opacity_map.frag" />
+    <None Include="shaders\WOIT_generate_wavelet_opacity_map.vert" />
+    <None Include="shaders\WOIT_merge_color.frag" />
+    <None Include="shaders\WOIT_reconstruct_transmittance.frag" />
+    <None Include="shaders\WOIT_reconstruct_transmittance.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\moment_math.glsl" />

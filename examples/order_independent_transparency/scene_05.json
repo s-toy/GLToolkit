@@ -1,0 +1,35 @@
+{
+  "skybox": {
+    "filePath": ""
+  },
+
+  "models": {
+    "opaqueModels": [
+      {
+        "filePath": "models/lpshead/head.obj",
+        "position": [ 0.0, -1.0, -4.0 ],
+        "scale": [ 6.0, 6.0, 6.0 ]
+      }
+    ],
+    "transparentModels": [
+      {
+        "filePath": "models/lpshead/head.obj",
+        "position": [ 0.0, -1.0, 0.0 ],
+        "scale": [ 6.0, 6.0, 6.0 ],
+        "parameters": [ 0.0, 0.5, 0.0, 0.2 ]
+      },
+      {
+        "filePath": "models/lpshead/head.obj",
+        "position": [ 1.15, -1.0, -2.0 ],
+        "scale": [ 6.0, 6.0, 6.0 ],
+        "parameters": [ 0.5, 0.0, 0.0, 0.5 ]
+      },
+      {
+        "filePath": "models/lpshead/head.obj",
+        "position": [ -1.15, -1.0, -2.0 ],
+        "scale": [ 6.0, 6.0, 6.0 ],
+        "parameters": [ 0.0, 0.0, 0.5, 0.8 ]
+      }
+    ]
+  }
+}
