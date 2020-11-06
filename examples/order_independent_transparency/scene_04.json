@@ -21,37 +21,37 @@
         "filePath": "models/bunny/bunny.obj",
         "position": [ 2.0, -1.5, -1.0 ],
         "scale": [ 0.8, 0.8, 0.8 ],
-        "parameters": [ 0.0, 0.5, 0.5, 0.2 ]
+        "parameters": [ 0.0, 0.5, 0.5, 0.3 ]
       },
       {
         "filePath": "models/bunny/bunny.obj",
         "position": [ 2.0, -1.5, 0.0 ],
         "scale": [ 0.8, 0.8, 0.8 ],
-        "parameters": [ 0.0, 0.0, 0.5, 0.8 ]
+        "parameters": [ 0.0, 0.0, 0.5, 0.7 ]
       },
       {
         "filePath": "models/bunny/bunny.obj",
         "position": [ 0.0, -1.5, -1.0 ],
         "scale": [ 0.8, 0.8, 0.8 ],
-        "parameters": [ 0.0, 0.5, 0.5, 0.5 ]
+        "parameters": [ 0.0, 0.5, 0.5, 0.4 ]
       },
       {
         "filePath": "models/bunny/bunny.obj",
         "position": [ 0.0, -1.5, 0.0 ],
         "scale": [ 0.8, 0.8, 0.8 ],
-        "parameters": [ 0.0, 0.0, 0.5, 0.5 ]
+        "parameters": [ 0.0, 0.0, 0.5, 0.4 ]
       },
       {
         "filePath": "models/bunny/bunny.obj",
         "position": [ -2.0, -1.5, -1.0 ],
         "scale": [ 0.8, 0.8, 0.8 ],
-        "parameters": [ 0.0, 0.5, 0.5, 0.9 ]
+        "parameters": [ 0.0, 0.5, 0.5, 0.8 ]
       },
       {
         "filePath": "models/bunny/bunny.obj",
         "position": [ -2.0, -1.5, 0.0 ],
         "scale": [ 0.8, 0.8, 0.8 ],
-        "parameters": [ 0.0, 0.0, 0.5, 0.1 ]
+        "parameters": [ 0.0, 0.0, 0.5, 0.2 ]
       }
     ]
   }

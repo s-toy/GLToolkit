@@ -20,7 +20,7 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define USING_FOURIER_OIT
+#define USING_ALL_METHODS
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -211,7 +211,7 @@ private:
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 		pCamera->setPosition(glm::dvec3(0, 0, 4));
 		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(200.0);
+		pCamera->setFarPlane(20.0);
 
 		std::vector<std::string> Faces = {
 			"textures/skybox/right.jpg",

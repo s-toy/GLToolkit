@@ -70,7 +70,7 @@ void main()
 	opticalDepth += map2.z * psi_integral(depth, 2, 2);
 	opticalDepth += map2.w * psi_integral(depth, 2, 3);
 
-	if (uWOITCoeffNum > 8)
+	if (uWOITCoeffNum == 16)
 	{
 		vec4 map3 = texelFetch(uWaveletOpacityMap3, ivec2(gl_FragCoord.xy), 0);
 		vec4 map4 = texelFetch(uWaveletOpacityMap4, ivec2(gl_FragCoord.xy), 0);

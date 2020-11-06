@@ -89,7 +89,7 @@ void main()
 	}
 	else
 	{
-		const float absorbance = 5000.0;
+		const float absorbance = 60.0;
 		if (counter % 2 == 0)
 		{
 			for (int i = 0; i < counter; i += 2)
