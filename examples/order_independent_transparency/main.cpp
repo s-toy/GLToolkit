@@ -211,7 +211,8 @@ private:
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 		pCamera->setPosition(glm::dvec3(0, 0, 4));
 		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(20.0);
+		pCamera->setFarPlane(10.0);
+		pCamera->setMoveSpeed(0.001);
 
 		std::vector<std::string> Faces = {
 			"textures/skybox/right.jpg",

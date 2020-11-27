@@ -55,7 +55,7 @@ void main()
 	float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
-	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane) - 0.01;
 
 	vec4 map1 = texelFetch(uWaveletOpacityMap1, ivec2(gl_FragCoord.xy), 0);
 	vec4 map2 = texelFetch(uWaveletOpacityMap2, ivec2(gl_FragCoord.xy), 0);

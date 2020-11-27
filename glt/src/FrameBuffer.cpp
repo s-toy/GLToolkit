@@ -44,7 +44,7 @@ void CFrameBuffer::set(EAttachment vAttachment, std::shared_ptr<CTexture> vTextu
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_ObjectID);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum)vAttachment, GL_TEXTURE_2D, vTexture->getObjectID(), 0);
-
+	
 	m_TextureMap[vAttachment] = vTexture;
 
 	//Specify a list of color buffers to be drawn into
