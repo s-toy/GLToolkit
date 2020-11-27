@@ -2,7 +2,7 @@
 
 uniform sampler2D uOpaqueColorTex;
 uniform sampler2D uTranslucentColorTex;
-uniform sampler2D uWaveletOpacityMap1;
+uniform sampler2D uTotalAbsorbanceTex;
 
 void main()
 {
@@ -10,7 +10,7 @@ void main()
 	vec3  opaqueColor = texelFetch(uOpaqueColorTex, uv, 0).rgb;
 	vec4  translucentColor = texelFetch(uTranslucentColorTex, uv, 0).rgba;
 
-	float totalOpticalDepth = texelFetch(uWaveletOpacityMap1, uv, 0).x;
+	float totalOpticalDepth = texelFetch(uTotalAbsorbanceTex, uv, 0).x;
 	float totalTransmittance = exp(-totalOpticalDepth);
 
 	vec3 finalColor = mix(translucentColor.rgb / (translucentColor.a + 1e-5), opaqueColor, totalTransmittance);

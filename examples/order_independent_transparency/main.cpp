@@ -212,7 +212,7 @@ private:
 		pCamera->setPosition(glm::dvec3(0, 0, 4));
 		pCamera->setNearPlane(0.1);
 		pCamera->setFarPlane(10.0);
-		pCamera->setMoveSpeed(0.001);
+		pCamera->setMoveSpeed(0.01);
 
 		std::vector<std::string> Faces = {
 			"textures/skybox/right.jpg",
@@ -323,14 +323,24 @@ private:
 		m_pWaveletOpacityMap4 = std::make_shared<CTexture2D>();
 		m_pWaveletOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
+		m_pTotalAbsorbanceTex = std::make_shared<CTexture2D>();
+		m_pTotalAbsorbanceTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
 		m_pWOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR0, m_pWaveletOpacityMap1);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR1, m_pWaveletOpacityMap2);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR2, m_pWaveletOpacityMap3);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR3, m_pWaveletOpacityMap4);
+		m_pWOITFrameBuffer1->set(EAttachment::COLOR4, m_pTotalAbsorbanceTex);
 
 		m_pWOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pWOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
+
+		m_pPsiIntegralLutTex = std::make_shared<CTexture2D>();
+		m_pPsiIntegralLutTex->load16("textures/psi_int.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pPsiLutTex = std::make_shared<CTexture2D>();
+		m_pPsiLutTex->load16("textures/psi.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 #endif
 
 #if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT)
@@ -681,10 +691,10 @@ private:
 		switch (m_WOITStrategy)
 		{
 		case 0:
-			WOITCoeffNum = 16;
+			WOITCoeffNum = 8;
 			break;
 		case 1:
-			WOITCoeffNum = 8;
+			WOITCoeffNum = 16;
 			break;
 		}
 
@@ -700,6 +710,8 @@ private:
 		m_pGenWaveletOpacityMapSP->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		m_pPsiLutTex->bindV(3);
+		m_pGenWaveletOpacityMapSP->updateUniformTexture("uPsiLutTex", m_pPsiLutTex.get());
 
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
@@ -735,11 +747,13 @@ private:
 		m_pWaveletOpacityMap2->bindV(4);
 		m_pWaveletOpacityMap3->bindV(5);
 		m_pWaveletOpacityMap4->bindV(6);
+		m_pPsiIntegralLutTex->bindV(7);
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletOpacityMap1", m_pWaveletOpacityMap1.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletOpacityMap2", m_pWaveletOpacityMap2.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletOpacityMap3", m_pWaveletOpacityMap3.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletOpacityMap4", m_pWaveletOpacityMap4.get());
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uPsiIntegralLutTex", m_pPsiIntegralLutTex.get());
 
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
@@ -765,12 +779,12 @@ private:
 
 		m_pOpaqueColorTex->bindV(0);
 		m_pTransparencyColorTex->bindV(1);
-		m_pWaveletOpacityMap1->bindV(2);
+		m_pTotalAbsorbanceTex->bindV(2);
 
 		m_pWOITMergerColorSP->bind();
 		m_pWOITMergerColorSP->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTex.get());
 		m_pWOITMergerColorSP->updateUniformTexture("uTranslucentColorTex", m_pTransparencyColorTex.get());
-		m_pWOITMergerColorSP->updateUniformTexture("uWaveletOpacityMap1", m_pWaveletOpacityMap1.get());
+		m_pWOITMergerColorSP->updateUniformTexture("uTotalAbsorbanceTex", m_pTotalAbsorbanceTex.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pWOITMergerColorSP);
 	}
@@ -901,6 +915,9 @@ private:
 	std::shared_ptr<CTexture2D>		m_pWaveletOpacityMap2;
 	std::shared_ptr<CTexture2D>		m_pWaveletOpacityMap3;
 	std::shared_ptr<CTexture2D>		m_pWaveletOpacityMap4;
+	std::shared_ptr<CTexture2D>		m_pPsiLutTex;
+	std::shared_ptr<CTexture2D>		m_pPsiIntegralLutTex;
+	std::shared_ptr<CTexture2D>		m_pTotalAbsorbanceTex;
 
 	int m_WOITStrategy = 0;
 #endif

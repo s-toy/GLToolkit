@@ -35,6 +35,7 @@ namespace glt
 	{
 	public:
 		void load(const char *vPath, GLint vWrapMode = GL_CLAMP_TO_BORDER, GLint vFilterMode = GL_LINEAR, bool vFlipVertically = false);
+		void load16(const char *vPath, GLint vWrapMode = GL_CLAMP_TO_BORDER, GLint vFilterMode = GL_LINEAR, bool vFlipVertically = false);
 		void createEmpty(unsigned int vWidth, unsigned int vHeight, GLint vInternalFormat = GL_RGBA, GLint vWrapMode = GL_CLAMP_TO_BORDER, GLint vFilterMode = GL_NEAREST, bool vGenerateMipMap = GL_FALSE);
 
 		void bindV(unsigned int vBindPoint) const override;

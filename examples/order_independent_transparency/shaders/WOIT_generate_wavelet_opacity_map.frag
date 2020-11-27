@@ -1,7 +1,11 @@
 #version 460 core
 #include "common.glsl"
 
+#define BASIS_NUM 8
+#define SLICE_COUNT 1000
+
 uniform sampler2D   uOpaqueDepthTex;
+uniform sampler2D	uPsiLutTex;
 uniform float		uCoverage;
 uniform float		uNearPlane;
 uniform float		uFarPlane;
@@ -13,13 +17,14 @@ layout(location = 0) out vec4 _outWaveletOpacityMap1;
 layout(location = 1) out vec4 _outWaveletOpacityMap2;
 layout(location = 2) out vec4 _outWaveletOpacityMap3;
 layout(location = 3) out vec4 _outWaveletOpacityMap4;
+layout(location = 4) out float _outTotalAbsorbance;
 
-float phi(float x)
+float haar_phi(float x)
 {
 	return 1;
 }
 
-float psi(float x, float j, float k)
+float haar_psi(float x, float j, float k)
 {
 	float value = pow(2.0f, j / 2.0f);
 	//value *= value;
@@ -37,6 +42,33 @@ float psi(float x, float j, float k)
 		return 0;
 }
 
+float meyer_phi(float d)
+{
+	int indexX = int(SLICE_COUNT * d);
+	indexX = min(max(indexX, 0), SLICE_COUNT - 1);
+	return texelFetch(uPsiLutTex, ivec2(indexX, BASIS_NUM - 1), 0).r;
+}
+
+float meyer_psi(float d, float j, float k)
+{
+	int indexX = int(SLICE_COUNT * d);
+	indexX = min(max(indexX, 0), SLICE_COUNT - 1);
+	int indexY = int(pow(2, j) - 1.0 + k);
+	return texelFetch(uPsiLutTex, ivec2(indexX, indexY), 0).r;
+}
+
+float phi(float x)
+{
+//	return haar_phi(x);
+	return meyer_phi(x) * 20 - 10;
+}
+
+float psi(float x, float j, float k)
+{
+//	return haar_psi(x, j, k);
+	return meyer_psi(x, j, k) * 20 - 10;
+}
+
 void main()
 {
 	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
@@ -47,6 +79,8 @@ void main()
 	float absorbance = -log(1.0 - uCoverage + 1e-5);
 	//float opticalDepth = 50.0 * uCoverage * (depth);
 	//float absorbance = gl_FrontFacing ? -opticalDepth : opticalDepth;
+
+	_outTotalAbsorbance = absorbance;
 
 	float phi00 = absorbance * phi(depth);
 	float psi00 =  absorbance * psi(depth, 0, 0);

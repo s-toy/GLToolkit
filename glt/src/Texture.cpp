@@ -63,6 +63,47 @@ void CTexture2D::load(const char* vPath, GLint vWrapMode, GLint vFilterMode, boo
 
 //***********************************************************************************************
 //FUNCTION:
+void CTexture2D::load16(const char* vPath, GLint vWrapMode, GLint vFilterMode, bool vFlipVertically)
+{
+	_ASSERTE(vPath);
+	m_FilePath = CFileLocator::getInstance()->locateFile(vPath);
+
+	stbi_set_flip_vertically_on_load(vFlipVertically);
+
+	int Width, Height, Channels;
+	unsigned short* pImageData = stbi_load_16(m_FilePath.c_str(), &Width, &Height, &Channels, 0);
+
+	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
+
+	switch (Channels)
+	{
+	case 1:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, Width, Height, 0, GL_RED, GL_UNSIGNED_SHORT, pImageData);
+		break;
+	case 3:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16, Width, Height, 0, GL_RGB, GL_UNSIGNED_SHORT, pImageData);
+		break;
+	case 4:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, Width, Height, 0, GL_RGBA, GL_UNSIGNED_SHORT, pImageData);
+		break;
+	default:
+		break;
+	}
+
+	if (!pImageData) _OUTPUT_WARNING("Failed to load texture due to failure of stbi_loadf().");
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, vWrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, vWrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, vFilterMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, vFilterMode);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(pImageData);
+}
+
+//***********************************************************************************************
+//FUNCTION:
 void CTexture2D::createEmpty(unsigned int vWidth, unsigned int vHeight, GLint vInternalFormat, GLint vWrapMode, GLint vFilterMode, bool vGenerateMipMap)
 {
 	glBindTexture(GL_TEXTURE_2D, m_ObjectID);

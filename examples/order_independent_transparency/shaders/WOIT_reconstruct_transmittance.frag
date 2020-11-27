@@ -3,6 +3,8 @@
 #include "compute_phong_shading.glsl"
 
 #define PI 3.1415926
+#define BASIS_NUM 8
+#define SLICE_COUNT 1000
 
 uniform sampler2D	uMaterialDiffuse;
 uniform sampler2D	uMaterialSpecular;
@@ -11,7 +13,7 @@ uniform sampler2D	uWaveletOpacityMap1;
 uniform sampler2D	uWaveletOpacityMap2;
 uniform sampler2D	uWaveletOpacityMap3;
 uniform sampler2D	uWaveletOpacityMap4;
-
+uniform sampler2D	uPsiIntegralLutTex;
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
 uniform float	uCoverage;
@@ -27,12 +29,12 @@ layout(location = 0) out vec4 _outTransparencyColor;
 
 #include "compute_reflection_color.glsl"
 
-float phi_integral(float d)
+float haar_phi_integral(float d)
 {
 	return d;
 }
 
-float psi_integral(float d, float j, float k)
+float haar_psi_integral(float d, float j, float k)
 {
 	const float value = pow(2.0f, j / 2.0f);
 	const float intervalLength = 1.0f / pow(2.0f, j + 1);
@@ -50,12 +52,39 @@ float psi_integral(float d, float j, float k)
 		return 0;
 }
 
+float meyer_phi_integral(float d)
+{
+	int indexX = int(SLICE_COUNT * d);
+	indexX = min(max(indexX, 0), SLICE_COUNT - 1);
+	return texelFetch(uPsiIntegralLutTex, ivec2(indexX, BASIS_NUM - 1), 0).r;
+}
+
+float meyer_psi_integral(float d, float j, float k)
+{
+	int indexX = int(SLICE_COUNT * d);
+	indexX = min(max(indexX, 0), SLICE_COUNT - 1);
+	int indexY = int(pow(2, j) - 1.0 + k);
+	return texelFetch(uPsiIntegralLutTex, ivec2(indexX, indexY), 0).r;
+}
+
+float phi_integral(float d)
+{
+//	return haar_phi_integral(d);
+	return meyer_phi_integral(d) * 20 - 10;
+}
+
+float psi_integral(float d, float j, float k)
+{
+//	return haar_psi_integral(d, j, k);
+	return meyer_psi_integral(d, j, k) * 20 - 10;
+}
+
 void main()
 {
 	float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
-	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane) - 0.01;
+	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane) - 0.0;
 
 	vec4 map1 = texelFetch(uWaveletOpacityMap1, ivec2(gl_FragCoord.xy), 0);
 	vec4 map2 = texelFetch(uWaveletOpacityMap2, ivec2(gl_FragCoord.xy), 0);
