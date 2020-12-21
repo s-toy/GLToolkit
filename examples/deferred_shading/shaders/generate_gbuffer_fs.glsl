@@ -1,7 +1,7 @@
 #version 460 core
 
-uniform sampler2D uMaterialDiffuse;
-uniform sampler2D uMaterialSpecular;
+uniform sampler2D uMaterialDiffuseTex;
+uniform sampler2D uMaterialSpecularTex;
 
 layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
@@ -16,6 +16,6 @@ void main()
 {
 	_outPositionW = _inPositionW;
 	_outNormalW = _inNormalW;
-	_outDiffuseColor = texture(uMaterialDiffuse, _inTexCoord).rgb;
-	_outSpecularColor = texture(uMaterialSpecular, _inTexCoord).rgb;
+	_outDiffuseColor = texture(uMaterialDiffuseTex, _inTexCoord).rgb;
+	_outSpecularColor = texture(uMaterialSpecularTex, _inTexCoord).rgb;
 }

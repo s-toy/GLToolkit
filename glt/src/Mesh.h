@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <any>
 #include <glm/glm.hpp>
 #include <assimp/Importer.hpp>
 #include "IndexBuffer.h"
@@ -18,13 +19,21 @@ namespace glt
 		glm::vec4  BoneWeights;
 	} SVertex;
 
+	typedef struct
+	{
+		EUniformType Type;
+		std::string Name;
+		std::any Value;
+	} SUniformInfo;
+
 	class CShaderProgram;
 	class CTexture2D;
 
 	class CMesh
 	{
 	public:
-		CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<std::shared_ptr<CTexture2D>>& vTextures);
+		CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<std::shared_ptr<CTexture2D>>& vTextures,
+			const std::vector<SUniformInfo>& vUniforms);
 
 	protected:
 		void _draw(const CShaderProgram& vShaderProgram) const;
@@ -36,6 +45,7 @@ namespace glt
 		std::vector<SVertex> m_Vertices;
 		std::vector<GLuint> m_Indices;
 		std::vector<std::shared_ptr<CTexture2D>> m_Textures;
+		std::vector<SUniformInfo> m_Uniforms;
 
 		std::shared_ptr<CVertexBuffer>	m_pVertexBuffer;
 		std::shared_ptr<CIndexBuffer>	m_pIndexBuffer;

@@ -363,7 +363,7 @@ private:
 		m_pOpaqueFrameBuffer->bind();
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(true);
-		//if (m_pSkybox) CRenderer::getInstance()->drawSkybox(*m_pSkybox, 0);
+		if (m_pSkybox) CRenderer::getInstance()->drawSkybox(*m_pSkybox, 0);
 
 		//draw opaque objects
 		if (!m_OpaqueModels.empty()) CRenderer::getInstance()->draw(m_OpaqueModels, *m_pOpaqueShaderProgram);

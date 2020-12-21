@@ -1,3 +1,6 @@
+uniform vec3	uMaterialDiffuse;
+uniform vec3	uMaterialSpecular;
+
 vec3 ACESFilmToneMapping(vec3 x)
 {
 	float a = 2.51f;
@@ -14,8 +17,8 @@ vec3 computeReflectColor()
 	vec3 NormalW = normalize(_inNormalW);
 
 	SMaterial Material;
-	Material.Diffuse = uDiffuseColor; //texture(uMaterialDiffuse, _inTexCoord).rgb;
-	Material.Specular = vec3(0.6); //texture(uMaterialSpecular, _inTexCoord).rgb;
+	Material.Diffuse = uMaterialDiffuse; //texture(uMaterialDiffuseTex, _inTexCoord).rgb;
+	Material.Specular = vec3(0.6); //texture(uMaterialSpecularTex, _inTexCoord).rgb;
 	Material.Shinness = 32.0;
 
 	vec3 color = vec3(0.0);

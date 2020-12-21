@@ -6,8 +6,8 @@
 #define BASIS_NUM 8
 #define SLICE_COUNT 1000
 
-uniform sampler2D	uMaterialDiffuse;
-uniform sampler2D	uMaterialSpecular;
+uniform sampler2D	uMaterialDiffuseTex;
+uniform sampler2D	uMaterialSpecularTex;
 uniform sampler2D   uOpaqueDepthTex;
 uniform sampler2D	uWaveletOpacityMap1;
 uniform sampler2D	uWaveletOpacityMap2;

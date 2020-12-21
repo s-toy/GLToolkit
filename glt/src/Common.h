@@ -65,6 +65,14 @@ namespace glt
 		}
 	};
 
+	enum class EUniformType : unsigned char 
+	{
+		FLOAT = 0,
+		VEC2F,
+		VEC3F,
+		VEC4F
+	};
+
 	template <class ... Args>
 	static std::string format(const char *vFormat, Args... args)
 	{

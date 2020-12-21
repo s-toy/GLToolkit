@@ -86,6 +86,7 @@ std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh)
 	std::vector<SVertex> Vertices(vMesh->mNumVertices);
 	std::vector<unsigned> Indices(3u * vMesh->mNumFaces);
 	std::vector<std::shared_ptr<CTexture2D>> Textures;
+	std::vector<SUniformInfo> Uniforms;
 
 	_ASSERTE(vMesh->HasNormals());
 	for (unsigned i = 0; i < vMesh->mNumVertices; ++i)
@@ -100,7 +101,7 @@ std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh)
 	}
 
 	if (vMesh->HasBones()) m_HasBones = true; //TODO:不一定所有mesh都有bones
-	for (unsigned i = 0; i < vMesh->mNumBones; ++i) 
+	for (unsigned i = 0; i < vMesh->mNumBones; ++i)
 	{
 		unsigned BoneIndex = 0;
 		std::string BoneName(vMesh->mBones[i]->mName.data);
@@ -148,14 +149,22 @@ std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh)
 	{
 		aiMaterial* pMaterial = m_pScene->mMaterials[vMesh->mMaterialIndex];
 
-		std::vector<std::shared_ptr<CTexture2D>> DiffuseMaps = __loadMaterialTextures(pMaterial, aiTextureType_DIFFUSE, "uMaterialDiffuse");
+		std::vector<std::shared_ptr<CTexture2D>> DiffuseMaps = __loadMaterialTextures(pMaterial, aiTextureType_DIFFUSE, "uMaterialDiffuseTex");
 		Textures.insert(Textures.end(), DiffuseMaps.begin(), DiffuseMaps.end());
 
-		std::vector<std::shared_ptr<CTexture2D>> SpecularMaps = __loadMaterialTextures(pMaterial, aiTextureType_SPECULAR, "uMaterialSpecular");
+		std::vector<std::shared_ptr<CTexture2D>> SpecularMaps = __loadMaterialTextures(pMaterial, aiTextureType_SPECULAR, "uMaterialSpecularTex");
 		Textures.insert(Textures.end(), SpecularMaps.begin(), SpecularMaps.end());
+
+		aiColor4D DiffuseColor;
+		aiGetMaterialColor(pMaterial, AI_MATKEY_COLOR_DIFFUSE, &DiffuseColor);
+		Uniforms.push_back(SUniformInfo{ EUniformType::VEC3F, "uMaterialDiffuse", std::any(glm::vec3(DiffuseColor.r, DiffuseColor.g, DiffuseColor.b)) });
+
+		aiColor4D SpecularColor;
+		aiGetMaterialColor(pMaterial, AI_MATKEY_COLOR_DIFFUSE, &SpecularColor);
+		Uniforms.push_back(SUniformInfo{ EUniformType::VEC3F, "uMaterialSpecular", std::any(glm::vec3(SpecularColor.r, SpecularColor.g, SpecularColor.b)) });
 	}
 
-	return std::make_shared<CMesh>(Vertices, Indices, Textures);
+	return std::make_shared<CMesh>(Vertices, Indices, Textures, Uniforms);
 }
 
 //**********************************************************************************************

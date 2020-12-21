@@ -4,8 +4,8 @@
 #define WEIGHTED_BLENDING 0
 #define AVERAGE_BLENDING  1
 
-uniform sampler2D	uMaterialDiffuse;
-uniform sampler2D	uMaterialSpecular;
+uniform sampler2D	uMaterialDiffuseTex;
+uniform sampler2D	uMaterialSpecularTex;
 uniform sampler2D   uOpaqueDepthTex;
 
 uniform vec3	uViewPos = vec3(0.0);

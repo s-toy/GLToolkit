@@ -9,11 +9,13 @@ using namespace glt;
 
 //**********************************************************************************************
 //FUNCTION:
-CMesh::CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<std::shared_ptr<CTexture2D>>& vTextures)
+CMesh::CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<std::shared_ptr<CTexture2D>>& vTextures,
+	const std::vector<SUniformInfo>& vUniforms)
 {
 	m_Vertices = vVertices;
 	m_Indices = vIndices;
 	m_Textures = vTextures;
+	m_Uniforms = vUniforms;
 
 	__setupMesh();
 }
@@ -42,10 +44,32 @@ void CMesh::_draw(const CShaderProgram& vShaderProgram) const
 	m_pVertexArray->bind();
 	m_pIndexBuffer->bind();
 
-	for (GLuint i = 0; i < m_Textures.size(); ++i)
+	for (int i = 0; i < m_Textures.size(); ++i)
 	{
 		m_Textures[i]->bindV(i);
 		vShaderProgram.updateUniform1i(m_Textures[i]->getTextureName(), i);
+	}
+
+	for (int i = 0; i < m_Uniforms.size(); ++i)
+	{
+		switch (m_Uniforms[i].Type)
+		{
+		case EUniformType::FLOAT:
+			vShaderProgram.updateUniform1f(m_Uniforms[i].Name, std::any_cast<float>(m_Uniforms[i].Value));
+			break;
+		case EUniformType::VEC2F:
+			vShaderProgram.updateUniform2f(m_Uniforms[i].Name, std::any_cast<glm::vec2>(m_Uniforms[i].Value));
+			break;
+		case EUniformType::VEC3F:
+			vShaderProgram.updateUniform3f(m_Uniforms[i].Name, std::any_cast<glm::vec3>(m_Uniforms[i].Value));
+			break;
+		case EUniformType::VEC4F:
+			vShaderProgram.updateUniform4f(m_Uniforms[i].Name, std::any_cast<glm::vec4>(m_Uniforms[i].Value));
+			break;
+		default:
+			_OUTPUT_WARNING("The uniform type is not supported.");
+			break;
+		}
 	}
 
 	glDrawElements(GL_TRIANGLES, m_pIndexBuffer->getCount(), GL_UNSIGNED_INT, nullptr);

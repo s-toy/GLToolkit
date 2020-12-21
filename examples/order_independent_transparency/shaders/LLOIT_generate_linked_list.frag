@@ -16,8 +16,8 @@ layout(binding = 0, offset = 0) uniform atomic_uint uListNodeCounter;
 layout(binding = 0, std430) buffer linkedLists { ListNode nodes[]; };
 
 uniform int			uMaxListNode;
-uniform sampler2D	uMaterialDiffuse;
-uniform sampler2D	uMaterialSpecular;
+uniform sampler2D	uMaterialDiffuseTex;
+uniform sampler2D	uMaterialSpecularTex;
 uniform sampler2D   uOpaqueDepthTex;
 uniform vec3		uViewPos = vec3(0.0);
 uniform float		uNearPlane;

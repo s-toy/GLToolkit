@@ -1,8 +1,11 @@
 #version 460 core
 #include "compute_phong_shading.glsl"
 
-uniform sampler2D uMaterialDiffuse;
-uniform sampler2D uMaterialSpecular;
+uniform sampler2D uMaterialDiffuseTex;
+uniform sampler2D uMaterialSpecularTex;
+
+uniform vec3 uMaterialDiffuse;
+uniform vec3 uMaterialSpecular;
 
 uniform vec3 uViewPos = vec3(0.0);
 
@@ -18,8 +21,8 @@ void main()
 	vec3 NormalW = normalize(_inNormalW);
 
 	SMaterial Material;
-	Material.Diffuse = vec3(0.6);// texture(uMaterialDiffuse, _inTexCoord).rgb;
-	Material.Specular = vec3(0.3);// texture(uMaterialSpecular, _inTexCoord).rgb;
+	Material.Diffuse = vec3(0.6);// texture(uMaterialDiffuseTex, _inTexCoord).rgb;
+	Material.Specular = vec3(0.3);// texture(uMaterialSpecularTex, _inTexCoord).rgb;
 	Material.Shinness = 32.0;
 
 	vec3 color = vec3(0.0);

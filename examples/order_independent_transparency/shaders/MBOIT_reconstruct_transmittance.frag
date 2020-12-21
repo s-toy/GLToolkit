@@ -4,8 +4,8 @@
 #include "compute_phong_shading.glsl"
 #include "reconstruction_config.glsl"
 
-uniform sampler2D	uMaterialDiffuse;
-uniform sampler2D	uMaterialSpecular;
+uniform sampler2D	uMaterialDiffuseTex;
+uniform sampler2D	uMaterialSpecularTex;
 uniform sampler2D   uOpaqueDepthTex;
 
 uniform sampler2D	uMomentB0Tex;
