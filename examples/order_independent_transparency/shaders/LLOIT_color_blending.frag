@@ -17,7 +17,7 @@ struct NodeData
 	float depth;
 };
 
-#define MAX_FRAGMENTS 16
+#define MAX_FRAGMENTS 64
 
 layout(binding = 0, r32ui) coherent uniform uimage2D uListHeadPtrTex;
 layout(binding = 0, std430) buffer linkedList { ListNode nodes[]; };
