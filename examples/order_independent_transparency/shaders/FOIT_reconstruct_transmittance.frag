@@ -3,6 +3,13 @@
 #include "compute_phong_shading.glsl"
 
 #define PI 3.1415926
+//#define ENABLE_SIGMA_AVERAGING 
+
+#ifdef ENABLE_SIGMA_AVERAGING
+	#define SIGMA_K(k, n) (sin(k*PI/n) / (k*PI/n))
+#else
+	#define SIGMA_K(k, n) 1
+#endif
 
 uniform sampler2D	uMaterialDiffuseTex;
 uniform sampler2D	uMaterialSpecularTex;
@@ -45,9 +52,10 @@ void main()
 	float a1 = xx_a0_a1_b1.z;
 	float b1 = xx_a0_a1_b1.w;
 
+	float N = uFOITCoeffNum / 2;
 	float opticalDepth = 0.5 * a0 * depth;
-	opticalDepth += (a1 / (2*PI)) * sin2;
-	opticalDepth += (b1 / (2*PI)) * (1-cos2);
+	opticalDepth += (a1 / (2*PI)) * sin2 * SIGMA_K(1, N);
+	opticalDepth += (b1 / (2*PI)) * (1-cos2) * SIGMA_K(1, N);
 
 	if (uFOITCoeffNum > 3)
 	{
@@ -62,10 +70,10 @@ void main()
 		float a3 = a2_b2_a3_b3.z;
 		float b3 = a2_b2_a3_b3.w;
 
-		opticalDepth += (a2 / (4*PI)) * sin4;
-		opticalDepth += (b2 / (4*PI)) * (1-cos4);
-		opticalDepth += (a3 / (6*PI)) * sin6;
-		opticalDepth += (b3 / (6*PI)) * (1-cos6);
+		opticalDepth += (a2 / (4*PI)) * sin4 * SIGMA_K(1, N);
+		opticalDepth += (b2 / (4*PI)) * (1-cos4) * SIGMA_K(1, N);
+		opticalDepth += (a3 / (6*PI)) * sin6 * SIGMA_K(1, N);
+		opticalDepth += (b3 / (6*PI)) * (1-cos6) * SIGMA_K(1, N);
 	}
 
 	if (uFOITCoeffNum > 7)
@@ -81,10 +89,10 @@ void main()
 		float a5 = a4_b4_a5_b5.z;
 		float b5 = a4_b4_a5_b5.w;
 
-		opticalDepth += (a4 / (8*PI)) * sin8;
-		opticalDepth += (b4 / (8*PI)) * (1-cos8);
-		opticalDepth += (a5 / (10*PI)) * sin10;
-		opticalDepth += (b5 / (10*PI)) * (1-cos10);
+		opticalDepth += (a4 / (8*PI)) * sin8 * SIGMA_K(1, N);
+		opticalDepth += (b4 / (8*PI)) * (1-cos8) * SIGMA_K(1, N);
+		opticalDepth += (a5 / (10*PI)) * sin10 * SIGMA_K(1, N);
+		opticalDepth += (b5 / (10*PI)) * (1-cos10) * SIGMA_K(1, N);
 	}
 
 	if (uFOITCoeffNum > 11)
@@ -100,10 +108,10 @@ void main()
 		float a7 = a6_b6_a7_b7.z;
 		float b7 = a6_b6_a7_b7.w;
 
-		opticalDepth += (a6 / (12*PI)) * sin12;
-		opticalDepth += (b6 / (12*PI)) * (1-cos12);
-		opticalDepth += (a7 / (14*PI)) * sin14;
-		opticalDepth += (b7 / (14*PI)) * (1-cos14);
+		opticalDepth += (a6 / (12*PI)) * sin12 * SIGMA_K(1, N);
+		opticalDepth += (b6 / (12*PI)) * (1-cos12) * SIGMA_K(1, N);
+		opticalDepth += (a7 / (14*PI)) * sin14 * SIGMA_K(1, N);
+		opticalDepth += (b7 / (14*PI)) * (1-cos14) * SIGMA_K(1, N);
 	}
 
 	float transmittance = exp(-opticalDepth);

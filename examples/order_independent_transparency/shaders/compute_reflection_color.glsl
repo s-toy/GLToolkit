@@ -22,8 +22,8 @@ vec3 computeReflectColor()
 	Material.Shinness = 32.0;
 
 	vec3 color = vec3(0.0);
-	color += computePhongShading4ParallelLight(_inPositionW.xyz, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(1.0, 1.0, 1.0)), Material);
-	color += computePhongShading4ParallelLight(_inPositionW.xyz, NormalW, ViewDirW, SParallelLight(vec3(0.7), vec3(-1.0, 1.0, -1.0)), Material);
+	color += computePhongShading4ParallelLight(_inPositionW.xyz, NormalW, ViewDirW, SParallelLight(vec3(1.7), vec3(1.0, 1.0, 1.0)), Material);
+	color += computePhongShading4ParallelLight(_inPositionW.xyz, NormalW, ViewDirW, SParallelLight(vec3(1.7), vec3(-1.0, 1.0, -1.0)), Material);
 	color = ACESFilmToneMapping(color);
 
 	return color;

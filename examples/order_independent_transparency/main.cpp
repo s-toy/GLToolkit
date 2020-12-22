@@ -45,7 +45,7 @@ const int WIN_WIDTH = 1600;
 const int WIN_HEIGHT = 900;
 
 #ifdef USING_LINKED_LIST_OIT
-const int MAX_LIST_NODE = WIN_WIDTH * WIN_HEIGHT * 24;
+const int MAX_LIST_NODE = WIN_WIDTH * WIN_HEIGHT * 64;
 
 struct SListNode
 {
@@ -76,7 +76,7 @@ class CMyApplication : public CApplicationBase
 protected:
 	bool _initV() override
 	{
-		setDisplayStatusHint();
+		//setDisplayStatusHint();
 
 		CFileLocator::getInstance()->addFileSearchPath("../../resource");
 
@@ -211,7 +211,7 @@ private:
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 		pCamera->setPosition(glm::dvec3(0, 0, 4));
 		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(20.0);
+		pCamera->setFarPlane(10.0);
 		pCamera->setMoveSpeed(0.01);
 
 		std::vector<std::string> Faces = {
