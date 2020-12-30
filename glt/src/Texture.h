@@ -65,4 +65,18 @@ namespace glt
 		int m_Width = 0;
 		int m_Height = 0;
 	};
+
+	class GLT_DECLSPEC CImage2DArray : public CTexture
+	{
+	public:
+		void createEmpty(int vWidth, int vHeight, int vDepth, GLenum vFormat, unsigned int vBindUnit);
+
+		void bindV(unsigned int vBindPoint) const override;
+		void unbindV() const override;
+
+	private:
+		GLenum m_Format = 0;
+		int m_Width = 0;
+		int m_Height = 0;
+	};
 }

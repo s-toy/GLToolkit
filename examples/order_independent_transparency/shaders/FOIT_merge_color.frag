@@ -1,8 +1,11 @@
 #version 460 core
+#include "common.glsl"
 
 uniform sampler2D uOpaqueColorTex;
 uniform sampler2D uTranslucentColorTex;
-uniform sampler2D uFourierOpacityMap1;
+
+layout(binding = 0, FOIT_FLT_PRECISION) uniform image2DArray uFourierOpacityMaps;
+layout(binding = 1, rgba8ui) uniform uimage2DArray uQuantizedFourierOpacityMaps;
 
 void main()
 {
@@ -10,10 +13,16 @@ void main()
 	vec3  opaqueColor = texelFetch(uOpaqueColorTex, uv, 0).rgb;
 	vec4  translucentColor = texelFetch(uTranslucentColorTex, uv, 0).rgba;
 
-	float totalOpticalDepth = 0.5 * texelFetch(uFourierOpacityMap1, uv, 0).y;
+#ifndef FOIT_ENABLE_QUANTIZATION
+	float totalOpticalDepth = 0.5 * imageLoad(uFourierOpacityMaps, ivec3(uv, 0)).y;
+#else
+	float totalOpticalDepth =  0.5 * dequantize(imageLoad(uQuantizedFourierOpacityMaps, ivec3(uv, 0)).y);
+#endif
+
 	float totalTransmittance = exp(-totalOpticalDepth);
 
 	vec3 finalColor = mix(translucentColor.rgb / (translucentColor.a + 1e-5), opaqueColor, totalTransmittance);
+	//vec3 finalColor = mix(translucentColor.rgb, opaqueColor, totalTransmittance);
 
 	gl_FragColor = vec4(finalColor, 1.0);
 }

@@ -20,7 +20,9 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define USING_ALL_METHODS
+#define FOIT_FLT_PRECISION GL_RGBA16F
+
+#define USING_FOURIER_OIT
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -107,25 +109,45 @@ protected:
 #endif
 
 #ifdef USING_WEIGHTED_BLENDED_OIT
-		if (KeyStatus[GLFW_KEY_0]) m_WBOITStrategy = 0;
-		else if (KeyStatus[GLFW_KEY_1]) m_WBOITStrategy = 1;
+#ifdef USING_ALL_METHODS
+		if (m_OITMethod == EOITMethod::WEIGHTED_BLENDED_OIT)
+#endif
+		{
+			if (KeyStatus[GLFW_KEY_0]) m_WBOITStrategy = 0;
+			else if (KeyStatus[GLFW_KEY_1]) m_WBOITStrategy = 1;
+		}
 #endif
 
 #ifdef USING_LINKED_LIST_OIT
-		if (KeyStatus[GLFW_KEY_0]) m_UseThickness = false;
-		else if (KeyStatus[GLFW_KEY_1]) m_UseThickness = true;
+#ifdef USING_ALL_METHODS
+		if (m_OITMethod == EOITMethod::LINKED_LIST_OIT)
+#endif
+		{
+			if (KeyStatus[GLFW_KEY_0]) m_UseThickness = false;
+			else if (KeyStatus[GLFW_KEY_1]) m_UseThickness = true;
+		}
 #endif
 
 #ifdef USING_FOURIER_OIT
-		if (KeyStatus[GLFW_KEY_0]) m_FOITStrategy = 0;
-		else if (KeyStatus[GLFW_KEY_1]) m_FOITStrategy = 1;
-		else if (KeyStatus[GLFW_KEY_2]) m_FOITStrategy = 2;
-		else if (KeyStatus[GLFW_KEY_3]) m_FOITStrategy = 3;
+#ifdef USING_ALL_METHODS
+		if (m_OITMethod == EOITMethod::FOURIER_OIT)
+#endif
+		{
+			if (KeyStatus[GLFW_KEY_0]) m_FOITStrategy = 0;
+			else if (KeyStatus[GLFW_KEY_1]) m_FOITStrategy = 1;
+			else if (KeyStatus[GLFW_KEY_2]) m_FOITStrategy = 2;
+			else if (KeyStatus[GLFW_KEY_3]) m_FOITStrategy = 3;
+		}
 #endif
 
 #ifdef USING_WAVELET_OIT
-		if (KeyStatus[GLFW_KEY_0]) m_WOITStrategy = 0;
-		else if (KeyStatus[GLFW_KEY_1]) m_WOITStrategy = 1;
+#ifdef USING_ALL_METHODS
+		if (m_OITMethod == EOITMethod::WAVELET_OIT)
+#endif
+		{
+			if (KeyStatus[GLFW_KEY_0]) m_WOITStrategy = 0;
+			else if (KeyStatus[GLFW_KEY_1]) m_WOITStrategy = 1;
+		}
 #endif
 	}
 
@@ -186,6 +208,9 @@ private:
 		m_pFOITMergerColorSP = std::make_unique<CShaderProgram>();
 		m_pFOITMergerColorSP->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
 		m_pFOITMergerColorSP->addShader("shaders/FOIT_merge_color.frag", EShaderType::FRAGMENT_SHADER);
+
+		m_pComputePdfSP = std::make_unique<CShaderProgram>();
+		m_pComputePdfSP->addShader("shaders/FOIT_compute_pdf.compute", EShaderType::COMPUTE_SHADER);
 #endif
 
 #ifdef USING_WAVELET_OIT
@@ -209,7 +234,7 @@ private:
 		timer.start();
 
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
-		pCamera->setPosition(glm::dvec3(0, 0, 4));
+		pCamera->setPosition(glm::dvec3(0, 0, 5));
 		pCamera->setNearPlane(0.1);
 		pCamera->setFarPlane(10.0);
 		pCamera->setMoveSpeed(0.01);
@@ -288,23 +313,36 @@ private:
 #endif
 
 #ifdef USING_FOURIER_OIT
-		m_pFourierOpacityMap1 = std::make_shared<CTexture2D>();
-		m_pFourierOpacityMap1->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		glGenBuffers(1, &m_ClearQuantizedFourierOpacityMapPBO);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearQuantizedFourierOpacityMapPBO);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, WIN_WIDTH * WIN_HEIGHT * 32, NULL, GL_STATIC_DRAW);
+		unsigned * dst = (unsigned*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+		memset(dst, 0x00, WIN_WIDTH * WIN_HEIGHT * 32);
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-		m_pFourierOpacityMap2 = std::make_shared<CTexture2D>();
-		m_pFourierOpacityMap2->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		glGenBuffers(1, &m_ClearFourierOpacityMapPBO);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierOpacityMapPBO);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, WIN_WIDTH * WIN_HEIGHT * 64, NULL, GL_STATIC_DRAW);
+		dst = (unsigned*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+		memset(dst, 0x00, WIN_WIDTH * WIN_HEIGHT * 64);
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-		m_pFourierOpacityMap3 = std::make_shared<CTexture2D>();
-		m_pFourierOpacityMap3->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pFourierOpacityMaps = std::make_shared<CImage2DArray>();
+		m_pFourierOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, 4, FOIT_FLT_PRECISION, 0);
 
-		m_pFourierOpacityMap4 = std::make_shared<CTexture2D>();
-		m_pFourierOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pQuantizedFourierOpacityMaps = std::make_shared<CImage2DArray>();
+		m_pQuantizedFourierOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, 4, GL_RGBA8UI, 1);
+
+		m_pFourierCoeffPDFImage = std::make_shared<CImage2D>();
+		m_pFourierCoeffPDFImage->createEmpty(10000, 1, GL_R32F, 2);
+
+		m_pEmptyRenderTexture = std::make_shared<CTexture2D>();
+		m_pEmptyRenderTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R8);
 
 		m_pFOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT,false);
-		m_pFOITFrameBuffer1->set(EAttachment::COLOR0, m_pFourierOpacityMap1);
-		m_pFOITFrameBuffer1->set(EAttachment::COLOR1, m_pFourierOpacityMap2);
-		m_pFOITFrameBuffer1->set(EAttachment::COLOR2, m_pFourierOpacityMap3);
-		m_pFOITFrameBuffer1->set(EAttachment::COLOR3, m_pFourierOpacityMap4);
+		m_pFOITFrameBuffer1->set(EAttachment::COLOR0, m_pEmptyRenderTexture);
 
 		m_pFOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pFOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
@@ -343,7 +381,7 @@ private:
 		m_pPsiLutTex->load16("textures/psi.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 #endif
 
-#if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT)
+#if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT) || defined(USING_FOURIER_OIT)
 		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 #endif
 	}
@@ -584,22 +622,43 @@ private:
 		switch (m_FOITStrategy)
 		{
 		case 0:
-			FOITCoeffNum = 15;
+			FOITCoeffNum = 3;
 			break;
 		case 1:
-			FOITCoeffNum = 11;
-			break;
-		case 2:
 			FOITCoeffNum = 7;
 			break;
+		case 2:
+			FOITCoeffNum = 11;
+			break;
 		case 3:
-			FOITCoeffNum = 3;
+			FOITCoeffNum = 15;
 		}
+
+		//clear images
+		for (int i = 0; i < 4; i++)
+		{
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierOpacityMapPBO);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, m_pFourierOpacityMaps->getObjectID());
+			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, WIN_WIDTH, WIN_HEIGHT, 1, GL_RGBA, GL_FLOAT, NULL);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearQuantizedFourierOpacityMapPBO);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, m_pQuantizedFourierOpacityMaps->getObjectID());
+			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, WIN_WIDTH, WIN_HEIGHT, 1, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, NULL);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+		}
+
+		m_pClearImageFrameBuffer->bind();
+		m_pClearImageFrameBuffer->set(EAttachment::COLOR0, m_pFourierCoeffPDFImage);
+		CRenderer::getInstance()->clear();
+		m_pClearImageFrameBuffer->unbind();
 
 		//pass1: generate fourier opacity map
 		m_pFOITFrameBuffer1->bind();
 
-		CRenderer::getInstance()->clear();
+		CRenderer::getInstance()->clear(GL_DEPTH_BUFFER_BIT);
 		CRenderer::getInstance()->enableCullFace(false);
 		CRenderer::getInstance()->setDepthMask(false);
 		CRenderer::getInstance()->enableBlend(true);
@@ -628,6 +687,16 @@ private:
 
 		m_pFOITFrameBuffer1->unbind();
 
+		//pass1.1: compute pdf
+		m_pComputePdfSP->bind();
+
+		int NumGroupsX = ceil(WIN_WIDTH / 16.0);
+		int NumGroupsY = ceil(WIN_HEIGHT / 16.0);
+		glDispatchCompute(NumGroupsX, NumGroupsY, 1);
+
+		m_pComputePdfSP->unbind();
+
+
 		//pass2: reconstruct transmittance
 		m_pFOITFrameBuffer2->bind();
 
@@ -639,15 +708,7 @@ private:
 
 		m_pFOITReconstructTransmittanceSP->bind();
 		m_pOpaqueDepthTex->bindV(2);
-		m_pFourierOpacityMap1->bindV(3);
-		m_pFourierOpacityMap2->bindV(4);
-		m_pFourierOpacityMap3->bindV(5);
-		m_pFourierOpacityMap4->bindV(6);
 		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uFourierOpacityMap1", m_pFourierOpacityMap1.get());
-		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uFourierOpacityMap2", m_pFourierOpacityMap2.get());
-		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uFourierOpacityMap3", m_pFourierOpacityMap3.get());
-		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uFourierOpacityMap4", m_pFourierOpacityMap4.get());
 
 		m_pFOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pFOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
@@ -673,12 +734,10 @@ private:
 
 		m_pOpaqueColorTex->bindV(0);
 		m_pTransparencyColorTex->bindV(1);
-		m_pFourierOpacityMap1->bindV(2);
 
 		m_pFOITMergerColorSP->bind();
 		m_pFOITMergerColorSP->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTex.get());
 		m_pFOITMergerColorSP->updateUniformTexture("uTranslucentColorTex", m_pTransparencyColorTex.get());
-		m_pFOITMergerColorSP->updateUniformTexture("uFourierOpacityMap1", m_pFourierOpacityMap1.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pFOITMergerColorSP);
 	}
@@ -887,7 +946,7 @@ private:
 	bool m_UseThickness = false;
 #endif
 
-#if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT)
+#if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT) || defined(USING_FOURIER_OIT)
 	std::unique_ptr<CFrameBuffer> m_pClearImageFrameBuffer;
 #endif
 
@@ -895,14 +954,18 @@ private:
 	std::unique_ptr<CShaderProgram> m_pGenFourierOpacityMapSP;
 	std::unique_ptr<CShaderProgram> m_pFOITReconstructTransmittanceSP;
 	std::unique_ptr<CShaderProgram> m_pFOITMergerColorSP;
+	std::unique_ptr<CShaderProgram> m_pComputePdfSP;
 	std::unique_ptr<CFrameBuffer>	m_pFOITFrameBuffer1;
 	std::unique_ptr<CFrameBuffer>	m_pFOITFrameBuffer2;
-	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap1;
-	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap2;
-	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap3;
-	std::shared_ptr<CTexture2D>		m_pFourierOpacityMap4;
+	std::shared_ptr<CImage2DArray>	m_pFourierOpacityMaps;
+	std::shared_ptr<CImage2DArray>	m_pQuantizedFourierOpacityMaps;
+	std::shared_ptr<CImage2D>		m_pFourierCoeffPDFImage;
+	std::shared_ptr<CTexture2D>		m_pEmptyRenderTexture;
 
-	int m_FOITStrategy = 0;
+	GLuint m_ClearFourierOpacityMapPBO;
+	GLuint m_ClearQuantizedFourierOpacityMapPBO;
+
+	int m_FOITStrategy = 3;
 #endif
 
 #ifdef USING_WAVELET_OIT

@@ -1,5 +1,6 @@
 #version 460 core
 #include "common.glsl"
+#include "WOIT_common.glsl"
 
 #define BASIS_NUM 8
 #define SLICE_COUNT 1000
@@ -59,14 +60,20 @@ float meyer_psi(float d, float j, float k)
 
 float phi(float x)
 {
-//	return haar_phi(x);
+#ifdef USING_HAAR_WAVELETS
+	return haar_phi(x);
+#else
 	return meyer_phi(x) * 20 - 10;
+#endif
 }
 
 float psi(float x, float j, float k)
 {
-//	return haar_psi(x, j, k);
+#ifdef USING_HAAR_WAVELETS
+	return haar_psi(x, j, k);
+#else
 	return meyer_psi(x, j, k) * 20 - 10;
+#endif
 }
 
 void main()

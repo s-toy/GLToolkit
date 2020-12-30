@@ -3,7 +3,7 @@
 #include "compute_phong_shading.glsl"
 
 #define PI 3.1415926
-//#define ENABLE_SIGMA_AVERAGING 
+#define ENABLE_SIGMA_AVERAGING 
 
 #ifdef ENABLE_SIGMA_AVERAGING
 	#define SIGMA_K(k, n) (sin(k*PI/n) / (k*PI/n))
@@ -14,10 +14,9 @@
 uniform sampler2D	uMaterialDiffuseTex;
 uniform sampler2D	uMaterialSpecularTex;
 uniform sampler2D   uOpaqueDepthTex;
-uniform sampler2D	uFourierOpacityMap1;
-uniform sampler2D	uFourierOpacityMap2;
-uniform sampler2D	uFourierOpacityMap3;
-uniform sampler2D	uFourierOpacityMap4;
+
+layout(binding = 0, FOIT_FLT_PRECISION) uniform image2DArray uFourierOpacityMaps;
+layout(binding = 1, rgba8ui) uniform uimage2DArray uQuantizedFourierOpacityMaps;
 
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
@@ -41,7 +40,11 @@ void main()
 
 	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
 
-	vec4 xx_a0_a1_b1 = texelFetch(uFourierOpacityMap1, ivec2(gl_FragCoord.xy), 0);
+#ifndef FOIT_ENABLE_QUANTIZATION
+	vec4 xx_a0_a1_b1 = imageLoad(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0));
+#else
+	vec4 xx_a0_a1_b1 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0)));
+#endif
 
 	float cos2 = cos(2 * PI * depth);
 	float sin2 = sin(2 * PI * depth);
@@ -64,7 +67,12 @@ void main()
 		cos6 = cos4 * cos2 - sin4 * sin2;
 		sin6 = sin4 * cos2 + cos4 * sin2;
 
-		vec4 a2_b2_a3_b3 = texelFetch(uFourierOpacityMap2, ivec2(gl_FragCoord.xy), 0);
+#ifndef FOIT_ENABLE_QUANTIZATION
+		vec4 a2_b2_a3_b3 = imageLoad(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 1));
+#else
+		vec4 a2_b2_a3_b3 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 1)));
+#endif
+
 		float a2 = a2_b2_a3_b3.x;
 		float b2 = a2_b2_a3_b3.y;
 		float a3 = a2_b2_a3_b3.z;
@@ -83,7 +91,12 @@ void main()
 		cos10 = cos6 * cos4 - sin6 * sin4;
 		sin10 = sin6 * cos4 + cos6 * sin4;
 
-		vec4 a4_b4_a5_b5 = texelFetch(uFourierOpacityMap3, ivec2(gl_FragCoord.xy), 0);
+#ifndef FOIT_ENABLE_QUANTIZATION
+		vec4 a4_b4_a5_b5 = imageLoad(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 2));
+#else
+		vec4 a4_b4_a5_b5 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 2)));
+#endif
+
 		float a4 = a4_b4_a5_b5.x;
 		float b4 = a4_b4_a5_b5.y;
 		float a5 = a4_b4_a5_b5.z;
@@ -102,7 +115,12 @@ void main()
 		cos14 = cos8 * cos6 - sin8 * sin6;
 		sin14 = cos8 * sin6 + sin8 * cos6;
 		
-		vec4 a6_b6_a7_b7 = texelFetch(uFourierOpacityMap4, ivec2(gl_FragCoord.xy), 0);
+#ifndef FOIT_ENABLE_QUANTIZATION
+		vec4 a6_b6_a7_b7 = imageLoad(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 3));
+#else
+		vec4 a6_b6_a7_b7 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 3)));
+#endif
+
 		float a6 = a6_b6_a7_b7.x;
 		float b6 = a6_b6_a7_b7.y;
 		float a7 = a6_b6_a7_b7.z;

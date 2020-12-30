@@ -251,3 +251,32 @@ void CImage2D::unbindV() const
 {
 
 }
+
+//***********************************************************************************************
+//FUNCTION:
+void CImage2DArray::createEmpty(int vWidth, int vHeight, int vDepth, GLenum vFormat, unsigned int vBindUnit)
+{
+	m_Format = vFormat;
+	m_Width = vWidth;
+	m_Height = vHeight;
+
+	glBindTexture(GL_TEXTURE_2D_ARRAY, m_ObjectID);
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, m_Format, m_Width, m_Height, vDepth);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+
+	glBindImageTexture(vBindUnit, m_ObjectID, 0, GL_FALSE, 0, GL_READ_WRITE, m_Format);
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CImage2DArray::bindV(unsigned int vBindPoint) const
+{
+
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CImage2DArray::unbindV() const
+{
+
+}

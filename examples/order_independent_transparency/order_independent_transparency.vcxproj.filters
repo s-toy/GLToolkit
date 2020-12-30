@@ -167,4 +167,9 @@
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\FOIT_compute_pdf.compute">
+      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>

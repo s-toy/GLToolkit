@@ -1,0 +1,48 @@
+#version 460 core
+#extension GL_NV_shader_atomic_float : require
+
+#include "common.glsl"
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(binding = 1, rgba8ui) uniform uimage2DArray	uQuantizedFourierOpacityMaps;
+layout(binding = 2, r32f)	 uniform image2D		uFourierCoeffPDFImage;
+
+void writePDF(float val)
+{
+	int sliceIndex = int(floor(PDF_SLICE_COUNT * (val - _IntervalMin) / _IntervalLength));
+	sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT - 1);
+	ivec2 coord = ivec2(sliceIndex, 1);
+	imageAtomicAdd(uFourierCoeffPDFImage, coord, 0.01);
+}
+
+void writePDF(vec4 val)
+{
+	writePDF(val.x);
+	writePDF(val.y);
+	writePDF(val.z);
+	writePDF(val.w);
+}
+
+void writePDF(vec3 val)
+{
+	writePDF(val.x);
+	writePDF(val.y);
+	writePDF(val.z);
+}
+
+void main()
+{
+#ifdef FOIT_ENABLE_QUANTIZATION
+	ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
+	vec4 fourierOpacityData1 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(coord, 0)));
+	vec4 fourierOpacityData2 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(coord, 1)));
+	vec4 fourierOpacityData3 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(coord, 2)));
+	vec4 fourierOpacityData4 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(coord, 3)));
+
+	writePDF(fourierOpacityData1.yzw);
+	writePDF(fourierOpacityData2);
+	writePDF(fourierOpacityData3);
+	writePDF(fourierOpacityData4);
+#endif
+}

@@ -1,5 +1,6 @@
 #version 460 core
 #include "common.glsl"
+#include "WOIT_common.glsl"
 #include "compute_phong_shading.glsl"
 
 #define PI 3.1415926
@@ -69,14 +70,20 @@ float meyer_psi_integral(float d, float j, float k)
 
 float phi_integral(float d)
 {
-//	return haar_phi_integral(d);
+#ifdef USING_HAAR_WAVELETS
+	return haar_phi_integral(d);
+#else
 	return meyer_phi_integral(d) * 20 - 10;
+#endif
 }
 
 float psi_integral(float d, float j, float k)
 {
-//	return haar_psi_integral(d, j, k);
+#ifdef USING_HAAR_WAVELETS
+	return haar_psi_integral(d, j, k);
+#else
 	return meyer_psi_integral(d, j, k) * 20 - 10;
+#endif
 }
 
 void main()
