@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <cmath>
+#include <fstream>
 #include <glm/glm.hpp>
 #include "ApplicationBase.h"
 #include "ShaderProgram.h"
@@ -20,7 +21,7 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define FOIT_FLT_PRECISION GL_RGBA16F
+#define FOIT_FLT_PRECISION GL_RGBA32F
 
 #define USING_FOURIER_OIT
 
@@ -45,6 +46,9 @@ using namespace glt;
 
 const int WIN_WIDTH = 1600;
 const int WIN_HEIGHT = 900;
+
+const float _IntervalMin = -50;
+const float _IntervalMax = 50;
 
 #ifdef USING_LINKED_LIST_OIT
 const int MAX_LIST_NODE = WIN_WIDTH * WIN_HEIGHT * 64;
@@ -211,6 +215,12 @@ private:
 
 		m_pComputePdfSP = std::make_unique<CShaderProgram>();
 		m_pComputePdfSP->addShader("shaders/FOIT_compute_pdf.compute", EShaderType::COMPUTE_SHADER);
+
+		m_pComputeRepresentativeLevelsSP = std::make_unique<CShaderProgram>();
+		m_pComputeRepresentativeLevelsSP->addShader("shaders/FOIT_compute_representative_levels.compute", EShaderType::COMPUTE_SHADER);
+
+		m_pComputeRepresentativeBoundariesSP = std::make_unique<CShaderProgram>();
+		m_pComputeRepresentativeBoundariesSP->addShader("shaders/FOIT_compute_representative_boundaries.compute", EShaderType::COMPUTE_SHADER);
 #endif
 
 #ifdef USING_WAVELET_OIT
@@ -234,7 +244,7 @@ private:
 		timer.start();
 
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
-		pCamera->setPosition(glm::dvec3(0, 0, 5));
+		pCamera->setPosition(glm::dvec3(0, 0, 4));
 		pCamera->setNearPlane(0.1);
 		pCamera->setFarPlane(10.0);
 		pCamera->setMoveSpeed(0.01);
@@ -313,19 +323,27 @@ private:
 #endif
 
 #ifdef USING_FOURIER_OIT
+		glGenBuffers(1, &m_ClearFourierOpacityMapPBO);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierOpacityMapPBO);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, WIN_WIDTH * WIN_HEIGHT * 64, NULL, GL_STATIC_DRAW);
+		unsigned* dst = (unsigned*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+		memset(dst, 0x00, WIN_WIDTH * WIN_HEIGHT * 64);
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
 		glGenBuffers(1, &m_ClearQuantizedFourierOpacityMapPBO);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearQuantizedFourierOpacityMapPBO);
 		glBufferData(GL_PIXEL_UNPACK_BUFFER, WIN_WIDTH * WIN_HEIGHT * 32, NULL, GL_STATIC_DRAW);
-		unsigned * dst = (unsigned*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+		dst = (unsigned*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 		memset(dst, 0x00, WIN_WIDTH * WIN_HEIGHT * 32);
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-		glGenBuffers(1, &m_ClearFourierOpacityMapPBO);
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierOpacityMapPBO);
-		glBufferData(GL_PIXEL_UNPACK_BUFFER, WIN_WIDTH * WIN_HEIGHT * 64, NULL, GL_STATIC_DRAW);
+		glGenBuffers(1, &m_ClearFourierCoeffPDFImagePBO);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierCoeffPDFImagePBO);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, PDF_SLICE_COUNT * 1 * 32, NULL, GL_STATIC_DRAW);
 		dst = (unsigned*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-		memset(dst, 0x00, WIN_WIDTH * WIN_HEIGHT * 64);
+		memset(dst, 0x00, PDF_SLICE_COUNT * 1 * 32);
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
@@ -336,7 +354,13 @@ private:
 		m_pQuantizedFourierOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, 4, GL_RGBA8UI, 1);
 
 		m_pFourierCoeffPDFImage = std::make_shared<CImage2D>();
-		m_pFourierCoeffPDFImage->createEmpty(10000, 1, GL_R32F, 2);
+		m_pFourierCoeffPDFImage->createEmpty(PDF_SLICE_COUNT, 1, GL_R32F, 2);
+
+		m_pRepresentativeDataImage = std::make_shared<CImage2D>();
+		m_pRepresentativeDataImage->createEmpty(257, 2, GL_R32F, 3);
+
+		m_pNewRepresentativeDataImage = std::make_shared<CImage2D>();
+		m_pNewRepresentativeDataImage->createEmpty(257, 2, GL_R32F, 4);
 
 		m_pEmptyRenderTexture = std::make_shared<CTexture2D>();
 		m_pEmptyRenderTexture->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R8);
@@ -346,6 +370,43 @@ private:
 
 		m_pFOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pFOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
+
+		GLfloat data[514] = { 0 };
+
+		for (int i = 257; i < 513; i++)
+		{
+			//data[i] = float(rand()) / RAND_MAX;
+			//data[i] = data[i] * (_IntervalMax - _IntervalMin) + _IntervalMin;
+			int k = i - 257;
+			if (k < 128)
+			{
+				float l = pow(2, k * log2(_IntervalMax + 1) / 128) - 1;
+				float r = pow(2, (k + 1) * log2(_IntervalMax + 1) / 128) - 1;
+				data[i] = (l + r) / 2;
+			}
+			else
+			{
+				float l = pow(2, (k - 128) * log2(-_IntervalMin + 1) / 128) - 1;
+				float r = pow(2, (k - 127) * log2(-_IntervalMin + 1) / 128) - 1;
+				data[i] = -(l + r) / 2;
+			}
+		}
+		std::sort(data + 257, data + 513);
+
+		data[0] = _IntervalMin;
+		data[256] = _IntervalMax;
+		for (int i = 1; i <= 255; ++i)
+		{
+			data[i] = 0.5 * (data[i + 256] + data[i + 257]);
+		}
+
+		glBindTexture(GL_TEXTURE_2D, m_pRepresentativeDataImage->getObjectID());
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 257, 2, GL_RED, GL_FLOAT, data);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glBindTexture(GL_TEXTURE_2D, m_pNewRepresentativeDataImage->getObjectID());
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 257, 2, GL_RED, GL_FLOAT, data);
+		glBindTexture(GL_TEXTURE_2D, 0);
 #endif
 
 #ifdef USING_WAVELET_OIT
@@ -616,6 +677,63 @@ private:
 #endif
 
 #ifdef USING_FOURIER_OIT
+	void __clearImages()
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierOpacityMapPBO);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, m_pFourierOpacityMaps->getObjectID());
+			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, WIN_WIDTH, WIN_HEIGHT, 1, GL_RGBA, GL_FLOAT, NULL);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearQuantizedFourierOpacityMapPBO);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, m_pQuantizedFourierOpacityMaps->getObjectID());
+			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, WIN_WIDTH, WIN_HEIGHT, 1, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, NULL);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+		}
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierCoeffPDFImagePBO);
+		glBindTexture(GL_TEXTURE_2D, m_pFourierCoeffPDFImage->getObjectID());
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, PDF_SLICE_COUNT, 1, GL_RED, GL_FLOAT, NULL);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		GLfloat data[514] = { 0 };
+
+		for (int i = 257; i < 513; i++)
+		{
+			data[i] = float(rand()) / RAND_MAX;
+			data[i] = data[i] * (_IntervalMax - _IntervalMin) + _IntervalMin;
+			//int k = i - 257;
+			//if (k < 128)
+			//{
+			//	float l = pow(2, k * log2(_IntervalMax + 1) / 128) - 1;
+			//	float r = pow(2, (k + 1) * log2(_IntervalMax + 1) / 128) - 1;
+			//	data[i] = (l + r) / 2;
+			//}
+			//else
+			//{
+			//	float l = pow(2, (k - 128) * log2(-_IntervalMin + 1) / 128) - 1;
+			//	float r = pow(2, (k - 127) * log2(-_IntervalMin + 1) / 128) - 1;
+			//	data[i] = -(l + r) / 2;
+			//}
+		}
+		std::sort(data + 257, data + 513);
+
+		data[0] = _IntervalMin;
+		data[256] = _IntervalMax;
+		for (int i = 1; i <= 255; ++i)
+		{
+			data[i] = 0.5 * (data[i + 256] + data[i + 257]);
+		}
+
+		//glBindTexture(GL_TEXTURE_2D, m_pNewRepresentativeDataImage->getObjectID());
+		//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 257, 2, GL_RED, GL_FLOAT, data);
+		//glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	void __renderUsingFourierOIT()
 	{
 		int FOITCoeffNum = 0;
@@ -634,26 +752,7 @@ private:
 			FOITCoeffNum = 15;
 		}
 
-		//clear images
-		for (int i = 0; i < 4; i++)
-		{
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierOpacityMapPBO);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, m_pFourierOpacityMaps->getObjectID());
-			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, WIN_WIDTH, WIN_HEIGHT, 1, GL_RGBA, GL_FLOAT, NULL);
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearQuantizedFourierOpacityMapPBO);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, m_pQuantizedFourierOpacityMaps->getObjectID());
-			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, WIN_WIDTH, WIN_HEIGHT, 1, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, NULL);
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-		}
-
-		m_pClearImageFrameBuffer->bind();
-		m_pClearImageFrameBuffer->set(EAttachment::COLOR0, m_pFourierCoeffPDFImage);
-		CRenderer::getInstance()->clear();
-		m_pClearImageFrameBuffer->unbind();
+		__clearImages();
 
 		//pass1: generate fourier opacity map
 		m_pFOITFrameBuffer1->bind();
@@ -689,13 +788,25 @@ private:
 
 		//pass1.1: compute pdf
 		m_pComputePdfSP->bind();
-
 		int NumGroupsX = ceil(WIN_WIDTH / 16.0);
 		int NumGroupsY = ceil(WIN_HEIGHT / 16.0);
 		glDispatchCompute(NumGroupsX, NumGroupsY, 1);
-
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		m_pComputePdfSP->unbind();
 
+		//pass1.2: compute representative levels and boundaries
+		for (int i = 0; i < 10; ++i)
+		{
+			m_pComputeRepresentativeBoundariesSP->bind();
+			glDispatchCompute(1, 1, 1);
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			m_pComputeRepresentativeBoundariesSP->unbind();
+
+			m_pComputeRepresentativeLevelsSP->bind();
+			glDispatchCompute(1, 1, 1);
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+			m_pComputeRepresentativeLevelsSP->unbind();
+		}
 
 		//pass2: reconstruct transmittance
 		m_pFOITFrameBuffer2->bind();
@@ -740,6 +851,17 @@ private:
 		m_pFOITMergerColorSP->updateUniformTexture("uTranslucentColorTex", m_pTransparencyColorTex.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pFOITMergerColorSP);
+
+		//pass4: copy representative data
+		float dataBuffer[514] = { 0 };
+
+		glBindTexture(GL_TEXTURE_2D, m_pNewRepresentativeDataImage->getObjectID());
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, dataBuffer);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glBindTexture(GL_TEXTURE_2D, m_pRepresentativeDataImage->getObjectID());
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 257, 2, GL_RED, GL_FLOAT, dataBuffer);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 #endif
 
@@ -955,17 +1077,24 @@ private:
 	std::unique_ptr<CShaderProgram> m_pFOITReconstructTransmittanceSP;
 	std::unique_ptr<CShaderProgram> m_pFOITMergerColorSP;
 	std::unique_ptr<CShaderProgram> m_pComputePdfSP;
+	std::unique_ptr<CShaderProgram> m_pComputeRepresentativeLevelsSP;
+	std::unique_ptr<CShaderProgram> m_pComputeRepresentativeBoundariesSP;
 	std::unique_ptr<CFrameBuffer>	m_pFOITFrameBuffer1;
 	std::unique_ptr<CFrameBuffer>	m_pFOITFrameBuffer2;
 	std::shared_ptr<CImage2DArray>	m_pFourierOpacityMaps;
 	std::shared_ptr<CImage2DArray>	m_pQuantizedFourierOpacityMaps;
 	std::shared_ptr<CImage2D>		m_pFourierCoeffPDFImage;
+	std::shared_ptr<CImage2D>		m_pRepresentativeDataImage;
+	std::shared_ptr<CImage2D>		m_pNewRepresentativeDataImage;
 	std::shared_ptr<CTexture2D>		m_pEmptyRenderTexture;
 
 	GLuint m_ClearFourierOpacityMapPBO;
 	GLuint m_ClearQuantizedFourierOpacityMapPBO;
+	GLuint m_ClearFourierCoeffPDFImagePBO;
 
 	int m_FOITStrategy = 3;
+
+	const int PDF_SLICE_COUNT = 10000;
 #endif
 
 #ifdef USING_WAVELET_OIT

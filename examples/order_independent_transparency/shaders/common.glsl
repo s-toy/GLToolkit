@@ -2,13 +2,14 @@
 
 #define FOIT_ENABLE_QUANTIZATION
 
-#define LINEAR_QUANTIZATION		0
+#define LINEAR_QUANTIZATION			0
 #define LOGARITHMIC_QUANTIZATION	1
 #define LOG_LINEAR_QUANTIZATION		2
+#define LLOYD_MAX_QUANTIZATION		3
 
-#define QUANTIZATION_METHOD	LOGARITHMIC_QUANTIZATION
+#define QUANTIZATION_METHOD	LLOYD_MAX_QUANTIZATION
 
-#define FOIT_FLT_PRECISION rgba16f
+#define FOIT_FLT_PRECISION rgba32f
 
 float _returnNegativeZe(float depth, float near, float far)
 {
@@ -200,6 +201,37 @@ float dequantize(uint vData)
 			return -((l + r) / 2 + K * IntervalMin);
 		}
 	}
+}
+#endif
+
+#if QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
+
+layout(binding = 3, r32f) uniform image2D uRepresentativeDataImage;
+
+uint quantize(float vData)
+{
+	if (abs(vData) < 1e-6) return 0;
+
+	int l = 0, r = 255;
+	while (l < r)
+	{
+		int mid = (l + r) / 2;
+		float lBoundary = imageLoad(uRepresentativeDataImage, ivec2(mid, 0)).x;
+		float rBoundary = imageLoad(uRepresentativeDataImage, ivec2(mid + 1, 0)).x;
+		if (vData >= lBoundary && vData <= rBoundary) { return mid; }
+		else if (vData < lBoundary) r = mid - 1;
+		else if (vData > rBoundary) l = mid + 1;
+	}
+
+	return uint(clamp(l, 0, 255));
+}
+
+float dequantize(uint vData)
+{
+	if (vData == 0) return 0;
+
+	ivec2 coord = ivec2(clamp(int(vData), 0, 255), 1);
+	return imageLoad(uRepresentativeDataImage, coord).x;
 }
 #endif
 

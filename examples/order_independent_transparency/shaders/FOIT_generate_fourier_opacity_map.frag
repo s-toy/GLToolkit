@@ -41,11 +41,11 @@ void main()
 
 #ifndef FOIT_ENABLE_QUANTIZATION
 		vec4 fourierOpacityData1 = imageLoad(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0));
-		fourierOpacityData1 += vec4(0, a0, a1, b1);
+		fourierOpacityData1 += vec4(1, a0, a1, b1);
 		imageStore(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0), fourierOpacityData1);
 #else
 		vec4 quantizedFourierOpacityData1 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0)));
-		quantizedFourierOpacityData1 += vec4(0, a0, a1, b1);
+		quantizedFourierOpacityData1 += vec4(1, a0, a1, b1);
 		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0), quantizeVec4(quantizedFourierOpacityData1));
 #endif
 	}

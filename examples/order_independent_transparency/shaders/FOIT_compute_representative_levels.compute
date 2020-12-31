@@ -1,0 +1,38 @@
+#version 460 core
+
+#include "common.glsl"
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(binding = 2, r32f) uniform image2D uFourierCoeffPDFImage;
+layout(binding = 4, r32f) uniform image2D uNewRepresentativeDataImage;
+
+const int N = 1000;
+
+void main()
+{
+	int coord = int(gl_GlobalInvocationID.x);
+	float leftBoundary = imageLoad(uNewRepresentativeDataImage, ivec2(coord, 0)).x;
+	float rightBoundary = imageLoad(uNewRepresentativeDataImage, ivec2(coord + 1, 0)).x;
+	float mumerator = 0;
+	float denominator = 0;
+
+	for (int k = 0; k < N; ++k)
+	{
+		float x = leftBoundary * float(k) / float(N) + rightBoundary * float(N - k) / float(N);
+		int sliceIndex = int(floor(float(PDF_SLICE_COUNT) * (x - _IntervalMin) / (_IntervalMax - _IntervalMin)));
+		sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT - 1);
+		float p = imageLoad(uFourierCoeffPDFImage, ivec2(sliceIndex, 0)).x;
+
+		mumerator += x * p;
+		denominator += p;
+	}
+
+	float representativeLevel = 0;
+	if (denominator < 1e-6)
+		representativeLevel = 0.5 * (leftBoundary + rightBoundary);
+	else
+		representativeLevel = mumerator / denominator;
+
+	imageStore(uNewRepresentativeDataImage, ivec2(coord, 1), vec4(representativeLevel, 0, 0, 0));
+}

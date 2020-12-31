@@ -171,5 +171,11 @@
     <FxCompile Include="shaders\FOIT_compute_pdf.compute">
       <Filter>Resource Files\shaders\FourierOIT</Filter>
     </FxCompile>
+    <FxCompile Include="shaders\FOIT_compute_representative_levels.compute">
+      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\FOIT_compute_representative_boundaries.compute">
+      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
