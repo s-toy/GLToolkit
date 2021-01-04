@@ -213,8 +213,8 @@ private:
 		m_pFOITMergerColorSP->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
 		m_pFOITMergerColorSP->addShader("shaders/FOIT_merge_color.frag", EShaderType::FRAGMENT_SHADER);
 
-		m_pComputePdfSP = std::make_unique<CShaderProgram>();
-		m_pComputePdfSP->addShader("shaders/FOIT_compute_pdf.compute", EShaderType::COMPUTE_SHADER);
+		//m_pComputePdfSP = std::make_unique<CShaderProgram>();
+		//m_pComputePdfSP->addShader("shaders/FOIT_compute_pdf.compute", EShaderType::COMPUTE_SHADER);
 
 		m_pComputeRepresentativeLevelsSP = std::make_unique<CShaderProgram>();
 		m_pComputeRepresentativeLevelsSP->addShader("shaders/FOIT_compute_representative_levels.compute", EShaderType::COMPUTE_SHADER);
@@ -354,7 +354,7 @@ private:
 		m_pQuantizedFourierOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, 4, GL_RGBA8UI, 1);
 
 		m_pFourierCoeffPDFImage = std::make_shared<CImage2D>();
-		m_pFourierCoeffPDFImage->createEmpty(PDF_SLICE_COUNT, 1, GL_R32F, 2);
+		m_pFourierCoeffPDFImage->createEmpty(PDF_SLICE_COUNT, 1, GL_R32UI, 2);
 
 		m_pRepresentativeDataImage = std::make_shared<CImage2D>();
 		m_pRepresentativeDataImage->createEmpty(257, 2, GL_R32F, 3);
@@ -704,21 +704,21 @@ private:
 
 		for (int i = 257; i < 513; i++)
 		{
-			data[i] = float(rand()) / RAND_MAX;
-			data[i] = data[i] * (_IntervalMax - _IntervalMin) + _IntervalMin;
-			//int k = i - 257;
-			//if (k < 128)
-			//{
-			//	float l = pow(2, k * log2(_IntervalMax + 1) / 128) - 1;
-			//	float r = pow(2, (k + 1) * log2(_IntervalMax + 1) / 128) - 1;
-			//	data[i] = (l + r) / 2;
-			//}
-			//else
-			//{
-			//	float l = pow(2, (k - 128) * log2(-_IntervalMin + 1) / 128) - 1;
-			//	float r = pow(2, (k - 127) * log2(-_IntervalMin + 1) / 128) - 1;
-			//	data[i] = -(l + r) / 2;
-			//}
+			//data[i] = float(rand()) / RAND_MAX;
+			//data[i] = data[i] * (_IntervalMax - _IntervalMin) + _IntervalMin;
+			int k = i - 257;
+			if (k < 128)
+			{
+				float l = pow(2, k * log2(_IntervalMax + 1) / 128) - 1;
+				float r = pow(2, (k + 1) * log2(_IntervalMax + 1) / 128) - 1;
+				data[i] = (l + r) / 2;
+			}
+			else
+			{
+				float l = pow(2, (k - 128) * log2(-_IntervalMin + 1) / 128) - 1;
+				float r = pow(2, (k - 127) * log2(-_IntervalMin + 1) / 128) - 1;
+				data[i] = -(l + r) / 2;
+			}
 		}
 		std::sort(data + 257, data + 513);
 
@@ -729,9 +729,9 @@ private:
 			data[i] = 0.5 * (data[i + 256] + data[i + 257]);
 		}
 
-		//glBindTexture(GL_TEXTURE_2D, m_pNewRepresentativeDataImage->getObjectID());
-		//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 257, 2, GL_RED, GL_FLOAT, data);
-		//glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, m_pNewRepresentativeDataImage->getObjectID());
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 257, 2, GL_RED, GL_FLOAT, data);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void __renderUsingFourierOIT()
@@ -773,12 +773,20 @@ private:
 
 		m_pGenFourierOpacityMapSP->updateUniform1i("uFOITCoeffNum", FOITCoeffNum);
 
+		float representativeDataBuffer[514] = { 0 };
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, m_pRepresentativeDataImage->getObjectID());
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, representativeDataBuffer);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		m_pGenFourierOpacityMapSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
+
 		for (auto Model : m_TransparentModels)
 		{
 			auto Material = m_Model2MaterialMap[Model];
 			m_pGenFourierOpacityMapSP->bind();
 			m_pGenFourierOpacityMapSP->updateUniform1f("uCoverage", Material.coverage);
 			CRenderer::getInstance()->draw(*Model, *m_pGenFourierOpacityMapSP);
+			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		}
 
 		CRenderer::getInstance()->setDepthMask(true);
@@ -787,15 +795,19 @@ private:
 		m_pFOITFrameBuffer1->unbind();
 
 		//pass1.1: compute pdf
-		m_pComputePdfSP->bind();
-		int NumGroupsX = ceil(WIN_WIDTH / 16.0);
-		int NumGroupsY = ceil(WIN_HEIGHT / 16.0);
-		glDispatchCompute(NumGroupsX, NumGroupsY, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-		m_pComputePdfSP->unbind();
+		//m_pComputePdfSP->bind();
+
+		//m_pComputePdfSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
+
+		//int NumGroupsX = ceil(WIN_WIDTH / 16.0);
+		//int NumGroupsY = ceil(WIN_HEIGHT / 16.0);
+		//glDispatchCompute(NumGroupsX, NumGroupsY, 1);
+		//
+		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		//m_pComputePdfSP->unbind();
 
 		//pass1.2: compute representative levels and boundaries
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < 5; ++i)
 		{
 			m_pComputeRepresentativeBoundariesSP->bind();
 			glDispatchCompute(1, 1, 1);
@@ -820,11 +832,10 @@ private:
 		m_pFOITReconstructTransmittanceSP->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pFOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-
 		m_pFOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pFOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
-
 		m_pFOITReconstructTransmittanceSP->updateUniform1i("uFOITCoeffNum", FOITCoeffNum);
+		m_pFOITReconstructTransmittanceSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -849,18 +860,18 @@ private:
 		m_pFOITMergerColorSP->bind();
 		m_pFOITMergerColorSP->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTex.get());
 		m_pFOITMergerColorSP->updateUniformTexture("uTranslucentColorTex", m_pTransparencyColorTex.get());
+		m_pFOITMergerColorSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pFOITMergerColorSP);
 
 		//pass4: copy representative data
-		float dataBuffer[514] = { 0 };
-
+		float newRepresentativeDataBuffer[514] = { 0 };
 		glBindTexture(GL_TEXTURE_2D, m_pNewRepresentativeDataImage->getObjectID());
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, dataBuffer);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, newRepresentativeDataBuffer);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glBindTexture(GL_TEXTURE_2D, m_pRepresentativeDataImage->getObjectID());
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 257, 2, GL_RED, GL_FLOAT, dataBuffer);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 257, 2, GL_RED, GL_FLOAT, newRepresentativeDataBuffer);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 #endif

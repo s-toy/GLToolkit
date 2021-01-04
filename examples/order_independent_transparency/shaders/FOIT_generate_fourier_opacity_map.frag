@@ -1,5 +1,7 @@
 #version 460 core
-#extension GL_ARB_fragment_shader_interlock : require
+//#extension GL_ARB_fragment_shader_interlock : require
+#extension GL_NV_fragment_shader_interlock : require
+#extension GL_NV_shader_atomic_float : require
 
 #include "common.glsl"
 
@@ -14,7 +16,37 @@ layout(location = 0) in float _inFragDepth;
 layout(location = 0) out float _outEmptyRenderTexture;
 
 layout(binding = 0, FOIT_FLT_PRECISION) uniform image2DArray uFourierOpacityMaps;
-layout(binding = 1, rgba8ui) uniform uimage2DArray uQuantizedFourierOpacityMaps;
+layout(binding = 1, rgba8ui) uniform uimage2DArray	uQuantizedFourierOpacityMaps;
+layout(binding = 2, r32ui)	 uniform uimage2D		uFourierCoeffPDFImage;
+
+void writePDF(float val)
+{
+#if defined(FOIT_ENABLE_QUANTIZATION) && (QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION)
+	int sliceIndex = int(floor(float(PDF_SLICE_COUNT) * (val - _IntervalMin) / (_IntervalMax - _IntervalMin)));
+	sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT - 1);
+	ivec2 coord = ivec2(sliceIndex, 0);
+	imageAtomicAdd(uFourierCoeffPDFImage, coord, 1);
+#endif
+}
+
+void writePDF(vec4 val)
+{
+#if defined(FOIT_ENABLE_QUANTIZATION) && (QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION)
+	writePDF(val.x);
+	writePDF(val.y);
+	writePDF(val.z);
+	writePDF(val.w);
+#endif
+}
+
+void writePDF(vec3 val)
+{
+#if defined(FOIT_ENABLE_QUANTIZATION) && (QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION)
+	writePDF(val.x);
+	writePDF(val.y);
+	writePDF(val.z);
+#endif
+}
 
 void main()
 {
@@ -31,7 +63,7 @@ void main()
 	float a0 = 2 * absorbance;
 	float sin2, cos2, sin4, cos4, sin6, cos6, sin8, cos8, sin10, cos10, sin12, cos12, sin14, cos14;
 
-	beginInvocationInterlockARB();
+	beginInvocationInterlockNV();
 
 	{
 		cos2 = cos(2 * PI * depth);
@@ -44,9 +76,10 @@ void main()
 		fourierOpacityData1 += vec4(1, a0, a1, b1);
 		imageStore(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0), fourierOpacityData1);
 #else
-		vec4 quantizedFourierOpacityData1 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0)));
-		quantizedFourierOpacityData1 += vec4(1, a0, a1, b1);
-		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0), quantizeVec4(quantizedFourierOpacityData1));
+		vec4 fourierOpacityData1 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0)));
+		fourierOpacityData1 += vec4(1, a0, a1, b1);
+		writePDF(fourierOpacityData1);
+		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 0), quantizeVec4(fourierOpacityData1));
 #endif
 	}
 
@@ -66,9 +99,10 @@ void main()
 		fourierOpacityData2 += vec4(a2, b2, a3, b3);
 		imageStore(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 1), fourierOpacityData2);
 #else
-		vec4 quantizedFourierOpacityData2 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 1)));
-		quantizedFourierOpacityData2 += vec4(a2, b2, a3, b3);
-		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 1), quantizeVec4(quantizedFourierOpacityData2));
+		vec4 fourierOpacityData2 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 1)));
+		fourierOpacityData2 += vec4(a2, b2, a3, b3);
+		writePDF(fourierOpacityData2);
+		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 1), quantizeVec4(fourierOpacityData2));
 #endif
 	}
 
@@ -88,9 +122,10 @@ void main()
 		fourierOpacityData3 += vec4(a4, b4, a5, b5);
 		imageStore(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 2), fourierOpacityData3);
 #else
-		vec4 quantizedFourierOpacityData3 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 2)));
-		quantizedFourierOpacityData3 += vec4(a4, b4, a5, b5);
-		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 2), quantizeVec4(quantizedFourierOpacityData3));
+		vec4 fourierOpacityData3 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 2)));
+		fourierOpacityData3 += vec4(a4, b4, a5, b5);
+		writePDF(fourierOpacityData3);
+		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 2), quantizeVec4(fourierOpacityData3));
 #endif
 	}
 
@@ -110,11 +145,12 @@ void main()
 		fourierOpacityData4 += vec4(a6, b6, a7, b7);
 		imageStore(uFourierOpacityMaps, ivec3(gl_FragCoord.xy, 3), fourierOpacityData4);
 #else
-		vec4 quantizedFourierOpacityData4 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 3)));
-		quantizedFourierOpacityData4 += vec4(a6, b6, a7, b7);
-		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 3), quantizeVec4(quantizedFourierOpacityData4));
+		vec4 fourierOpacityData4 = dequantizeVec4(imageLoad(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 3)));
+		fourierOpacityData4 += vec4(a6, b6, a7, b7);
+		writePDF(fourierOpacityData4);
+		imageStore(uQuantizedFourierOpacityMaps, ivec3(gl_FragCoord.xy, 3), quantizeVec4(fourierOpacityData4));
 #endif
 	}
 
-	endInvocationInterlockARB();
+	endInvocationInterlockNV();
 }

@@ -31,6 +31,8 @@ const float _IntervalMin = -50;
 const float _IntervalMax = 50;
 const float _IntervalLength = (_IntervalMax - _IntervalMin) / 256.0;
 
+#ifndef USE_IN_COMPUTE_SHADER
+
 #if QUANTIZATION_METHOD == LOGARITHMIC_QUANTIZATION
 uint quantize(float vData)
 {
@@ -207,6 +209,7 @@ float dequantize(uint vData)
 #if QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
 
 layout(binding = 3, r32f) uniform image2D uRepresentativeDataImage;
+uniform float uRepresentativeData[514];
 
 uint quantize(float vData)
 {
@@ -216,8 +219,10 @@ uint quantize(float vData)
 	while (l < r)
 	{
 		int mid = (l + r) / 2;
-		float lBoundary = imageLoad(uRepresentativeDataImage, ivec2(mid, 0)).x;
-		float rBoundary = imageLoad(uRepresentativeDataImage, ivec2(mid + 1, 0)).x;
+		//float lBoundary = imageLoad(uRepresentativeDataImage, ivec2(mid, 0)).x;
+		//float rBoundary = imageLoad(uRepresentativeDataImage, ivec2(mid + 1, 0)).x;
+		float lBoundary = uRepresentativeData[mid];
+		float rBoundary = uRepresentativeData[mid + 1];
 		if (vData >= lBoundary && vData <= rBoundary) { return mid; }
 		else if (vData < lBoundary) r = mid - 1;
 		else if (vData > rBoundary) l = mid + 1;
@@ -231,7 +236,8 @@ float dequantize(uint vData)
 	if (vData == 0) return 0;
 
 	ivec2 coord = ivec2(clamp(int(vData), 0, 255), 1);
-	return imageLoad(uRepresentativeDataImage, coord).x;
+	//return imageLoad(uRepresentativeDataImage, coord).x;
+	return uRepresentativeData[coord.x + 257];
 }
 #endif
 
@@ -244,3 +250,5 @@ vec4 dequantizeVec4(uvec4 vData)
 {
 	return vec4(dequantize(vData.x), dequantize(vData.y), dequantize(vData.z), dequantize(vData.w));
 }
+
+#endif

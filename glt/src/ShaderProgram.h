@@ -38,6 +38,8 @@ namespace glt
 		void updateUniform3f(const std::string& vName, const glm::vec3& vValue) const;
 		void updateUniform4f(const std::string& vName, const glm::vec4& vValue) const;
 
+		void updateUniform1fv(const std::string& vName, unsigned int vCount, float* vValue) const;
+
 		void updateUniformMat3(const std::string& vName, const glm::mat3& vValue) const;
 		void updateUniformMat4(const std::string& vName, const glm::mat4& vValue) const;
 
