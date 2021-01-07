@@ -25,7 +25,7 @@ float _linearizeDepth(float depth, float near, float far)
 	return z;
 }
 
-const int PDF_SLICE_COUNT = 10000;
+const int PDF_SLICE_COUNT = 100;
 
 const float _IntervalMin = -50;
 const float _IntervalMax = 50;

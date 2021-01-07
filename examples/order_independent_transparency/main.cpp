@@ -341,9 +341,9 @@ private:
 
 		glGenBuffers(1, &m_ClearFourierCoeffPDFImagePBO);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierCoeffPDFImagePBO);
-		glBufferData(GL_PIXEL_UNPACK_BUFFER, PDF_SLICE_COUNT * 1 * 32, NULL, GL_STATIC_DRAW);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, PDF_SLICE_COUNT * PDF_SLICE_COUNT * 32, NULL, GL_STATIC_DRAW);
 		dst = (unsigned*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-		memset(dst, 0x00, PDF_SLICE_COUNT * 1 * 32);
+		memset(dst, 0x00, PDF_SLICE_COUNT * PDF_SLICE_COUNT * 32);
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
@@ -354,7 +354,7 @@ private:
 		m_pQuantizedFourierOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, 4, GL_RGBA8UI, 1);
 
 		m_pFourierCoeffPDFImage = std::make_shared<CImage2D>();
-		m_pFourierCoeffPDFImage->createEmpty(PDF_SLICE_COUNT, 1, GL_R32UI, 2);
+		m_pFourierCoeffPDFImage->createEmpty(PDF_SLICE_COUNT, PDF_SLICE_COUNT, GL_R32UI, 2);
 
 		m_pRepresentativeDataImage = std::make_shared<CImage2D>();
 		m_pRepresentativeDataImage->createEmpty(257, 2, GL_R32F, 3);
@@ -696,7 +696,7 @@ private:
 
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearFourierCoeffPDFImagePBO);
 		glBindTexture(GL_TEXTURE_2D, m_pFourierCoeffPDFImage->getObjectID());
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, PDF_SLICE_COUNT, 1, GL_RED, GL_FLOAT, NULL);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, PDF_SLICE_COUNT, PDF_SLICE_COUNT, GL_RED, GL_FLOAT, NULL);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -1105,7 +1105,7 @@ private:
 
 	int m_FOITStrategy = 3;
 
-	const int PDF_SLICE_COUNT = 10000;
+	const int PDF_SLICE_COUNT = 100;
 #endif
 
 #ifdef USING_WAVELET_OIT

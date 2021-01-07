@@ -20,9 +20,10 @@ void main()
 	for (int k = 0; k < N; ++k)
 	{
 		float x = leftBoundary * float(k) / float(N) + rightBoundary * float(N - k) / float(N);
-		int sliceIndex = int(floor(float(PDF_SLICE_COUNT) * (x - _IntervalMin) / (_IntervalMax - _IntervalMin)));
-		sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT - 1);
-		float p = float(imageLoad(uFourierCoeffPDFImage, ivec2(sliceIndex, 0)).x);
+		int sliceIndex = int(floor(float(PDF_SLICE_COUNT * PDF_SLICE_COUNT) * (x - _IntervalMin) / (_IntervalMax - _IntervalMin)));
+		sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT * PDF_SLICE_COUNT - 1);
+		ivec2 coord = ivec2(sliceIndex / PDF_SLICE_COUNT, sliceIndex % PDF_SLICE_COUNT);
+		float p = float(imageLoad(uFourierCoeffPDFImage, coord).x);
 
 		mumerator += x * p;
 		denominator += p;

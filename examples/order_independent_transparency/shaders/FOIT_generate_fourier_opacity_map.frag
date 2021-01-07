@@ -22,9 +22,9 @@ layout(binding = 2, r32ui)	 uniform uimage2D		uFourierCoeffPDFImage;
 void writePDF(float val)
 {
 #if defined(FOIT_ENABLE_QUANTIZATION) && (QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION)
-	int sliceIndex = int(floor(float(PDF_SLICE_COUNT) * (val - _IntervalMin) / (_IntervalMax - _IntervalMin)));
-	sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT - 1);
-	ivec2 coord = ivec2(sliceIndex, 0);
+	int sliceIndex = int(floor(float(PDF_SLICE_COUNT * PDF_SLICE_COUNT) * (val - _IntervalMin) / (_IntervalMax - _IntervalMin)));
+	sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT * PDF_SLICE_COUNT - 1);
+	ivec2 coord = ivec2(sliceIndex / PDF_SLICE_COUNT, sliceIndex % PDF_SLICE_COUNT);
 	imageAtomicAdd(uFourierCoeffPDFImage, coord, 1);
 #endif
 }
