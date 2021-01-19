@@ -98,8 +98,8 @@ float basisIntegralFunc(float x, int i)
 	if ((x >= i * l))
 	{
 		x = min(x, (i + 1) * l);
-		//result = (1 - cos(n * PI * (x - i * l))) * sqrt(2 * n) / (n * PI);
-		result = 2.3094 * ( (-cos(2*n*PI*(x-i*l)-PI/2)) / (2*n*PI) + x );
+		result = (1 - cos(n * PI * (x - i * l))) * sqrt(2 * n) / (n * PI);
+		//result = 2.3094 * ( (-cos(2*n*PI*(x-i*l)-PI/2)) / (2*n*PI) + x - i*l);
 	}
 	else
 	{

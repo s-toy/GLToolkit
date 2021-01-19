@@ -119,8 +119,8 @@ float basisFunc(float x, int i)
 
 	if ((x >= i * l) && (x < (i + 1) * l))
 	{
-		//result = sin(n * PI * (x - i * l)) * sqrt(2 * n);
-		result = 2.3094 * (sin(2*n*PI*(x-i*l)-PI/2) + 1);
+		result = sin(n * PI * (x - i * l)) * sqrt(2 * n);
+		//result = 2.3094 * (sin(2*n*PI*(x-i*l)-PI/2) + 1);
 	}
 	else
 	{
