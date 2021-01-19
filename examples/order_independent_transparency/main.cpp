@@ -318,10 +318,10 @@ private:
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 		m_pWaveletOpacityMaps = std::make_shared<CImage2DArray>();
-		m_pWaveletOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, 4, WOIT_FLT_PRECISION, 0);
+		m_pWaveletOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, COEFF_MAP_COUNT, WOIT_FLT_PRECISION, 0);
 
 		m_pQuantizedWaveletOpacityMaps = std::make_shared<CImage2DArray>();
-		m_pQuantizedWaveletOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, 4, GL_RGBA8UI, 1);
+		m_pQuantizedWaveletOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, COEFF_MAP_COUNT, GL_RGBA8UI, 1);
 
 		m_pWaveletCoeffPDFImage = std::make_shared<CImage2D>();
 		m_pWaveletCoeffPDFImage->createEmpty(PDF_SLICE_COUNT, PDF_SLICE_COUNT, GL_R32UI, 2);
@@ -618,7 +618,7 @@ private:
 #ifdef USING_WAVELET_OIT
 	void __clearImages()
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < COEFF_MAP_COUNT; i++)
 		{
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearWaveletOpacityMapPBO);
 			glBindTexture(GL_TEXTURE_2D_ARRAY, m_pWaveletOpacityMaps->getObjectID());
@@ -929,6 +929,7 @@ private:
 	int m_WOITStrategy = 0;
 
 	const int PDF_SLICE_COUNT = 100;
+	const int COEFF_MAP_COUNT = 8;
 #endif
 };
 

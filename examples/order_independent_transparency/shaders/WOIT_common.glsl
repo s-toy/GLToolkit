@@ -11,9 +11,19 @@
 #define FOURIER_BASIS	0
 #define HAAR_BASIS		1
 #define MEYER_BASIS		2
-#define BASIS_TYPE		FOURIER_BASIS
+#define SIN_BASIS		3
+#define BASIS_TYPE		SIN_BASIS
 
+#if BASIS_TYPE == FOURIER_BASIS
 #define BASIS_NUM 7
+#elif BASIS_TYPE == HAAR_BASIS
+#define BASIS_NUM 8
+#elif BASIS_TYPE == MEYER_BASIS
+#define BASIS_NUM 8
+#elif BASIS_TYPE == SIN_BASIS
+#define BASIS_NUM 8
+#endif
+
 #define SLICE_COUNT 1000
 #define WOIT_FLT_PRECISION rgba32f
 

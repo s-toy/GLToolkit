@@ -53,7 +53,7 @@ float meyer_phi_integral(float d)
 {
 	int indexX = int(SLICE_COUNT * d);
 	indexX = min(max(indexX, 0), SLICE_COUNT - 1);
-	return texelFetch(uPsiIntegralLutTex, ivec2(indexX, BASIS_NUM - 1), 0).r;
+	return 20 * texelFetch(uPsiIntegralLutTex, ivec2(indexX, BASIS_NUM - 1), 0).r - 10;
 }
 
 float meyer_psi_integral(float d, float j, float k)
@@ -61,45 +61,52 @@ float meyer_psi_integral(float d, float j, float k)
 	int indexX = int(SLICE_COUNT * d);
 	indexX = min(max(indexX, 0), SLICE_COUNT - 1);
 	int indexY = int(pow(2, j) - 1.0 + k);
-	return texelFetch(uPsiIntegralLutTex, ivec2(indexX, indexY), 0).r;
-}
-
-float phi_integral(float d)
-{
-#ifdef USING_HAAR_WAVELETS
-	return haar_phi_integral(d);
-#else
-	return meyer_phi_integral(d) * 20 - 10;
-#endif
-}
-
-float psi_integral(float d, float j, float k)
-{
-#ifdef USING_HAAR_WAVELETS
-	return haar_psi_integral(d, j, k);
-#else
-	return meyer_psi_integral(d, j, k) * 20 - 10;
-#endif
+	return 20 * texelFetch(uPsiIntegralLutTex, ivec2(indexX, indexY), 0).r - 10;
 }
 
 float basisIntegralFunc(float x, int i)
 {
-	float y = 0;
+	float result = 0;
+	int indexJ = (i != 0) ? int(floor(log2(float(i)))) : 0;
+	int indexK = int(i - pow(2, indexJ));
+
 #if BASIS_TYPE == FOURIER_BASIS
 	if (i == 0) 
 	{
-		y = x / 2.0;
+		result = x / 2.0;
 	}
 	else
 	{
 		int k = (i - 1) / 2 + 1;
-		y = (i % 2 == 1) ? sin(2*PI*k*x) : (1 - cos(2*PI*k*x));
-		y /= 2 * PI * k;
+		result = (i % 2 == 1) ? sin(2*PI*k*x) : (1 - cos(2*PI*k*x));
+		result /= 2 * PI * k;
 	}
-#elif 
+#elif BASIS_TYPE == HAAR_BASIS
+	if (i == 0)
+		result = haar_phi_integral(x);
+	else
+		result = haar_psi_integral(x, indexJ, indexK);
+#elif BASIS_TYPE == MEYER_BASIS
+	if (i == 0)
+		result = meyer_phi_integral(x);
+	else
+		result = meyer_psi_integral(x, indexJ, indexK);
+#elif BASIS_TYPE == SIN_BASIS
+	float n = BASIS_NUM;
+	float l = 1.0 / n;
 
+	if ((x >= i * l))
+	{
+		x = min(x, (i + 1) * l);
+		//result = (1 - cos(n * PI * (x - i * l))) * sqrt(2 * n) / (n * PI);
+		result = 2.3094 * ( (-cos(2*n*PI*(x-i*l)-PI/2)) / (2*n*PI) + x );
+	}
+	else
+	{
+		result = 0;
+	}
 #endif
-	return y;
+	return result;
 }
 
 void main()
