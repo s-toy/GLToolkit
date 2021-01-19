@@ -1,9 +1,9 @@
 #version 460 core
+#extension GL_NV_fragment_shader_interlock : require
+#extension GL_NV_shader_atomic_float : require
+
 #include "common.glsl"
 #include "WOIT_common.glsl"
-
-#define BASIS_NUM 8
-#define SLICE_COUNT 1000
 
 uniform sampler2D   uOpaqueDepthTex;
 uniform sampler2D	uPsiLutTex;
@@ -14,11 +14,40 @@ uniform int			uWOITCoeffNum;
 
 layout(location = 0) in float _inFragDepth;
 
-layout(location = 0) out vec4 _outWaveletOpacityMap1;
-layout(location = 1) out vec4 _outWaveletOpacityMap2;
-layout(location = 2) out vec4 _outWaveletOpacityMap3;
-layout(location = 3) out vec4 _outWaveletOpacityMap4;
-layout(location = 4) out float _outTotalAbsorbance;
+layout(location = 0) out float _outTotalAbsorbance;
+
+layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray uWaveletOpacityMaps;
+layout(binding = 1, rgba8ui) uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
+layout(binding = 2, r32ui)	 uniform uimage2D		uWaveletCoeffPDFImage;
+
+void writePDF(float val)
+{
+#if defined(WOIT_ENABLE_QUANTIZATION) && (QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION)
+	int sliceIndex = int(floor(float(PDF_SLICE_COUNT * PDF_SLICE_COUNT) * (val - _IntervalMin) / (_IntervalMax - _IntervalMin)));
+	sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT * PDF_SLICE_COUNT - 1);
+	ivec2 coord = ivec2(sliceIndex / PDF_SLICE_COUNT, sliceIndex % PDF_SLICE_COUNT);
+	imageAtomicAdd(uWaveletCoeffPDFImage, coord, 1);
+#endif
+}
+
+void writePDF(vec4 val)
+{
+#if defined(WOIT_ENABLE_QUANTIZATION) && (QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION)
+	writePDF(val.x);
+	writePDF(val.y);
+	writePDF(val.z);
+	writePDF(val.w);
+#endif
+}
+
+void writePDF(vec3 val)
+{
+#if defined(WOIT_ENABLE_QUANTIZATION) && (QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION)
+	writePDF(val.x);
+	writePDF(val.y);
+	writePDF(val.z);
+#endif
+}
 
 float haar_phi(float x)
 {
@@ -76,39 +105,62 @@ float psi(float x, float j, float k)
 #endif
 }
 
+float basisFunc(float x, int i)
+{
+	float y = 0;
+#if BASIS_TYPE == FOURIER_BASIS
+	if (i == 0) 
+	{
+		y = 2;
+	}
+	else
+	{
+		int k = (i - 1) / 2 + 1;
+		y = (i % 2 == 1) ? 2*cos(2*PI*k*x) : 2*sin(2*PI*k*x);
+	}
+#elif 
+
+#endif
+	return y;
+}
+
 void main()
 {
 	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
 	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
-
 	float absorbance = -log(1.0 - uCoverage + 1e-5);
-	//float opticalDepth = 50.0 * uCoverage * (depth);
-	//float absorbance = gl_FrontFacing ? -opticalDepth : opticalDepth;
 
 	_outTotalAbsorbance = absorbance;
 
-	float phi00 = absorbance * phi(depth);
-	float psi00 =  absorbance * psi(depth, 0, 0);
-	float psi10 =  absorbance * psi(depth, 1, 0);
-	float psi11 =  absorbance * psi(depth, 1, 1);
-	float psi20 =  absorbance * psi(depth, 2, 0);
-	float psi21 =  absorbance * psi(depth, 2, 1);
-	float psi22 =  absorbance * psi(depth, 2, 2);
-	float psi23 =  absorbance * psi(depth, 2, 3);
-	_outWaveletOpacityMap1 = vec4(phi00, psi00, psi10, psi11);
-	_outWaveletOpacityMap2 = vec4(psi20, psi21, psi22, psi23);
-	if (uWOITCoeffNum <= 8) return;
+	beginInvocationInterlockNV();
 
-	float psi30 =  absorbance * psi(depth, 3, 0);
-	float psi31 =  absorbance * psi(depth, 3, 1);
-	float psi32 =  absorbance * psi(depth, 3, 2);
-	float psi33 =  absorbance * psi(depth, 3, 3);
-	float psi34 =  absorbance * psi(depth, 3, 4);
-	float psi35 =  absorbance * psi(depth, 3, 5);
-	float psi36 =  absorbance * psi(depth, 3, 6);
-	float psi37 =  absorbance * psi(depth, 3, 7);
-	_outWaveletOpacityMap3 = vec4(psi30, psi31, psi32, psi33);
-	_outWaveletOpacityMap4 = vec4(psi34, psi35, psi36, psi37);
+	float coeffsIncr[BASIS_NUM];
+	for (int i = 0; i < BASIS_NUM; ++i)
+	{
+		coeffsIncr[i] = basisFunc(depth, i) * absorbance;
+	}
+
+	int loopCount = int(ceil(float(BASIS_NUM) / 4.0));
+	for (int i = 0; i < loopCount; ++i)
+	{
+#ifndef WOIT_ENABLE_QUANTIZATION
+		vec4 coeffs = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i));
+#else
+		vec4 coeffs = dequantizeVec4(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)));
+#endif
+		coeffs.x += coeffsIncr[4 * i];
+		if (4 * i + 1 < BASIS_NUM) coeffs.y += coeffsIncr[4 * i + 1];
+		if (4 * i + 2 < BASIS_NUM) coeffs.z += coeffsIncr[4 * i + 2];
+		if (4 * i + 3 < BASIS_NUM) coeffs.w += coeffsIncr[4 * i + 3];
+#ifndef WOIT_ENABLE_QUANTIZATION
+		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), coeffs);
+#else
+		writePDF(coeffs);
+		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), quantizeVec4(coeffs));
+#endif
+	}
+
+	endInvocationInterlockNV();
 }

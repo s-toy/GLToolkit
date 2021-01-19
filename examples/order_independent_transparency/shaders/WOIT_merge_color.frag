@@ -1,4 +1,5 @@
 #version 460 core
+#include "common.glsl"
 
 uniform sampler2D uOpaqueColorTex;
 uniform sampler2D uTranslucentColorTex;

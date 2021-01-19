@@ -173,11 +173,6 @@
     <None Include="shaders\draw_opaque_objects.frag" />
     <None Include="shaders\draw_opaque_objects.vert" />
     <None Include="shaders\draw_screen_coord.vert" />
-    <None Include="shaders\FOIT_generate_fourier_opacity_map.frag" />
-    <None Include="shaders\FOIT_generate_fourier_opacity_map.vert" />
-    <None Include="shaders\FOIT_merge_color.frag" />
-    <None Include="shaders\FOIT_reconstruct_transmittance.frag" />
-    <None Include="shaders\FOIT_reconstruct_transmittance.vert" />
     <None Include="shaders\HLSL_to_GLSL.glsl" />
     <None Include="shaders\LLOIT_color_blending.frag" />
     <None Include="shaders\LLOIT_generate_linked_list.frag" />
@@ -206,19 +201,13 @@
     <ClInclude Include="shaders\moment_math.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shaders\FOIT_compute_pdf.compute">
+    <FxCompile Include="shaders\compute_representative_boundaries.compute">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="shaders\FOIT_compute_representative_boundaries.compute">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="shaders\FOIT_compute_representative_levels.compute">
+    <FxCompile Include="shaders\compute_representative_levels.compute">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

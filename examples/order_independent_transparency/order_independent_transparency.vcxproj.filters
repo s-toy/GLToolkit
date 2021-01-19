@@ -31,9 +31,6 @@
     <Filter Include="Resource Files\scenes">
       <UniqueIdentifier>{ee5756ae-810a-4234-8953-a9ec5f05c45e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\shaders\FourierOIT">
-      <UniqueIdentifier>{196b0013-d3a3-4854-914d-60bfa1d2419e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\shaders\WaveletOIT">
       <UniqueIdentifier>{7ae1b129-31f7-4c01-bb4d-19eec2bf6ad8}</UniqueIdentifier>
     </Filter>
@@ -122,23 +119,8 @@
     <None Include="scene_04.json">
       <Filter>Resource Files\scenes</Filter>
     </None>
-    <None Include="shaders\FOIT_generate_fourier_opacity_map.frag">
-      <Filter>Resource Files\shaders\FourierOIT</Filter>
-    </None>
-    <None Include="shaders\FOIT_generate_fourier_opacity_map.vert">
-      <Filter>Resource Files\shaders\FourierOIT</Filter>
-    </None>
-    <None Include="shaders\FOIT_merge_color.frag">
-      <Filter>Resource Files\shaders\FourierOIT</Filter>
-    </None>
     <None Include="shaders\common.glsl">
       <Filter>Resource Files\shaders\Common</Filter>
-    </None>
-    <None Include="shaders\FOIT_reconstruct_transmittance.frag">
-      <Filter>Resource Files\shaders\FourierOIT</Filter>
-    </None>
-    <None Include="shaders\FOIT_reconstruct_transmittance.vert">
-      <Filter>Resource Files\shaders\FourierOIT</Filter>
     </None>
     <None Include="scene_05.json">
       <Filter>Resource Files\scenes</Filter>
@@ -168,14 +150,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shaders\FOIT_compute_pdf.compute">
-      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    <FxCompile Include="shaders\compute_representative_levels.compute">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\FOIT_compute_representative_levels.compute">
-      <Filter>Resource Files\shaders\FourierOIT</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\FOIT_compute_representative_boundaries.compute">
-      <Filter>Resource Files\shaders\FourierOIT</Filter>
+    <FxCompile Include="shaders\compute_representative_boundaries.compute">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

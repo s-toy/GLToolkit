@@ -4,7 +4,7 @@
 uniform sampler2D uOpaqueColorTex;
 uniform sampler2D uTranslucentColorTex;
 
-layout(binding = 0, FOIT_FLT_PRECISION) uniform image2DArray uFourierOpacityMaps;
+layout(binding = 0, OIT_FLT_PRECISION) uniform image2DArray uFourierOpacityMaps;
 layout(binding = 1, rgba8ui) uniform uimage2DArray uQuantizedFourierOpacityMaps;
 
 void main()
