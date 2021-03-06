@@ -143,6 +143,18 @@
     <None Include="shaders\WOIT_common.glsl">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </None>
+    <None Include="shaders\WOIT_compute_surface_z.frag">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
+    <None Include="shaders\WOIT_compute_surface_z.vert">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
+    <None Include="scene_02_1.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="scene_04_1.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\moment_math.glsl">
@@ -154,6 +166,9 @@
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </FxCompile>
     <FxCompile Include="shaders\compute_representative_boundaries.compute">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\WOIT_compute_surface_z.compute">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </FxCompile>
   </ItemGroup>

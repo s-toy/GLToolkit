@@ -39,6 +39,15 @@ namespace glt
 		return to;
 	}
 
+	inline glm::vec3 aiVector3ToGlm(const aiVector3D* from)
+	{
+		glm::vec3 to;
+		to.x = from->x;
+		to.y = from->y;
+		to.z = from->z;
+		return to;
+	}
+
 	std::string readFileToString(const std::string& vFilePath);
 
 	void writeStringToFile(const std::string& vFilePath, const std::string& vContent);

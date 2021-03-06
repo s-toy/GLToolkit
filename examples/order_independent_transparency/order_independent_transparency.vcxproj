@@ -164,8 +164,10 @@
   <ItemGroup>
     <None Include="scene_01.json" />
     <None Include="scene_02.json" />
+    <None Include="scene_02_1.json" />
     <None Include="scene_03.json" />
     <None Include="scene_04.json" />
+    <None Include="scene_04_1.json" />
     <None Include="scene_05.json" />
     <None Include="shaders\common.glsl" />
     <None Include="shaders\complex_algebra.glsl" />
@@ -191,6 +193,8 @@
     <None Include="shaders\WBOIT_weighted_blending.frag" />
     <None Include="shaders\WBOIT_weighted_blending.vert" />
     <None Include="shaders\WOIT_common.glsl" />
+    <None Include="shaders\WOIT_compute_surface_z.frag" />
+    <None Include="shaders\WOIT_compute_surface_z.vert" />
     <None Include="shaders\WOIT_generate_wavelet_opacity_map.frag" />
     <None Include="shaders\WOIT_generate_wavelet_opacity_map.vert" />
     <None Include="shaders\WOIT_merge_color.frag" />
@@ -212,6 +216,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shaders\WOIT_compute_surface_z.compute">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

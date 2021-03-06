@@ -1,31 +1,31 @@
 #define PI 3.1415926
 
 //#define WOIT_ENABLE_QUANTIZATION
+//#define ENABLE_DEPTH_REMAPPING
+//#define USING_DIRECT_PROJECTION
 
 #define LINEAR_QUANTIZATION			0
 #define LOGARITHMIC_QUANTIZATION	1
 #define LOG_LINEAR_QUANTIZATION		2
-#define LLOYD_MAX_QUANTIZATION		3
+#define LLOYD_MAX_QUANTIZATION		3 
 #define QUANTIZATION_METHOD			LLOYD_MAX_QUANTIZATION
 
 #define FOURIER_BASIS	0
 #define HAAR_BASIS		1
 #define MEYER_BASIS		2
-#define SIN_BASIS		3
-#define BASIS_TYPE		SIN_BASIS
+#define BASIS_TYPE		MEYER_BASIS
 
 #if BASIS_TYPE == FOURIER_BASIS
-#define BASIS_NUM 7
+#define BASIS_NUM 9
 #elif BASIS_TYPE == HAAR_BASIS
 #define BASIS_NUM 8
 #elif BASIS_TYPE == MEYER_BASIS
-#define BASIS_NUM 8
-#elif BASIS_TYPE == SIN_BASIS
-#define BASIS_NUM 8
+#define BASIS_NUM 10
 #endif
 
-#define SLICE_COUNT 1000
-#define WOIT_FLT_PRECISION rgba32f
+#define BASIS_SLICE_COUNT 2001
+#define BASIS_SCALE 20
+#define WOIT_FLT_PRECISION r16f
 
 #ifdef ENABLE_SIGMA_AVERAGING
 #define SIGMA_K(k, n) (sin(k*PI/n) / (k*PI/n))
@@ -57,7 +57,7 @@ uint quantize(float vData)
 	else
 	{
 		float data = abs(vData);
-		uint c = uint(floor(log2(data + 1) * 128.0 / log2(-_IntervalMin + 1)));
+		uint c = uint(floor(log2(data + 1) * 128.0 / log2(-_IntervalMin + 1))); 
 		c = clamp(c, 0u, 127u);
 		return c + 128;
 	}
@@ -108,7 +108,7 @@ uint quantize(float vData)
 }
 
 float dequantize(uint vData)
-{
+{ 
 	if (vData == 0)
 	{
 		return 0;
@@ -260,3 +260,52 @@ vec4 dequantizeVec4(uvec4 vData)
 }
 
 #endif
+
+
+
+
+float haar_phi_integral(float d)
+{
+	return d;
+}
+
+float haar_psi_integral(float d, float j, float k)
+{
+	const float value = pow(2.0f, j / 2.0f);
+	const float intervalLength = 1.0f / pow(2.0f, j + 1);
+	const float intervalMin = 2 * k * intervalLength;
+	const float intervalMid = intervalMin + intervalLength;
+	const float intervalMax = intervalMid + intervalLength;
+
+	if (d < intervalMin)
+		return 0;
+	else if (d >= intervalMin && d < intervalMid)
+		return value * (d - intervalMin);
+	else if (d >= intervalMid && d < intervalMax)
+		return value * (intervalMid - intervalMin) + (-value) * (d - intervalMid);
+	else
+		return 0;
+}
+
+float haar_phi(float x)
+{
+	return 1;
+}
+
+float haar_psi(float x, float j, float k)
+{
+	float value = pow(2.0f, j / 2.0f);
+	//value *= value;
+
+	const float intervalLength = 1.0f / pow(2.0f, j + 1);
+	const float intervalMin = 2 * k * intervalLength;
+	const float intervalMid = intervalMin + intervalLength;
+	const float intervalMax = intervalMid + intervalLength;
+
+	if (x >= intervalMin && x < intervalMid)
+		return value;
+	else if (x >= intervalMid && x < intervalMax)
+		return -value;
+	else
+		return 0;
+}

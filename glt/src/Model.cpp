@@ -35,6 +35,26 @@ CModel::~CModel()
 {
 }
 
+//***********************************************************************************************
+//FUNCTION:
+SAABB CModel::getAABB() const
+{
+	SAABB Box;
+	Box.Min = glm::vec3(1e8, 1e8, 1e8);
+	Box.Max = glm::vec3(-1e8, -1e8, -1e8);
+
+	for (auto mesh : m_Meshes)
+	{
+		Box.Min = min(Box.Min, mesh->getAABB().Min);
+		Box.Max = max(Box.Max, mesh->getAABB().Max);
+	}
+
+	Box.Min += getPosition();
+	Box.Max += getPosition();
+
+	return Box;
+}
+
 //**********************************************************************************************
 //FUNCTION:
 bool CModel::__loadModel(const std::string& vPath)
@@ -49,7 +69,7 @@ bool CModel::__loadModel(const std::string& vPath)
 		else { *this = *m_ExsitedModelMap[FilePath]; return true; }
 	}
 
-	m_pScene = m_pImporter->ReadFile(FilePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
+	m_pScene = m_pImporter->ReadFile(FilePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_GenBoundingBoxes);
 
 	if (!m_pScene || m_pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !m_pScene->mRootNode) { return false; }
 	m_GlobalInverseTransform = aiMatrix4x4ToGlm(&(m_pScene->mRootNode->mTransformation));
@@ -164,7 +184,11 @@ std::shared_ptr<CMesh> CModel::__processMesh(const aiMesh* vMesh)
 		Uniforms.push_back(SUniformInfo{ EUniformType::VEC3F, "uMaterialSpecular", std::any(glm::vec3(SpecularColor.r, SpecularColor.g, SpecularColor.b)) });
 	}
 
-	return std::make_shared<CMesh>(Vertices, Indices, Textures, Uniforms);
+	SAABB AABB;
+	AABB.Max = aiVector3ToGlm(&(vMesh->mAABB.mMax));
+	AABB.Min = aiVector3ToGlm(&(vMesh->mAABB.mMin));
+
+	return std::make_shared<CMesh>(Vertices, Indices, Textures, Uniforms, AABB);
 }
 
 //**********************************************************************************************

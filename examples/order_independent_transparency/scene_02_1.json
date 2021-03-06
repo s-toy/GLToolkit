@@ -1,0 +1,65 @@
+{
+  "skybox": {
+    "filePath": ""
+  },
+
+  "models": {
+    "opaqueModels": [],
+    "transparentModels": [
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ 0.0, 0.0, -1.0 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.5, 0.5, 0.5, 1.0 ]
+      },
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ 0.0, 0.0, -0.5 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.0, 0.5, 0.0, 1.0 ]
+      },
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ 0.0, 0.0, 0.0 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.5, 0.0, 0.0, 1.0 ]
+      },
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ -2.0, 0.0, -1.0 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.5, 0.5, 0.5, 0.8 ]
+      },
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ -2.0, 0.0, -0.5 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.0, 0.5, 0.0, 0.5 ]
+      },
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ -2.0, 0.0, 0.0 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.5, 0.0, 0.0, 0.2 ]
+      },
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ 2.0, 0.0, -1.0 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.5, 0.5, 0.5, 0.2 ]
+      },
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ 2.0, 0.0, -0.5 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.0, 0.5, 0.0, 0.5 ]
+      },
+      {
+        "filePath": "models/plane/plane.obj",
+        "position": [ 2.0, 0.0, 0.0 ],
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.0, 0.0, 0.0, 0.8 ]
+      }
+    ]
+  }
+}

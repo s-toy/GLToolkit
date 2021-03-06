@@ -17,8 +17,9 @@ layout(location = 0) in float _inFragDepth;
 layout(location = 0) out float _outTotalAbsorbance;
 
 layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray uWaveletOpacityMaps;
-layout(binding = 1, rgba8ui) uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
+layout(binding = 1, r8ui) uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
 layout(binding = 2, r32ui)	 uniform uimage2D		uWaveletCoeffPDFImage;
+layout(binding = 5, rg16f)	 uniform image2D		uSurfaceZImage;
 
 void writePDF(float val)
 {
@@ -49,42 +50,12 @@ void writePDF(vec3 val)
 #endif
 }
 
-float haar_phi(float x)
+float meyer_basis(float d, int i)
 {
-	return 1;
-}
-
-float haar_psi(float x, float j, float k)
-{
-	float value = pow(2.0f, j / 2.0f);
-	//value *= value;
-
-	const float intervalLength = 1.0f / pow(2.0f, j + 1);
-	const float intervalMin = 2 * k * intervalLength;
-	const float intervalMid = intervalMin + intervalLength;
-	const float intervalMax = intervalMid + intervalLength;
-
-	if (x >= intervalMin && x < intervalMid)
-		return value;
-	else if (x >= intervalMid && x < intervalMax)
-		return -value;
-	else
-		return 0;
-}
-
-float meyer_phi(float d)
-{
-	int indexX = int(SLICE_COUNT * d);
-	indexX = min(max(indexX, 0), SLICE_COUNT - 1);
-	return 20 * texelFetch(uPsiLutTex, ivec2(indexX, BASIS_NUM - 1), 0).r - 10;
-}
-
-float meyer_psi(float d, float j, float k)
-{
-	int indexX = int(SLICE_COUNT * d);
-	indexX = min(max(indexX, 0), SLICE_COUNT - 1);
-	int indexY = int(pow(2, j) - 1.0 + k);
-	return 20 * texelFetch(uPsiLutTex, ivec2(indexX, indexY), 0).r - 10;
+	int indexX = int(BASIS_SLICE_COUNT * d);
+	indexX = min(max(indexX, 0), BASIS_SLICE_COUNT - 1);
+	int indexY = i;
+	return 2 * BASIS_SCALE * texelFetch(uPsiLutTex, ivec2(indexX, indexY), 0).r - BASIS_SCALE;
 }
 
 float basisFunc(float x, int i)
@@ -104,28 +75,20 @@ float basisFunc(float x, int i)
 		result = (i % 2 == 1) ? 2*cos(2*PI*k*x) : 2*sin(2*PI*k*x);
 	}
 #elif BASIS_TYPE == HAAR_BASIS
-	if (i == 0)
-		result = haar_phi(x);
-	else
-		result = haar_psi(x, indexJ, indexK);
-#elif BASIS_TYPE == MEYER_BASIS
-	if (i == 0)
-		result = meyer_phi(x);
-	else
-		result = meyer_psi(x, indexJ, indexK);
-#elif BASIS_TYPE == SIN_BASIS
-	float n = BASIS_NUM;
-	float l = 1.0 / n;
+	#ifdef USING_DIRECT_PROJECTION
+		if (i == 0)
+			result = haar_phi_integral(1) - haar_phi_integral(x);
+		else
+			result = haar_psi_integral(1, indexJ, indexK) - haar_psi_integral(x, indexJ, indexK);
+	#else
+		if (i == 0)
+			result = haar_phi(x);
+		else
+			result = haar_psi(x, indexJ, indexK);
+	#endif
 
-	if ((x >= i * l) && (x < (i + 1) * l))
-	{
-		result = sin(n * PI * (x - i * l)) * sqrt(2 * n);
-		//result = 2.3094 * (sin(2*n*PI*(x-i*l)-PI/2) + 1);
-	}
-	else
-	{
-		result = 0;
-	}
+#elif BASIS_TYPE == MEYER_BASIS
+	result = meyer_basis(x, i);
 #endif
 
 	return result;
@@ -136,12 +99,18 @@ void main()
 	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
+	beginInvocationInterlockNV();
+
 	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+#ifdef ENABLE_DEPTH_REMAPPING
+	float nearestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).x;
+	float farthestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).y;
+	depth = remap(depth, nearestSurfaceZ, farthestSurfaceZ, 0.1, 0.9);
+#endif
+
 	float absorbance = -log(1.0 - uCoverage + 1e-5);
 
 	_outTotalAbsorbance = absorbance;
-
-	beginInvocationInterlockNV();
 
 	float coeffsIncr[BASIS_NUM];
 	for (int i = 0; i < BASIS_NUM; ++i)
@@ -149,23 +118,21 @@ void main()
 		coeffsIncr[i] = basisFunc(depth, i) * absorbance;
 	}
 
-	int loopCount = int(ceil(float(BASIS_NUM) / 4.0));
-	for (int i = 0; i < loopCount; ++i)
+	for (int i = 0; i < BASIS_NUM; ++i)
 	{
+		if (coeffsIncr[i] < 0.001) continue;
+
 #ifndef WOIT_ENABLE_QUANTIZATION
-		vec4 coeffs = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i));
+		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
 #else
-		vec4 coeffs = dequantizeVec4(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)));
+		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r);
 #endif
-		coeffs.x += coeffsIncr[4 * i];
-		if (4 * i + 1 < BASIS_NUM) coeffs.y += coeffsIncr[4 * i + 1];
-		if (4 * i + 2 < BASIS_NUM) coeffs.z += coeffsIncr[4 * i + 2];
-		if (4 * i + 3 < BASIS_NUM) coeffs.w += coeffsIncr[4 * i + 3];
+		coeff += coeffsIncr[i];
 #ifndef WOIT_ENABLE_QUANTIZATION
-		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), coeffs);
+		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), vec4(coeff, 0, 0, 0));
 #else
-		writePDF(coeffs);
-		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), quantizeVec4(coeffs));
+		//writePDF(coeff);
+		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff), 0, 0, 0));
 #endif
 	}
 

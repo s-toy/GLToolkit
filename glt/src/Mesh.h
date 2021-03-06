@@ -26,6 +26,12 @@ namespace glt
 		std::any Value;
 	} SUniformInfo;
 
+	struct SAABB
+	{
+		glm::vec3 Min;
+		glm::vec3 Max;
+	};
+
 	class CShaderProgram;
 	class CTexture2D;
 
@@ -33,7 +39,9 @@ namespace glt
 	{
 	public:
 		CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<std::shared_ptr<CTexture2D>>& vTextures,
-			const std::vector<SUniformInfo>& vUniforms);
+			const std::vector<SUniformInfo>& vUniforms, const SAABB& vAABB);
+
+		const SAABB& getAABB() const { return m_AABB; }
 
 	protected:
 		void _draw(const CShaderProgram& vShaderProgram) const;
@@ -50,6 +58,8 @@ namespace glt
 		std::shared_ptr<CVertexBuffer>	m_pVertexBuffer;
 		std::shared_ptr<CIndexBuffer>	m_pIndexBuffer;
 		std::shared_ptr<CVertexArray>	m_pVertexArray;
+
+		SAABB m_AABB;
 
 		friend class CModel;
 	};

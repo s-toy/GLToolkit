@@ -25,6 +25,8 @@ namespace glt
 		CModel(const std::string& vFilePath);
 		~CModel();
 
+		SAABB getAABB() const;
+
 	protected:
 		void _draw(const CShaderProgram& vShaderProgram) const;
 		bool _hasBones() const { return m_HasBones; }

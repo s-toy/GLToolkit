@@ -90,7 +90,7 @@ bool glt::CApplicationBase::__initIMGUI()
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	if (!ImGui_ImplGlfw_InitForOpenGL(_pWindow->getGLFWWindow(), true)) return false;
-	ImGui_ImplOpenGL3_Init("#version 430");
+	ImGui_ImplOpenGL3_Init("#version 460");
 
 	return true;
 }

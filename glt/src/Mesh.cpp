@@ -10,12 +10,13 @@ using namespace glt;
 //**********************************************************************************************
 //FUNCTION:
 CMesh::CMesh(const std::vector<SVertex>& vVertices, const std::vector<unsigned int>& vIndices, const std::vector<std::shared_ptr<CTexture2D>>& vTextures,
-	const std::vector<SUniformInfo>& vUniforms)
+	const std::vector<SUniformInfo>& vUniforms, const SAABB& vAABB)
 {
 	m_Vertices = vVertices;
 	m_Indices = vIndices;
 	m_Textures = vTextures;
 	m_Uniforms = vUniforms;
+	m_AABB = vAABB;
 
 	__setupMesh();
 }

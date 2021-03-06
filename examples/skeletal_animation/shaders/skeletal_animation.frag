@@ -1,4 +1,4 @@
-#version 430
+#version 460
 #extension GL_ARB_separate_shader_objects : enable
 
 uniform sampler2D uMaterialDiffuseTex;
