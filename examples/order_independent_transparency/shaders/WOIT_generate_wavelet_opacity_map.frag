@@ -120,7 +120,7 @@ void main()
 
 	for (int i = 0; i < BASIS_NUM; ++i)
 	{
-		if (coeffsIncr[i] < 0.001) continue;
+		if (abs(coeffsIncr[i]) < 0.001) continue;
 
 #ifndef WOIT_ENABLE_QUANTIZATION
 		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;

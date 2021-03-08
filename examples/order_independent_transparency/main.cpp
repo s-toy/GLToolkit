@@ -232,9 +232,9 @@ private:
 		timer.start();
 
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
-		pCamera->setPosition(glm::dvec3(0, 0, 4));
+		pCamera->setPosition(glm::dvec3(0, 0, 3));
 		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(10.0);
+		pCamera->setFarPlane(5.0);
 		pCamera->setMoveSpeed(0.1);
 
 		std::vector<std::string> Faces = {
