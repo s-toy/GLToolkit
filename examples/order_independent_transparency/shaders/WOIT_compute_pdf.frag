@@ -10,17 +10,27 @@ uniform sampler2D	uPsiLutTex;
 uniform float		uCoverage;
 uniform float		uNearPlane;
 uniform float		uFarPlane;
-uniform int			uScaleSize;
 uniform int			uTileSize;
 uniform int			uTileCountW;
 
 layout(location = 0) in float _inFragDepth;
 
-layout(location = 0) out float _outTotalAbsorbance;
+layout(location = 0) out float _outEmpty;
 
 layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray	uWaveletOpacityMaps;
 layout(binding = 1, r8ui)				uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
-layout(binding = 3, rgba16f)			uniform image2D			uDefaultQuantizerParamsImage;
+layout(binding = 2, r32ui)				uniform uimage2D		uPDFImage;
+
+float m_IntervalMin = -50;
+float m_IntervalMax = 50;
+
+void writePDF(float val, int tileIndex)
+{
+	int sliceIndex = int(floor(float(PDF_SLICE_COUNT) * (val - m_IntervalMin) / (m_IntervalMax - m_IntervalMin)));
+	sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT - 1);
+	ivec2 coord = ivec2(tileIndex, sliceIndex);
+	imageAtomicAdd(uPDFImage, coord, 1);
+}
 
 float meyer_basis(float d, int i)
 {
@@ -47,10 +57,10 @@ float basisFunc(float x, int i)
 		result = (i % 2 == 1) ? 2*cos(2*PI*k*x) : 2*sin(2*PI*k*x);
 	}
 #elif BASIS_TYPE == HAAR_BASIS
-		if (i == 0)
-			result = haar_phi(x);
-		else
-			result = haar_psi(x, indexJ, indexK);
+	if (i == 0)
+		result = haar_phi(x);
+	else
+		result = haar_psi(x, indexJ, indexK);
 #elif BASIS_TYPE == MEYER_BASIS
 	result = meyer_basis(x, i);
 #endif
@@ -60,24 +70,24 @@ float basisFunc(float x, int i)
 
 void main()
 {
-	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r; //TODO
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
 	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
-
 	float absorbance = -log(1.0 - uCoverage + 1e-5);
-
-	_outTotalAbsorbance = absorbance;
 
 	float coeffsIncr[BASIS_NUM];
 	for (int i = 0; i < BASIS_NUM; ++i)
 	{
-		coeffsIncr[i] = basisFunc(depth, i) * absorbance;
+		float basisValue = basisFunc(depth, i);
+		coeffsIncr[i] = basisValue * absorbance;
+		//if (abs(basisValue) > 0.001) writePDF2(basisValue);
 	}
 
-	ivec2 tileCoord = ivec2(gl_FragCoord.xy) / (uTileSize * uScaleSize);
+	ivec2 tileCoord = ivec2(gl_FragCoord.xy) / uTileSize;
 	int tileIndex = tileCoord.y * uTileCountW + tileCoord.x;
-	vec3 uniformQuantizerParams = imageLoad(uDefaultQuantizerParamsImage, ivec2(tileIndex, 0)).xyz;
+
+	_outEmpty = 1;
 
 	beginInvocationInterlockNV();
 
@@ -85,21 +95,18 @@ void main()
 	{
 		if (abs(coeffsIncr[i]) < 0.001) continue;
 
-#ifndef WOIT_ENABLE_QUANTIZATION
+//#ifndef WOIT_ENABLE_QUANTIZATION
 		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
-#else
-	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
-		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, uniformQuantizerParams.x, uniformQuantizerParams.z);
-	#endif
-#endif
+//#else
+//		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r);
+//#endif
 		coeff += coeffsIncr[i];
-#ifndef WOIT_ENABLE_QUANTIZATION
+		writePDF(coeff, tileIndex);
+//#ifndef WOIT_ENABLE_QUANTIZATION
 		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), vec4(coeff, 0, 0, 0));
-#else
-	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
-		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff, uniformQuantizerParams.x, uniformQuantizerParams.z), 0, 0, 0));
-	#endif
-#endif
+//#else
+//		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff), 0, 0, 0));
+//#endif
 	}
 
 	endInvocationInterlockNV();

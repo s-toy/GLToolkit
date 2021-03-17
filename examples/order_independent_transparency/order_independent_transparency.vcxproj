@@ -193,8 +193,8 @@
     <None Include="shaders\WBOIT_weighted_blending.frag" />
     <None Include="shaders\WBOIT_weighted_blending.vert" />
     <None Include="shaders\WOIT_common.glsl" />
-    <None Include="shaders\WOIT_compute_surface_z.frag" />
-    <None Include="shaders\WOIT_compute_surface_z.vert" />
+    <None Include="shaders\WOIT_compute_pdf.frag" />
+    <None Include="shaders\WOIT_compute_pdf.vert" />
     <None Include="shaders\WOIT_generate_wavelet_opacity_map.frag" />
     <None Include="shaders\WOIT_generate_wavelet_opacity_map.vert" />
     <None Include="shaders\WOIT_merge_color.frag" />
@@ -205,6 +205,10 @@
     <ClInclude Include="shaders\moment_math.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="shaders\compute_quantizer_parameters.compute">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="shaders\compute_representative_boundaries.compute">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -216,10 +220,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="shaders\WOIT_compute_surface_z.compute">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -2,14 +2,13 @@
 
 layout(local_size_x = 255, local_size_y = 1, local_size_z = 1) in;
 
-layout(binding = 2, r32f) uniform image2D uFourierCoeffPDFImage;
-layout(binding = 4, r32f) uniform image2D uNewRepresentativeDataImage;
+layout(binding = 3, r32f) uniform image2D uRepresentativeDataImage;
 
 void main()
 {
 	int coord = int(gl_GlobalInvocationID.x) + 1;
-	float leftRepresentativeLevel = imageLoad(uNewRepresentativeDataImage, ivec2(coord - 1, 1)).x;
-	float rightRepresentativeLevel = imageLoad(uNewRepresentativeDataImage, ivec2(coord, 1)).x;
+	float leftRepresentativeLevel = imageLoad(uRepresentativeDataImage, ivec2(coord - 1, 1)).x;
+	float rightRepresentativeLevel = imageLoad(uRepresentativeDataImage, ivec2(coord, 1)).x;
 	float representativeBoundary = 0.5 * (leftRepresentativeLevel + rightRepresentativeLevel);
-	imageStore(uNewRepresentativeDataImage, ivec2(coord, 0), vec4(representativeBoundary, 0, 0, 0));
+	imageStore(uRepresentativeDataImage, ivec2(coord, 0), vec4(representativeBoundary, 0, 0, 0));
 }

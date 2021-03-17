@@ -6,9 +6,9 @@
 #include "WOIT_common.glsl"
 #include "compute_phong_shading.glsl"
 
-layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray uWaveletOpacityMaps;
-layout(binding = 1, r8ui) uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
-layout(binding = 5, rg16f)	 uniform image2D		uSurfaceZImage;
+layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray	uWaveletOpacityMaps;
+layout(binding = 1, r8ui)				uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
+layout(binding = 3, rgba16f)			uniform image2D			uDefaultQuantizerParamsImage;
 
 uniform sampler2D	uMaterialDiffuseTex;
 uniform sampler2D	uMaterialSpecularTex;
@@ -20,7 +20,9 @@ uniform vec3	uDiffuseColor;
 uniform float	uCoverage;
 uniform float	uNearPlane;
 uniform float	uFarPlane;
-uniform int		uWOITCoeffNum;
+uniform int		uScaleSize;
+uniform int		uTileSize;
+uniform int		uTileCountW;
 
 layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
@@ -56,19 +58,10 @@ float basisIntegralFunc(float x, int i)
 		result /= 2 * PI * k;
 	}
 #elif BASIS_TYPE == HAAR_BASIS
-
-	#ifdef USING_DIRECT_PROJECTION
-		if (i == 0)
-			result = haar_phi(x);
-		else
-			result = haar_psi(x, indexJ, indexK);
-	#else
-		if (i == 0)
-			result = haar_phi_integral(x);
-		else
-			result = haar_psi_integral(x, indexJ, indexK);
-	#endif
-
+	if (i == 0)
+		result = haar_phi_integral(x);
+	else
+		result = haar_psi_integral(x, indexJ, indexK);
 #elif BASIS_TYPE == MEYER_BASIS
 	result = meyer_basis_integral(x, i);
 #endif
@@ -96,12 +89,18 @@ void main()
 		basisIntegral[i] = basisIntegralFunc(depth, i);
 	}
 
+	ivec2 tileCoord = ivec2(gl_FragCoord.xy) / (uTileSize * uScaleSize);
+	int tileIndex = tileCoord.y * uTileCountW + tileCoord.x;
+	vec3 uniformQuantizerParams = imageLoad(uDefaultQuantizerParamsImage, ivec2(tileIndex, 0)).xyz;
+
 	for (int i = 0; i < BASIS_NUM; ++i)
 	{
 #ifndef WOIT_ENABLE_QUANTIZATION
 		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
 #else
-		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r);
+	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
+		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, uniformQuantizerParams.x, uniformQuantizerParams.z);
+	#endif
 #endif
 		opticalDepth += coeff * basisIntegral[i];
 	}

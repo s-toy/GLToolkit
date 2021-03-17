@@ -4,16 +4,16 @@
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
-layout(binding = 2, r32ui) uniform uimage2D uFourierCoeffPDFImage;
-layout(binding = 4, r32f) uniform image2D uNewRepresentativeDataImage;
+layout(binding = 2, r32ui) uniform uimage2D uWaveletCoeffPDFImage;
+layout(binding = 3, r32f) uniform image2D uRepresentativeDataImage;
 
 const int N = 1000;
 
 void main()
 {
 	int coord = int(gl_GlobalInvocationID.x);
-	float leftBoundary = imageLoad(uNewRepresentativeDataImage, ivec2(coord, 0)).x;
-	float rightBoundary = imageLoad(uNewRepresentativeDataImage, ivec2(coord + 1, 0)).x;
+	float leftBoundary = imageLoad(uRepresentativeDataImage, ivec2(coord, 0)).x;
+	float rightBoundary = imageLoad(uRepresentativeDataImage, ivec2(coord + 1, 0)).x;
 	float mumerator = 0;
 	float denominator = 0;
 
@@ -23,7 +23,7 @@ void main()
 		int sliceIndex = int(floor(float(PDF_SLICE_COUNT * PDF_SLICE_COUNT) * (x - _IntervalMin) / (_IntervalMax - _IntervalMin)));
 		sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT * PDF_SLICE_COUNT - 1);
 		ivec2 coord = ivec2(sliceIndex / PDF_SLICE_COUNT, sliceIndex % PDF_SLICE_COUNT);
-		float p = float(imageLoad(uFourierCoeffPDFImage, coord).x);
+		float p = float(imageLoad(uWaveletCoeffPDFImage, coord).x);
 
 		mumerator += x * p;
 		denominator += p;
@@ -35,5 +35,5 @@ void main()
 	else
 		representativeLevel = mumerator / denominator;
 
-	imageStore(uNewRepresentativeDataImage, ivec2(coord, 1), vec4(representativeLevel, 0, 0, 0));
+	imageStore(uRepresentativeDataImage, ivec2(coord, 1), vec4(representativeLevel, 0, 0, 0));
 }
