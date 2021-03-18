@@ -18,9 +18,9 @@ layout(location = 0) in float _inFragDepth;
 
 layout(location = 0) out float _outTotalAbsorbance;
 
-layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray	uWaveletOpacityMaps;
-layout(binding = 1, r8ui)				uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
-layout(binding = 3, rgba16f)			uniform image2D			uDefaultQuantizerParamsImage;
+layout(binding = 0, WOIT_FLT_PRECISION) coherent uniform image2DArray	uWaveletOpacityMaps;
+layout(binding = 1, r8ui)				coherent uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
+layout(binding = 3, rgba16f)			coherent uniform image2D		uDefaultQuantizerParamsImage;
 
 float meyer_basis(float d, int i)
 {
@@ -85,22 +85,22 @@ void main()
 	{
 		if (abs(coeffsIncr[i]) < 0.001) continue;
 
-#ifndef WOIT_ENABLE_QUANTIZATION
-		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
-#else
-	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
+#if defined(WOIT_ENABLE_QUANTIZATION) || defined(WOIT_ENABLE_QERROR_CALCULATION)
+	{
 		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, uniformQuantizerParams.x, uniformQuantizerParams.z);
-	#endif
-#endif
 		coeff += coeffsIncr[i];
-#ifndef WOIT_ENABLE_QUANTIZATION
-		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), vec4(coeff, 0, 0, 0));
-#else
-	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
 		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff, uniformQuantizerParams.x, uniformQuantizerParams.z), 0, 0, 0));
-	#endif
-#endif
 	}
+#endif
+
+#if !defined(WOIT_ENABLE_QUANTIZATION) || defined(WOIT_ENABLE_QERROR_CALCULATION)
+	{
+		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
+		coeff += coeffsIncr[i];
+		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), vec4(coeff, 0, 0, 0));
+	}
+#endif
+	} //end for
 
 	endInvocationInterlockNV();
 }

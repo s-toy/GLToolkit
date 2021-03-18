@@ -48,9 +48,9 @@ void CFrameBuffer::set(EAttachment vAttachment, std::shared_ptr<CTexture> vTextu
 	m_TextureMap[vAttachment] = vTexture;
 
 	//Specify a list of color buffers to be drawn into
-	std::vector<GLuint> ColorAttachments;
+	std::vector<GLenum> ColorAttachments;
 	for (auto iter = m_TextureMap.begin(); iter != m_TextureMap.end(); ++iter) 
-		if(__isColorAttachment(iter->first)) ColorAttachments.push_back((GLuint)iter->first);
+		if(__isColorAttachment(iter->first)) ColorAttachments.push_back((GLenum)iter->first);
 
 	if (!ColorAttachments.empty())
 		glDrawBuffers(ColorAttachments.size(), ColorAttachments.data());

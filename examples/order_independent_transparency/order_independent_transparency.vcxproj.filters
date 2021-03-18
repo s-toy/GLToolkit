@@ -155,6 +155,9 @@
     <None Include="shaders\WOIT_compute_pdf.frag">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </None>
+    <None Include="shaders\WOIT_calculate_quantization_error.frag">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\moment_math.glsl">

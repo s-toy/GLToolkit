@@ -1,6 +1,7 @@
 #define PI 3.1415926
 
 #define WOIT_ENABLE_QUANTIZATION
+#define WOIT_ENABLE_QERROR_CALCULATION
 //#define ENABLE_DEPTH_REMAPPING
 
 #define UNIFORM_QUANTIZATION		0
@@ -42,17 +43,27 @@ const float _IntervalLength = (_IntervalMax - _IntervalMin) / 256.0;
 
 uint quantize(float data, float min, float delta)
 {
-	int codebook = int(ceil((data - min) / delta));
+	if (abs(data) < 1e-6) return 0;
 
-	float max = min + delta * 254;
-	if (data <= min) return 0;
-	else if (data > max) return 255;
-	else uint(ceil((data - min) / delta));
+	if (data <= min) 
+	{
+		return 1;
+	}
+	else if (data > min + delta * 253)
+	{
+		return 255;
+	}
+	else
+	{
+		return 1 + uint(ceil((data - min) / delta));
+	}
 }
 
 float dequantize(uint data, float min, float delta)
 { 
-	return min + data * delta - 0.5 * delta;
+	if (data == 0) return 0;
+
+	return min + data * delta - 1.5 * delta;
 }
 #endif
 

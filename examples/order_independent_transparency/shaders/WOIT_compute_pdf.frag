@@ -17,9 +17,9 @@ layout(location = 0) in float _inFragDepth;
 
 layout(location = 0) out float _outEmpty;
 
-layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray	uWaveletOpacityMaps;
-layout(binding = 1, r8ui)				uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
-layout(binding = 2, r32ui)				uniform uimage2D		uPDFImage;
+layout(binding = 0, WOIT_FLT_PRECISION) coherent uniform image2DArray	uWaveletOpacityMaps;
+layout(binding = 1, r8ui)				coherent uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
+layout(binding = 2, r32ui)				coherent uniform uimage2D		uPDFImage;
 
 float m_IntervalMin = -50;
 float m_IntervalMax = 50;

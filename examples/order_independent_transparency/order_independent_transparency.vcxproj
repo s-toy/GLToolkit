@@ -192,6 +192,7 @@
     <None Include="shaders\WBOIT_merge_color.frag" />
     <None Include="shaders\WBOIT_weighted_blending.frag" />
     <None Include="shaders\WBOIT_weighted_blending.vert" />
+    <None Include="shaders\WOIT_calculate_quantization_error.frag" />
     <None Include="shaders\WOIT_common.glsl" />
     <None Include="shaders\WOIT_compute_pdf.frag" />
     <None Include="shaders\WOIT_compute_pdf.vert" />
