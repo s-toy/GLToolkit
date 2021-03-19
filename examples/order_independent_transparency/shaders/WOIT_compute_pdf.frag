@@ -12,6 +12,7 @@ uniform float		uNearPlane;
 uniform float		uFarPlane;
 uniform int			uTileSize;
 uniform int			uTileCountW;
+uniform int			uTileCountD;
 
 layout(location = 0) in float _inFragDepth;
 
@@ -67,6 +68,8 @@ float basisFunc(float x, int i)
 
 void main()
 {
+	_outEmpty = 1;
+
 	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r; //TODO
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
@@ -81,10 +84,9 @@ void main()
 		//if (abs(basisValue) > 0.001) writePDF2(basisValue);
 	}
 
-	ivec2 tileCoord = ivec2(gl_FragCoord.xy) / uTileSize;
-	int tileIndex = tileCoord.y * uTileCountW + tileCoord.x;
-
-	_outEmpty = 1;
+	ivec3 tileCoord;
+	tileCoord.xy = ivec2(gl_FragCoord.xy) / uTileSize;
+	int basisNumPerTile = (BASIS_NUM - 1) / uTileCountD + 1;
 
 	beginInvocationInterlockNV();
 
@@ -92,19 +94,17 @@ void main()
 	{
 		if (abs(coeffsIncr[i]) < 0.001) continue;
 
-//#ifndef WOIT_ENABLE_QUANTIZATION
+		tileCoord.z = i / basisNumPerTile;
+		int tileIndex = (tileCoord.y * uTileCountW + tileCoord.x) * uTileCountD + tileCoord.z;
+
 		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
-//#else
-//		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r);
-//#endif
 		coeff += coeffsIncr[i];
+	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
+		writePDF(expandFuncMiu(coeff, _IntervalMin, _IntervalMax, _Mu), tileIndex);
+	#elif QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
 		writePDF(coeff, tileIndex);
-//#ifndef WOIT_ENABLE_QUANTIZATION
-		coeff = expandFuncMiu(coeff, _IntervalMin, _IntervalMax, _Mu);
+	#endif
 		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), vec4(coeff, 0, 0, 0));
-//#else
-//		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff), 0, 0, 0));
-//#endif
 	}
 
 	endInvocationInterlockNV();

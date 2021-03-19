@@ -200,6 +200,7 @@
     <None Include="shaders\WOIT_generate_wavelet_opacity_map.frag" />
     <None Include="shaders\WOIT_generate_wavelet_opacity_map.vert" />
     <None Include="shaders\WOIT_merge_color.frag" />
+    <None Include="shaders\WOIT_quantization.glsl" />
     <None Include="shaders\WOIT_reconstruct_transmittance.frag" />
     <None Include="shaders\WOIT_reconstruct_transmittance.vert" />
   </ItemGroup>
@@ -208,18 +209,6 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\compute_quantizer_parameters.compute">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="shaders\compute_representative_boundaries.compute">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="shaders\compute_representative_levels.compute">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

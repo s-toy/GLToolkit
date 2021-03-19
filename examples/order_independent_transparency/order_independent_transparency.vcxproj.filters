@@ -161,6 +161,9 @@
     <None Include="shaders\transparency_blur.frag">
       <Filter>Resource Files\shaders\Common</Filter>
     </None>
+    <None Include="shaders\WOIT_quantization.glsl">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\moment_math.glsl">
@@ -168,12 +171,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shaders\compute_representative_levels.compute">
-      <Filter>Resource Files\shaders\WaveletOIT</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\compute_representative_boundaries.compute">
-      <Filter>Resource Files\shaders\WaveletOIT</Filter>
-    </FxCompile>
     <FxCompile Include="shaders\compute_quantizer_parameters.compute">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </FxCompile>

@@ -3,17 +3,20 @@
 #extension GL_ARB_shader_image_load_store : require
 
 #include "common.glsl"
-#include "WOIT_common.glsl"
 #include "compute_phong_shading.glsl"
+
+uniform sampler3D		uDefaultQuantizerParamsImage;
+uniform sampler2DArray	uOptimalQuantizerParamsImage;
+
+#include "WOIT_quantization.glsl"
 
 layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray	uWaveletOpacityMaps;
 layout(binding = 1, r8ui)				uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
 
-uniform sampler2D	uMaterialDiffuseTex;
-uniform sampler2D	uMaterialSpecularTex;
-uniform sampler2D   uOpaqueDepthTex;
-uniform sampler2D	uPsiIntegralLutTex;
-uniform sampler2D	uDefaultQuantizerParamsImage;
+uniform sampler2D		uMaterialDiffuseTex;
+uniform sampler2D		uMaterialSpecularTex;
+uniform sampler2D		uOpaqueDepthTex;
+uniform sampler2D		uPsiIntegralLutTex;
 
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
@@ -24,6 +27,7 @@ uniform int		uScaleSize;
 uniform int		uTileSize;
 uniform int		uTileCountW;
 uniform int		uTileCountH;
+uniform int		uTileCountD;
 
 layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
@@ -90,20 +94,24 @@ void main()
 		basisIntegral[i] = basisIntegralFunc(depth, i);
 	}
 
-	//ivec2 tileCoord = ivec2(gl_FragCoord.xy) / (uTileSize * uScaleSize);
-	//vec3 uniformQuantizerParams = texelFetch(uDefaultQuantizerParamsImage, tileCoord, 0).xyz;
-
-	vec2 texCoord = gl_FragCoord.xy / (vec2(uTileCountW, uTileCountH) * uTileSize * uScaleSize);
-	vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
+	vec3 texCoord;
+	texCoord.xy = gl_FragCoord.xy / (vec2(uTileCountW, uTileCountH) * uTileSize * uScaleSize);
+	int basisNumPerTile = (BASIS_NUM - 1) / uTileCountD + 1;
 
 	for (int i = 0; i < BASIS_NUM; ++i)
 	{
+		//texCoord.z = (float(i) + 0.5) / float(basisNumPerTile * uTileCountD);
+		texCoord.z = (float(i / basisNumPerTile) + 0.5) / float(uTileCountD);
+		vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
+
 #ifndef WOIT_ENABLE_QUANTIZATION
 		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
 #else
 	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
 		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, uniformQuantizerParams.x, uniformQuantizerParams.z);
 		coeff = expandFuncMiuReverse(coeff, _IntervalMin, _IntervalMax, _Mu);
+	#elif QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
+		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, texCoord.xy);
 	#endif
 #endif
 		opticalDepth += coeff * basisIntegral[i];

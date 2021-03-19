@@ -4,24 +4,31 @@
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-layout(binding = 2, r32ui)	 uniform uimage2D	uPDFImage;
-layout(binding = 3, rgba16f) uniform image2D	uDefaultQuantizerParamsImage;
+layout(binding = 2, r32ui)	 uniform uimage2D		uPDFImage;
+layout(binding = 3, rgba16f) uniform image3D		uDefaultQuantizerParamsImage;
+layout(binding = 4, r16f)	 uniform image2DArray	uOptimalQuantizerParamsImage;
 
 uniform int	uTileCountW;
+uniform int	uTileCountD;
 
 void main()
 {
-	ivec2 tileCoord = ivec2(gl_GlobalInvocationID.xy);
-	int tileIndex = tileCoord.y * uTileCountW + tileCoord.x;
+	ivec3 tileCoord = ivec3(gl_GlobalInvocationID.xyz);
+	int tileIndex = (tileCoord.y * uTileCountW + tileCoord.x) * uTileCountD + tileCoord.z;
 
 	float minValue = _IntervalMin;
 	float maxValue = _IntervalMax;
 	float delta = 0.1;
 
+	uint pdf[PDF_SLICE_COUNT];
 	for (int i = 0; i < PDF_SLICE_COUNT; ++i)
 	{
-		uint pCount = imageLoad(uPDFImage, ivec2(tileIndex, i)).r;
-		if (pCount != 0)
+		pdf[i] = imageLoad(uPDFImage, ivec2(tileIndex, i)).r;
+	}
+
+	for (int i = 0; i < PDF_SLICE_COUNT; ++i)
+	{
+		if (pdf[i] != 0)
 		{
 			minValue = float(i) / float(PDF_SLICE_COUNT) * (_IntervalMax - _IntervalMin) + _IntervalMin;
 			break;
@@ -30,8 +37,7 @@ void main()
 
 	for (int i = PDF_SLICE_COUNT - 1; i >= 0; --i)
 	{
-		uint pCount = imageLoad(uPDFImage, ivec2(tileIndex, i)).r;
-		if (pCount != 0)
+		if (pdf[i] != 0)
 		{
 			maxValue = float(i) / float(PDF_SLICE_COUNT) * (_IntervalMax - _IntervalMin) + _IntervalMin;
 			break;
@@ -40,5 +46,75 @@ void main()
 
 	delta = (maxValue - minValue) / 253;
 
+#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
+
 	imageStore(uDefaultQuantizerParamsImage, tileCoord, vec4(minValue, maxValue, delta, 0));
+
+#elif QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
+
+	float partitions[256];
+	float codebooks[255];
+
+	partitions[0] = -1000;
+	partitions[255] = 1000;
+	codebooks[0] = minValue - 0.5 * delta;
+
+	for (int i = 1; i < 255; ++i)
+	{
+		partitions[i] = minValue + (i - 1) * delta;
+		codebooks[i] = partitions[i] + 0.5 * delta;
+	}
+
+	int maxIter = 0;
+	for (int i = 0; i < maxIter; ++i)
+	{
+		for (int k = 1; k < 255; ++k)
+		{
+			partitions[k] = 0.5 * (codebooks[k - 1] + codebooks[k]);
+		}
+
+		for (int k = 0; k < 255; ++k)
+		{
+			float numerator = 0;
+			float denominator = 0;
+
+			int startIndex = int(floor(PDF_SLICE_COUNT * (partitions[k] - _IntervalMin) / (_IntervalMax - _IntervalMin)) - 1);
+			startIndex = max(0, min(startIndex, PDF_SLICE_COUNT - 1));
+			int endIndex = int(ceil(PDF_SLICE_COUNT * (partitions[k + 1] - _IntervalMin) / (_IntervalMax - _IntervalMin)) + 1);
+			endIndex = max(0, min(endIndex, PDF_SLICE_COUNT - 1));
+
+			for (int m = startIndex; m <= endIndex; ++m)
+			{
+				float x = float(m) / float(PDF_SLICE_COUNT) * (_IntervalMax - _IntervalMin) + _IntervalMin;
+				if (x > partitions[k] && x <= partitions[k + 1])
+				{
+					numerator += x * float(pdf[m]);
+					denominator += float(pdf[m]);
+				}
+			}
+
+			if (denominator > 0.1)
+			{
+				codebooks[k] = numerator / denominator;
+			}
+			else
+			{
+				if (k == 0)
+					codebooks[k] = partitions[k + 1];
+				else if (k == 254)
+					codebooks[k] = partitions[k];
+				else
+					codebooks[k] = 0.5 * (partitions[k] + partitions[k + 1]);
+			}
+		}
+	}
+
+	for (int i = 0; i < 255; ++i)
+	{
+		imageStore(uOptimalQuantizerParamsImage, ivec3(tileCoord.xy, i), vec4(partitions[i], 0, 0, 0));
+		imageStore(uOptimalQuantizerParamsImage, ivec3(tileCoord.xy, i + 256), vec4(codebooks[i], 0, 0, 0));
+	}
+	imageStore(uOptimalQuantizerParamsImage, ivec3(tileCoord.xy, 255), vec4(partitions[255], 0, 0, 0));
+
+#endif
 }

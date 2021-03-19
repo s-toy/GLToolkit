@@ -345,11 +345,11 @@ private:
 		m_pWaveletCoeffPDFImage = std::make_shared<CImage2D>();
 		m_pWaveletCoeffPDFImage->createEmpty(k_totalTileCount, k_pdfSliceCount, GL_R32UI, 2);
 
-		m_pDefaultQuantizerParamsImage = std::make_shared<CImage2D>();
-		m_pDefaultQuantizerParamsImage->createEmpty(k_tileCountW, k_tileCountH, GL_RGBA16F, 3, GL_CLAMP_TO_EDGE, GL_LINEAR);
+		m_pDefaultQuantizerParamsImage = std::make_shared<CImage3D>();
+		m_pDefaultQuantizerParamsImage->createEmpty(k_tileCountW, k_tileCountH, k_tileCountD, GL_RGBA16F, 3, GL_CLAMP_TO_EDGE, GL_LINEAR);
 
-		m_pOptimalQuantizerParamsImage = std::make_shared<CImage2D>();
-		m_pOptimalQuantizerParamsImage->createEmpty(k_totalTileCount, 514, GL_R16F, 4);
+		m_pOptimalQuantizerParamsImage = std::make_shared<CImage2DArray>();
+		m_pOptimalQuantizerParamsImage->createEmpty(k_tileCountW, k_tileCountH, 512, GL_R16F, 4, GL_CLAMP_TO_EDGE, GL_LINEAR);
 
 		m_pTotalAbsorbanceTex = std::make_shared<CTexture2D>();
 		m_pTotalAbsorbanceTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
@@ -688,12 +688,13 @@ private:
 		m_pComputePDFSP->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pComputePDFSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-		m_pPsiLutTex->bindV(4);
+		m_pPsiLutTex->bindV(3);
 		m_pComputePDFSP->updateUniformTexture("uPsiLutTex", m_pPsiLutTex.get());
 		m_pComputePDFSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pComputePDFSP->updateUniform1f("uFarPlane", pCamera->getFar());
 		m_pComputePDFSP->updateUniform1i("uTileSize", k_tileSize);
 		m_pComputePDFSP->updateUniform1i("uTileCountW", k_tileCountW);
+		m_pComputePDFSP->updateUniform1i("uTileCountD", k_tileCountD);
 
 		float representativeDataBuffer[514] = { 0 };
 		//glActiveTexture(GL_TEXTURE3);
@@ -733,7 +734,8 @@ private:
 		//pass0.1: compute quantizer paramters
 		m_pComputeQuantizerParamsSP->bind();
 		m_pComputeQuantizerParamsSP->updateUniform1i("uTileCountW", k_tileCountW);
-		glDispatchCompute(k_tileCountW, k_tileCountH, 1);
+		m_pComputeQuantizerParamsSP->updateUniform1i("uTileCountD", k_tileCountD);
+		glDispatchCompute(k_tileCountW, k_tileCountH, k_tileCountD);
 		m_pComputeQuantizerParamsSP->unbind();
 
 		//pass0.1: compute representative levels and boundaries
@@ -763,10 +765,12 @@ private:
 		m_pGenWaveletOpacityMapSP->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-		m_pPsiLutTex->bindV(4);
+		m_pPsiLutTex->bindV(3);
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uPsiLutTex", m_pPsiLutTex.get());
-		m_pDefaultQuantizerParamsImage->bindV(5);
+		m_pDefaultQuantizerParamsImage->bindV(4);
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uDefaultQuantizerParamsImage", m_pDefaultQuantizerParamsImage.get());
+		m_pOptimalQuantizerParamsImage->bindV(5);
+		m_pGenWaveletOpacityMapSP->updateUniformTexture("uOptimalQuantizerParamsImage", m_pOptimalQuantizerParamsImage.get());
 
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uFarPlane", pCamera->getFar());
@@ -774,6 +778,7 @@ private:
 		m_pGenWaveletOpacityMapSP->updateUniform1i("uTileSize", k_tileSize);
 		m_pGenWaveletOpacityMapSP->updateUniform1i("uTileCountW", k_tileCountW);
 		m_pGenWaveletOpacityMapSP->updateUniform1i("uTileCountH", k_tileCountH);
+		m_pGenWaveletOpacityMapSP->updateUniform1i("uTileCountD", k_tileCountD);
 
 		m_pGenWaveletOpacityMapSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
 
@@ -806,8 +811,10 @@ private:
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uPsiIntegralLutTex", m_pPsiIntegralLutTex.get());
 
-		m_pDefaultQuantizerParamsImage->bindV(5);
+		m_pDefaultQuantizerParamsImage->bindV(4);
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uDefaultQuantizerParamsImage", m_pDefaultQuantizerParamsImage.get());
+		m_pOptimalQuantizerParamsImage->bindV(5);
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOptimalQuantizerParamsImage", m_pOptimalQuantizerParamsImage.get());
 
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
@@ -815,6 +822,7 @@ private:
 		m_pWOITReconstructTransmittanceSP->updateUniform1i("uTileSize", k_tileSize);
 		m_pWOITReconstructTransmittanceSP->updateUniform1i("uTileCountW", k_tileCountW);
 		m_pWOITReconstructTransmittanceSP->updateUniform1i("uTileCountH", k_tileCountH);
+		m_pWOITReconstructTransmittanceSP->updateUniform1i("uTileCountD", k_tileCountD);
 		m_pWOITReconstructTransmittanceSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
 
 		for (auto Model : m_TransparentModels)
@@ -875,9 +883,12 @@ private:
 		m_pCalculateQuantizationErrorSP->updateUniform1i("uTileSize", k_tileSize);
 		m_pCalculateQuantizationErrorSP->updateUniform1i("uTileCountW", k_tileCountW);
 		m_pCalculateQuantizationErrorSP->updateUniform1i("uTileCountH", k_tileCountH);
+		m_pCalculateQuantizationErrorSP->updateUniform1i("uTileCountD", k_tileCountD);
 
-		m_pDefaultQuantizerParamsImage->bindV(5);
+		m_pDefaultQuantizerParamsImage->bindV(0);
 		m_pCalculateQuantizationErrorSP->updateUniformTexture("uDefaultQuantizerParamsImage", m_pDefaultQuantizerParamsImage.get());
+		m_pOptimalQuantizerParamsImage->bindV(1);
+		m_pCalculateQuantizationErrorSP->updateUniformTexture("uOptimalQuantizerParamsImage", m_pOptimalQuantizerParamsImage.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pCalculateQuantizationErrorSP);
 
@@ -1023,8 +1034,8 @@ private:
 	std::shared_ptr<CImage2DArray>	m_pWaveletOpacityMaps;
 	std::shared_ptr<CImage2DArray>	m_pQuantizedWaveletOpacityMaps;
 	std::shared_ptr<CImage2D>		m_pWaveletCoeffPDFImage;
-	std::shared_ptr<CImage2D>		m_pDefaultQuantizerParamsImage;
-	std::shared_ptr<CImage2D>		m_pOptimalQuantizerParamsImage;
+	std::shared_ptr<CImage3D>		m_pDefaultQuantizerParamsImage;
+	std::shared_ptr<CImage2DArray>	m_pOptimalQuantizerParamsImage;
 
 	std::shared_ptr<CTexture2D>		m_pPsiLutTex;
 	std::shared_ptr<CTexture2D>		m_pPsiIntegralLutTex;
@@ -1042,7 +1053,8 @@ private:
 	const int k_tileSize = 32;
 	const int k_tileCountW = (k_pdfFrameBufferWidth - 1) / k_tileSize + 1;
 	const int k_tileCountH = (k_pdfFrameBufferHeight - 1) / k_tileSize + 1;
-	const int k_totalTileCount = k_tileCountW * k_tileCountH;
+	const int k_tileCountD = 4;
+	const int k_totalTileCount = k_tileCountW * k_tileCountH * k_tileCountD;
 	const int k_pdfSliceCount = 1024; // 需要与shader中的数值保持一致
 #endif
 };

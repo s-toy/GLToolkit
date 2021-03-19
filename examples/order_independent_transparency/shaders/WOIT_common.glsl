@@ -37,71 +37,6 @@ const float _IntervalMin = -100;
 const float _IntervalMax = 100;
 const float _Mu = 0;
 
-#ifndef USE_IN_COMPUTE_SHADER
-
-#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
-
-uint quantize(float data, float min, float delta)
-{
-	if (abs(data) < 1e-6) return 0;
-
-	if (data <= min) 
-	{
-		return 1;
-	}
-	else if (data > min + delta * 253)
-	{
-		return 255;
-	}
-	else
-	{
-		return 1 + uint(ceil((data - min) / delta));
-	}
-}
-
-float dequantize(uint data, float min, float delta)
-{ 
-	if (data == 0) return 0;
-
-	return min + data * delta - 1.5 * delta;
-}
-#endif
-
-#if QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
-
-layout(binding = 3, r16f) uniform image2D uRepresentativeDataImage;
-uniform float uRepresentativeData[514];
-
-uint quantize(float vData)
-{
-	if (abs(vData) < 1e-6) return 0;
-
-	int l = 0, r = 255;
-	while (l < r)
-	{
-		int mid = (l + r) / 2;
-		//float lBoundary = imageLoad(uRepresentativeDataImage, ivec2(mid, 0)).x;
-		//float rBoundary = imageLoad(uRepresentativeDataImage, ivec2(mid + 1, 0)).x;
-		float lBoundary = uRepresentativeData[mid];
-		float rBoundary = uRepresentativeData[mid + 1];
-		if (vData >= lBoundary && vData <= rBoundary) { return mid; }
-		else if (vData < lBoundary) r = mid - 1;
-		else if (vData > rBoundary) l = mid + 1;
-	}
-
-	return uint(clamp(l, 0, 255));
-}
-
-float dequantize(uint vData)
-{
-	if (vData == 0) return 0;
-
-	ivec2 coord = ivec2(clamp(int(vData), 0, 255), 1);
-	//return imageLoad(uRepresentativeDataImage, coord).x;
-	return uRepresentativeData[coord.x + 257];
-}
-#endif
-
 float haar_phi_integral(float d)
 {
 	return d;
@@ -167,5 +102,3 @@ float expandFuncMiuReverse(float x, float intervalMin, float intervalMax, float 
     y = (y * 0.5 + 0.5) * (intervalMax - intervalMin) + intervalMin;
 	return y;
 }
-
-#endif //USE_IN_COMPUTE_SHADER

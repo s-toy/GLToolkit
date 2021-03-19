@@ -3,11 +3,13 @@
 #extension GL_NV_shader_atomic_float : require
 
 #include "common.glsl"
-#include "WOIT_common.glsl"
 
-uniform sampler2D   uOpaqueDepthTex;
-uniform sampler2D	uPsiLutTex;
-uniform sampler2D	uDefaultQuantizerParamsImage;
+uniform sampler2D		uOpaqueDepthTex;
+uniform sampler2D		uPsiLutTex;
+uniform sampler3D		uDefaultQuantizerParamsImage;
+uniform sampler2DArray	uOptimalQuantizerParamsImage;
+
+#include "WOIT_quantization.glsl"
 
 uniform float		uCoverage;
 uniform float		uNearPlane;
@@ -16,6 +18,7 @@ uniform int			uScaleSize;
 uniform int			uTileSize;
 uniform int			uTileCountW;
 uniform int			uTileCountH;
+uniform int			uTileCountD;
 
 layout(location = 0) in float _inFragDepth;
 
@@ -77,17 +80,19 @@ void main()
 		coeffsIncr[i] = basisFunc(depth, i) * absorbance;
 	}
 
-	//ivec2 tileCoord = ivec2(gl_FragCoord.xy) / (uTileSize * uScaleSize);
-	//vec3 uniformQuantizerParams = texelFetch(uDefaultQuantizerParamsImage, tileCoord, 0).xyz;
-
-	vec2 texCoord = gl_FragCoord.xy / (vec2(uTileCountW, uTileCountH) * uTileSize * uScaleSize);
-	vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
+	vec3 texCoord;
+	texCoord.xy = gl_FragCoord.xy / (vec2(uTileCountW, uTileCountH) * uTileSize * uScaleSize);
+	int basisNumPerTile = (BASIS_NUM - 1) / uTileCountD + 1;
 
 	beginInvocationInterlockNV();
 
 	for (int i = 0; i < BASIS_NUM; ++i)
 	{
 		if (abs(coeffsIncr[i]) < 0.001) continue;
+
+		//texCoord.z = (float(i) + 0.5) / float(basisNumPerTile * uTileCountD);
+		texCoord.z = (float(i / basisNumPerTile) + 0.5) / float(uTileCountD);
+		vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
 
 #if defined(WOIT_ENABLE_QUANTIZATION) || defined(WOIT_ENABLE_QERROR_CALCULATION)
 	{
@@ -97,6 +102,10 @@ void main()
 		coeff += coeffsIncr[i];
 		coeff = expandFuncMiu(coeff, _IntervalMin, _IntervalMax, _Mu);
 		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff, uniformQuantizerParams.x, uniformQuantizerParams.z), 0, 0, 0));
+	#elif QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
+		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, texCoord.xy);
+		coeff += coeffsIncr[i];
+		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff, texCoord.xy), 0, 0, 0));
 	#endif
 	}
 #endif
