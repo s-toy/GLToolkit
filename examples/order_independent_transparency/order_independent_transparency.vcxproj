@@ -188,6 +188,7 @@
     <None Include="shaders\compute_phong_shading.glsl" />
     <None Include="shaders\reconstruction_config.glsl" />
     <None Include="shaders\skeletal_animation_input.glsl" />
+    <None Include="shaders\transparency_blur.frag" />
     <None Include="shaders\trigonometric_moment_math.glsl" />
     <None Include="shaders\WBOIT_merge_color.frag" />
     <None Include="shaders\WBOIT_weighted_blending.frag" />

@@ -225,14 +225,20 @@ void CTextureCube::unbindV() const
 
 //***********************************************************************************************
 //FUNCTION:
-void CImage2D::createEmpty(int vWidth, int vHeight, GLenum vFormat, unsigned int vBindUnit)
+void CImage2D::createEmpty(int vWidth, int vHeight, GLenum vFormat, unsigned int vBindUnit, GLint vWrapMode, GLint vFilterMode)
 {
 	m_Format = vFormat;
 	m_Width = vWidth;
 	m_Height = vHeight;
 
 	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
+
 	glTexStorage2D(GL_TEXTURE_2D, 1, m_Format, m_Width, m_Height);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, vWrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, vWrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, vFilterMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, vFilterMode);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindImageTexture(vBindUnit, m_ObjectID, 0, GL_FALSE, 0, GL_READ_WRITE, m_Format);
@@ -242,14 +248,17 @@ void CImage2D::createEmpty(int vWidth, int vHeight, GLenum vFormat, unsigned int
 //FUNCTION:
 void CImage2D::bindV(unsigned int vBindPoint) const
 {
-
+	glActiveTexture(GL_TEXTURE0 + vBindPoint);
+	glBindTexture(GL_TEXTURE_2D, m_ObjectID);
+	m_BindPoint = vBindPoint;
 }
 
 //***********************************************************************************************
 //FUNCTION:
 void CImage2D::unbindV() const
 {
-
+	glActiveTexture(GL_TEXTURE0 + m_BindPoint);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //***********************************************************************************************

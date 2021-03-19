@@ -8,12 +8,12 @@
 
 layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray	uWaveletOpacityMaps;
 layout(binding = 1, r8ui)				uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
-layout(binding = 3, rgba16f)			uniform image2D			uDefaultQuantizerParamsImage;
 
 uniform sampler2D	uMaterialDiffuseTex;
 uniform sampler2D	uMaterialSpecularTex;
 uniform sampler2D   uOpaqueDepthTex;
 uniform sampler2D	uPsiIntegralLutTex;
+uniform sampler2D	uDefaultQuantizerParamsImage;
 
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
@@ -23,6 +23,7 @@ uniform float	uFarPlane;
 uniform int		uScaleSize;
 uniform int		uTileSize;
 uniform int		uTileCountW;
+uniform int		uTileCountH;
 
 layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
@@ -89,9 +90,11 @@ void main()
 		basisIntegral[i] = basisIntegralFunc(depth, i);
 	}
 
-	ivec2 tileCoord = ivec2(gl_FragCoord.xy) / (uTileSize * uScaleSize);
-	int tileIndex = tileCoord.y * uTileCountW + tileCoord.x;
-	vec3 uniformQuantizerParams = imageLoad(uDefaultQuantizerParamsImage, ivec2(tileIndex, 0)).xyz;
+	//ivec2 tileCoord = ivec2(gl_FragCoord.xy) / (uTileSize * uScaleSize);
+	//vec3 uniformQuantizerParams = texelFetch(uDefaultQuantizerParamsImage, tileCoord, 0).xyz;
+
+	vec2 texCoord = gl_FragCoord.xy / (vec2(uTileCountW, uTileCountH) * uTileSize * uScaleSize);
+	vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
 
 	for (int i = 0; i < BASIS_NUM; ++i)
 	{
@@ -100,6 +103,7 @@ void main()
 #else
 	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
 		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, uniformQuantizerParams.x, uniformQuantizerParams.z);
+		coeff = expandFuncMiuReverse(coeff, _IntervalMin, _IntervalMax, _Mu);
 	#endif
 #endif
 		opticalDepth += coeff * basisIntegral[i];

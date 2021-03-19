@@ -33,9 +33,9 @@
 
 const int PDF_SLICE_COUNT = 1024;
 
-const float _IntervalMin = -50;
-const float _IntervalMax = 50;
-const float _IntervalLength = (_IntervalMax - _IntervalMin) / 256.0;
+const float _IntervalMin = -100;
+const float _IntervalMax = 100;
+const float _Mu = 0;
 
 #ifndef USE_IN_COMPUTE_SHADER
 
@@ -146,6 +146,26 @@ float haar_psi(float x, float j, float k)
 		return -value;
 	else
 		return 0;
+}
+
+float expandFuncMiu(float x, float intervalMin, float intervalMax, float mu)
+{
+	if (mu < 1e-6) return x;
+
+    x = (x - intervalMin) / (intervalMax - intervalMin) * 2 - 1;
+    float y = sign(x) * log(1+mu*abs(x)) / log(1+mu);
+    y = (y * 0.5 + 0.5) * (intervalMax - intervalMin) + intervalMin;
+	return y;
+}
+
+float expandFuncMiuReverse(float x, float intervalMin, float intervalMax, float mu)
+{
+	if (mu < 1e-6) return x;
+
+    x = (x - intervalMin) / (intervalMax - intervalMin) * 2 - 1;
+    float y = sign(x) * (1 / mu) * (pow(1 + mu, abs(x)) - 1);
+    y = (y * 0.5 + 0.5) * (intervalMax - intervalMin) + intervalMin;
+	return y;
 }
 
 #endif //USE_IN_COMPUTE_SHADER

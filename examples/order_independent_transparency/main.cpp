@@ -48,8 +48,8 @@ using namespace glt;
 const int WIN_WIDTH = 1600;
 const int WIN_HEIGHT = 900;
 
-const float _IntervalMin = -50;
-const float _IntervalMax = 50;
+const float _IntervalMin = -100;
+const float _IntervalMax = 100;
 
 #ifdef USING_LINKED_LIST_OIT
 const int MAX_LIST_NODE = WIN_WIDTH * WIN_HEIGHT * 64;
@@ -141,6 +141,10 @@ private:
 		m_pOpaqueShaderProgram->addShader("shaders/draw_opaque_objects.vert", EShaderType::VERTEX_SHADER);
 		m_pOpaqueShaderProgram->addShader("shaders/draw_opaque_objects.frag", EShaderType::FRAGMENT_SHADER);
 
+		m_pTransparencyBlurShaderProgram = std::make_unique<CShaderProgram>();
+		m_pTransparencyBlurShaderProgram->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
+		m_pTransparencyBlurShaderProgram->addShader("shaders/transparency_blur.frag", EShaderType::FRAGMENT_SHADER);
+
 #ifdef USING_MOMENT_BASED_OIT
 		m_pGenerateMomentShaderProgram = std::make_unique<CShaderProgram>();
 		m_pGenerateMomentShaderProgram->addShader("shaders/MBOIT_generate_moments.vert", EShaderType::VERTEX_SHADER);
@@ -222,7 +226,7 @@ private:
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 		pCamera->setPosition(glm::dvec3(0, 0, 3));
 		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(8.0);
+		pCamera->setFarPlane(15.0);
 		pCamera->setMoveSpeed(0.02);
 
 		std::vector<std::string> Faces = {
@@ -262,6 +266,15 @@ private:
 
 		m_pTransparencyColorTex = std::make_shared<CTexture2D>();
 		m_pTransparencyColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pTransparencyBlurColorTex = std::make_shared<CTexture2D>();
+		m_pTransparencyBlurColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pTransparencyBlurFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
+		m_pTransparencyBlurFrameBuffer->set(EAttachment::COLOR0, m_pTransparencyBlurColorTex);
+
+		m_pTransparencyBlurSwapFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
+		m_pTransparencyBlurSwapFrameBuffer->set(EAttachment::COLOR0, m_pTransparencyColorTex);
 
 #ifdef USING_MOMENT_BASED_OIT
 		m_pMomentB0Tex = std::make_shared<CTexture2D>();
@@ -333,7 +346,7 @@ private:
 		m_pWaveletCoeffPDFImage->createEmpty(k_totalTileCount, k_pdfSliceCount, GL_R32UI, 2);
 
 		m_pDefaultQuantizerParamsImage = std::make_shared<CImage2D>();
-		m_pDefaultQuantizerParamsImage->createEmpty(k_totalTileCount, 1, GL_RGBA16F, 3);
+		m_pDefaultQuantizerParamsImage->createEmpty(k_tileCountW, k_tileCountH, GL_RGBA16F, 3, GL_CLAMP_TO_EDGE, GL_LINEAR);
 
 		m_pOptimalQuantizerParamsImage = std::make_shared<CImage2D>();
 		m_pOptimalQuantizerParamsImage->createEmpty(k_totalTileCount, 514, GL_R16F, 4);
@@ -752,12 +765,15 @@ private:
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 		m_pPsiLutTex->bindV(4);
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uPsiLutTex", m_pPsiLutTex.get());
+		m_pDefaultQuantizerParamsImage->bindV(5);
+		m_pGenWaveletOpacityMapSP->updateUniformTexture("uDefaultQuantizerParamsImage", m_pDefaultQuantizerParamsImage.get());
 
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uFarPlane", pCamera->getFar());
 		m_pGenWaveletOpacityMapSP->updateUniform1i("uScaleSize", k_scaleSize);
 		m_pGenWaveletOpacityMapSP->updateUniform1i("uTileSize", k_tileSize);
 		m_pGenWaveletOpacityMapSP->updateUniform1i("uTileCountW", k_tileCountW);
+		m_pGenWaveletOpacityMapSP->updateUniform1i("uTileCountH", k_tileCountH);
 
 		m_pGenWaveletOpacityMapSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
 
@@ -789,11 +805,16 @@ private:
 		m_pPsiIntegralLutTex->bindV(3);
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uPsiIntegralLutTex", m_pPsiIntegralLutTex.get());
+
+		m_pDefaultQuantizerParamsImage->bindV(5);
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uDefaultQuantizerParamsImage", m_pDefaultQuantizerParamsImage.get());
+
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
 		m_pWOITReconstructTransmittanceSP->updateUniform1i("uScaleSize", k_scaleSize);
 		m_pWOITReconstructTransmittanceSP->updateUniform1i("uTileSize", k_tileSize);
 		m_pWOITReconstructTransmittanceSP->updateUniform1i("uTileCountW", k_tileCountW);
+		m_pWOITReconstructTransmittanceSP->updateUniform1i("uTileCountH", k_tileCountH);
 		m_pWOITReconstructTransmittanceSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
 
 		for (auto Model : m_TransparentModels)
@@ -810,6 +831,25 @@ private:
 		CRenderer::getInstance()->enableBlend(false);
 
 		m_pWOITFrameBuffer2->unbind();
+
+		//pass2.1: transparency texture filtering
+		//m_pTransparencyBlurFrameBuffer->bind();
+		//CRenderer::getInstance()->clear();
+		//m_pTransparencyBlurShaderProgram->bind();
+		//m_pTransparencyColorTex->bindV(0);
+		//m_pTransparencyBlurShaderProgram->updateUniformTexture("uInputTex", m_pTransparencyColorTex.get());
+		//m_pTransparencyBlurShaderProgram->updateUniform2f("uBlurDirection", glm::vec2(1, 0));
+		//CRenderer::getInstance()->drawScreenQuad(*m_pTransparencyBlurShaderProgram);
+		//m_pTransparencyBlurFrameBuffer->unbind();
+
+		//m_pTransparencyBlurSwapFrameBuffer->bind();
+		//CRenderer::getInstance()->clear();
+		//m_pTransparencyBlurShaderProgram->bind();
+		//m_pTransparencyBlurColorTex->bindV(0);
+		//m_pTransparencyBlurShaderProgram->updateUniformTexture("uInputTex", m_pTransparencyBlurColorTex.get());
+		//m_pTransparencyBlurShaderProgram->updateUniform2f("uBlurDirection", glm::vec2(0, 1));
+		//CRenderer::getInstance()->drawScreenQuad(*m_pTransparencyBlurShaderProgram);
+		//m_pTransparencyBlurSwapFrameBuffer->unbind();
 
 		//pass3: merge color
 		CRenderer::getInstance()->clear();
@@ -834,10 +874,21 @@ private:
 		m_pCalculateQuantizationErrorSP->updateUniform1i("uScaleSize", k_scaleSize);
 		m_pCalculateQuantizationErrorSP->updateUniform1i("uTileSize", k_tileSize);
 		m_pCalculateQuantizationErrorSP->updateUniform1i("uTileCountW", k_tileCountW);
+		m_pCalculateQuantizationErrorSP->updateUniform1i("uTileCountH", k_tileCountH);
+
+		m_pDefaultQuantizerParamsImage->bindV(5);
+		m_pCalculateQuantizationErrorSP->updateUniformTexture("uDefaultQuantizerParamsImage", m_pDefaultQuantizerParamsImage.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pCalculateQuantizationErrorSP);
 
 		m_pWOITCalculateQErrorFrameBuffer->unbind();
+
+		float totalError = 0;
+		glBindTexture(GL_TEXTURE_2D, m_pTotalQuantizationErrorImage->getObjectID());
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, &totalError);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		std::cout << totalError << std::endl;
 #endif
 	}
 #endif
@@ -897,10 +948,16 @@ private:
 	CScene m_Scene;
 
 	std::unique_ptr<CShaderProgram> m_pOpaqueShaderProgram;
+	std::unique_ptr<CShaderProgram> m_pTransparencyBlurShaderProgram;
+
 	std::unique_ptr<CFrameBuffer>	m_pOpaqueFrameBuffer;
+	std::unique_ptr<CFrameBuffer>	m_pTransparencyBlurFrameBuffer;
+	std::unique_ptr<CFrameBuffer>	m_pTransparencyBlurSwapFrameBuffer;
+
 	std::shared_ptr<CTexture2D>		m_pOpaqueColorTex;
 	std::shared_ptr<CTexture2D>		m_pOpaqueDepthTex;
 	std::shared_ptr<CTexture2D>		m_pTransparencyColorTex;
+	std::shared_ptr<CTexture2D>		m_pTransparencyBlurColorTex;
 
 #ifdef USING_ALL_METHODS
 	EOITMethod m_OITMethod = EOITMethod::LINKED_LIST_OIT;

@@ -55,7 +55,7 @@ namespace glt
 	class GLT_DECLSPEC CImage2D : public CTexture
 	{
 	public:
-		void createEmpty(int vWidth, int vHeight, GLenum vFormat, unsigned int vBindUnit);
+		void createEmpty(int vWidth, int vHeight, GLenum vFormat, unsigned int vBindUnit, GLint vWrapMode = GL_CLAMP_TO_BORDER, GLint vFilterMode = GL_NEAREST);
 
 		void bindV(unsigned int vBindPoint) const override;
 		void unbindV() const override;

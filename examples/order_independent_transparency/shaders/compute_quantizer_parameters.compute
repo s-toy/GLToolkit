@@ -40,5 +40,5 @@ void main()
 
 	delta = (maxValue - minValue) / 253;
 
-	imageStore(uDefaultQuantizerParamsImage, ivec2(tileIndex, 0), vec4(minValue, maxValue, delta, 0));
+	imageStore(uDefaultQuantizerParamsImage, tileCoord, vec4(minValue, maxValue, delta, 0));
 }

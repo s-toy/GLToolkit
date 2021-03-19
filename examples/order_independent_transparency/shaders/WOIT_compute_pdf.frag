@@ -21,12 +21,9 @@ layout(binding = 0, WOIT_FLT_PRECISION) coherent uniform image2DArray	uWaveletOp
 layout(binding = 1, r8ui)				coherent uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
 layout(binding = 2, r32ui)				coherent uniform uimage2D		uPDFImage;
 
-float m_IntervalMin = -50;
-float m_IntervalMax = 50;
-
 void writePDF(float val, int tileIndex)
 {
-	int sliceIndex = int(floor(float(PDF_SLICE_COUNT) * (val - m_IntervalMin) / (m_IntervalMax - m_IntervalMin)));
+	int sliceIndex = int(floor(float(PDF_SLICE_COUNT) * (val - _IntervalMin) / (_IntervalMax - _IntervalMin)));
 	sliceIndex = clamp(sliceIndex, 0, PDF_SLICE_COUNT - 1);
 	ivec2 coord = ivec2(tileIndex, sliceIndex);
 	imageAtomicAdd(uPDFImage, coord, 1);
@@ -103,6 +100,7 @@ void main()
 		coeff += coeffsIncr[i];
 		writePDF(coeff, tileIndex);
 //#ifndef WOIT_ENABLE_QUANTIZATION
+		coeff = expandFuncMiu(coeff, _IntervalMin, _IntervalMax, _Mu);
 		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), vec4(coeff, 0, 0, 0));
 //#else
 //		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff), 0, 0, 0));
