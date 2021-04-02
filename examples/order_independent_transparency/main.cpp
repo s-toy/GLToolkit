@@ -21,8 +21,6 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define WOIT_FLT_PRECISION GL_R16F
-
 #define USING_WAVELET_OIT
 
 #ifdef USING_ALL_METHODS
@@ -32,8 +30,14 @@
 #define USING_WAVELET_OIT
 #endif
 
-#define WOIT_ENABLE_QERROR_CALCULATION
-//#define WOIT_ENABLE_FULL_PDF
+const int WIN_WIDTH = 1024;
+const int WIN_HEIGHT = 1024;
+const float CAMERA_MOVE_SPEED = 0.005;
+const float NEAR_PLANE = 0.1;
+const float FAR_PLANE = 10;
+const bool DISPLAY_FPS = false;
+const glm::dvec3 DEFAULT_CAMERA_POS = glm::dvec3(0, 0, 3);
+const std::string SCENE_NAME = "bmw.json";
 
 enum class EOITMethod : unsigned char
 {
@@ -45,12 +49,6 @@ enum class EOITMethod : unsigned char
 };
 
 using namespace glt;
-
-const int WIN_WIDTH = 1024;
-const int WIN_HEIGHT = 1024;
-
-const float _IntervalMin = -50;
-const float _IntervalMax = 50;
 
 #ifdef USING_LINKED_LIST_OIT
 const int MAX_LIST_NODE = WIN_WIDTH * WIN_HEIGHT * 64;
@@ -84,7 +82,7 @@ class CMyApplication : public CApplicationBase
 protected:
 	bool _initV() override
 	{
-		setDisplayStatusHint();
+		if (DISPLAY_FPS) setDisplayStatusHint();
 
 		CFileLocator::getInstance()->addFileSearchPath("../../resource");
 
@@ -201,9 +199,6 @@ private:
 
 	void __initScene()
 	{
-		CCPUTimer timer;
-		timer.start();
-
 		//std::vector<std::string> Faces = {
 		//	"textures/skybox/right.jpg",
 		//	"textures/skybox/left.jpg",
@@ -225,7 +220,7 @@ private:
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
 		//m_Scene.load("scene_05.json");
-		m_Scene.load("bmws.json");
+		m_Scene.load(SCENE_NAME);
 		m_OpaqueModels = m_Scene.getModelGroup("opaqueModels");
 		m_TransparentModels = m_Scene.getModelGroup("transparentModels");
 		for (auto pModel : m_TransparentModels)
@@ -235,18 +230,14 @@ private:
 		}
 
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
-		pCamera->setPosition(glm::dvec3(0, 0, 3));
-		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(15.0);
-		pCamera->setMoveSpeed(0.05);
+		pCamera->setNearPlane(NEAR_PLANE);
+		pCamera->setFarPlane(FAR_PLANE);
+		pCamera->setMoveSpeed(CAMERA_MOVE_SPEED);
 
 		if (m_Scene.hasCameraPos())
 			pCamera->setPosition(m_Scene.getCameraPos());
 		else
-			pCamera->setPosition(glm::dvec3(0, 0, 3));
-		
-		timer.stop();
-		_OUTPUT_EVENT(format("Total time: %f", timer.getElapsedTimeInMS()));
+			pCamera->setPosition(DEFAULT_CAMERA_POS);
 	}
 
 	void __initTexturesAndBuffers()

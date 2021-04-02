@@ -60,6 +60,7 @@ void main()
 	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
 	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+	//float depth = gl_FragCoord.z;
 
 	float absorbance = -log(1.0 - uCoverage + 1e-5);
 
