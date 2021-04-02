@@ -33,6 +33,7 @@
 #endif
 
 #define WOIT_ENABLE_QERROR_CALCULATION
+//#define WOIT_ENABLE_FULL_PDF
 
 enum class EOITMethod : unsigned char
 {
@@ -45,11 +46,11 @@ enum class EOITMethod : unsigned char
 
 using namespace glt;
 
-const int WIN_WIDTH = 1600;
-const int WIN_HEIGHT = 900;
+const int WIN_WIDTH = 1024;
+const int WIN_HEIGHT = 1024;
 
-const float _IntervalMin = -100;
-const float _IntervalMax = 100;
+const float _IntervalMin = -50;
+const float _IntervalMax = 50;
 
 #ifdef USING_LINKED_LIST_OIT
 const int MAX_LIST_NODE = WIN_WIDTH * WIN_HEIGHT * 64;
@@ -83,7 +84,7 @@ class CMyApplication : public CApplicationBase
 protected:
 	bool _initV() override
 	{
-		setDisplayStatusHint();
+		//setDisplayStatusHint();
 
 		CFileLocator::getInstance()->addFileSearchPath("../../resource");
 
@@ -103,6 +104,9 @@ protected:
 
 	void _updateV() override
 	{
+		auto pCamera = CRenderer::getInstance()->fetchCamera();
+		std::cout << pCamera->getPosition().x << ", " << pCamera->getPosition().y << ", " << pCamera->getPosition().z << std::endl;
+
 		auto KeyStatus = CInputManager::getInstance()->getKeyStatus();
 
 #ifdef USING_ALL_METHODS
@@ -209,6 +213,9 @@ private:
 		m_pComputeRepresentativeBoundariesSP = std::make_unique<CShaderProgram>();
 		m_pComputeRepresentativeBoundariesSP->addShader("shaders/compute_representative_boundaries.compute", EShaderType::COMPUTE_SHADER);
 
+		m_pClearCoeffFeatureImageSP = std::make_unique<CShaderProgram>();
+		m_pClearCoeffFeatureImageSP->addShader("shaders/WOIT_clear_coeff_feature_image.compute", EShaderType::COMPUTE_SHADER);
+
 #ifdef WOIT_ENABLE_QERROR_CALCULATION
 		m_pCalculateQuantizationErrorSP = std::make_unique<CShaderProgram>();
 		m_pCalculateQuantizationErrorSP->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
@@ -223,23 +230,28 @@ private:
 		CCPUTimer timer;
 		timer.start();
 
-		auto pCamera = CRenderer::getInstance()->fetchCamera();
-		pCamera->setPosition(glm::dvec3(0, 0, 3));
-		pCamera->setNearPlane(0.1);
-		pCamera->setFarPlane(15.0);
-		pCamera->setMoveSpeed(0.02);
+		//std::vector<std::string> Faces = {
+		//	"textures/skybox/right.jpg",
+		//	"textures/skybox/left.jpg",
+		//	"textures/skybox/top.jpg",
+		//	"textures/skybox/bottom.jpg",
+		//	"textures/skybox/front.jpg",
+		//	"textures/skybox/back.jpg"
+		//};
 
 		std::vector<std::string> Faces = {
-			"textures/skybox/right.jpg",
-			"textures/skybox/left.jpg",
-			"textures/skybox/top.jpg",
-			"textures/skybox/bottom.jpg",
-			"textures/skybox/front.jpg",
-			"textures/skybox/back.jpg"
+			"textures/meadow/meadow-NX.jpg",
+			"textures/meadow/meadow-PX.jpg",
+			"textures/meadow/meadow-PY.jpg",
+			"textures/meadow/meadow-NY.jpg",
+			"textures/meadow/meadow-PZ.jpg",
+			"textures/meadow/meadow-NZ.jpg"
 		};
+
 		m_pSkybox = std::make_unique<CSkybox>(Faces);
 
-		m_Scene.load("scene_05.json");
+		//m_Scene.load("scene_05.json");
+		m_Scene.load("bmws.json");
 		m_OpaqueModels = m_Scene.getModelGroup("opaqueModels");
 		m_TransparentModels = m_Scene.getModelGroup("transparentModels");
 		for (auto pModel : m_TransparentModels)
@@ -247,6 +259,18 @@ private:
 			glm::vec4 Params = pModel->getParameters();
 			m_Model2MaterialMap[pModel] = SMaterial(glm::vec3(Params.x, Params.y, Params.z), Params.w);
 		}
+
+		auto pCamera = CRenderer::getInstance()->fetchCamera();
+		pCamera->setPosition(glm::dvec3(0, 0, 3));
+		pCamera->setNearPlane(0.1);
+		pCamera->setFarPlane(15.0);
+		pCamera->setMoveSpeed(0.05);
+
+		if (m_Scene.hasCameraPos())
+			pCamera->setPosition(m_Scene.getCameraPos());
+		else
+			pCamera->setPosition(glm::dvec3(0, 0, 3));
+		
 
 		timer.stop();
 		_OUTPUT_EVENT(format("Total time: %f", timer.getElapsedTimeInMS()));
@@ -328,6 +352,7 @@ private:
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
+#ifdef WOIT_ENABLE_FULL_PDF
 		glGenBuffers(1, &m_ClearWaveletCoeffPDFImagePBO);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearWaveletCoeffPDFImagePBO);
 		glBufferData(GL_PIXEL_UNPACK_BUFFER, k_totalTileCount * k_pdfSliceCount * 32, NULL, GL_STATIC_DRAW);
@@ -335,6 +360,7 @@ private:
 		memset(dst, 0x00, k_totalTileCount * k_pdfSliceCount * 32);
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+#endif
 
 		m_pWaveletOpacityMaps = std::make_shared<CImage2DArray>();
 		m_pWaveletOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, k_coeffMapCount, WOIT_FLT_PRECISION, 0);
@@ -342,21 +368,26 @@ private:
 		m_pQuantizedWaveletOpacityMaps = std::make_shared<CImage2DArray>();
 		m_pQuantizedWaveletOpacityMaps->createEmpty(WIN_WIDTH, WIN_HEIGHT, k_coeffMapCount, GL_R8UI, 1);
 
+#ifdef WOIT_ENABLE_FULL_PDF
 		m_pWaveletCoeffPDFImage = std::make_shared<CImage2D>();
 		m_pWaveletCoeffPDFImage->createEmpty(k_totalTileCount, k_pdfSliceCount, GL_R32UI, 2);
+#else
+		m_pWaveletCoeffFeatureImage = std::make_shared<CImage2D>();
+		m_pWaveletCoeffFeatureImage->createEmpty(k_totalTileCount, 4, GL_R32UI, 2);
+#endif
 
 		m_pDefaultQuantizerParamsImage = std::make_shared<CImage3D>();
-		m_pDefaultQuantizerParamsImage->createEmpty(k_tileCountW, k_tileCountH, k_tileCountD, GL_RGBA16F, 3, GL_CLAMP_TO_EDGE, GL_LINEAR);
+		m_pDefaultQuantizerParamsImage->createEmpty(k_tileCountW, k_tileCountH, k_tileCountD, GL_RGBA16F, 3, GL_CLAMP_TO_EDGE, GL_NEAREST);
 
 		m_pOptimalQuantizerParamsImage = std::make_shared<CImage2DArray>();
-		m_pOptimalQuantizerParamsImage->createEmpty(k_tileCountW, k_tileCountH, 512, GL_R16F, 4, GL_CLAMP_TO_EDGE, GL_LINEAR);
+		m_pOptimalQuantizerParamsImage->createEmpty(k_tileCountW, k_tileCountH, 512, GL_R16F, 4, GL_CLAMP_TO_EDGE, GL_NEAREST);
 
 		m_pTotalAbsorbanceTex = std::make_shared<CTexture2D>();
 		m_pTotalAbsorbanceTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pEmptyTex = std::make_shared<CTexture2D>();
 		m_pEmptyTex->createEmpty(k_pdfFrameBufferWidth, k_pdfFrameBufferHeight, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
-
+		 
 		m_pWOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR0, m_pTotalAbsorbanceTex);
 
@@ -367,10 +398,14 @@ private:
 		m_pWOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
 
 		m_pPsiIntegralLutTex = std::make_shared<CTexture2D>();
-		m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n10_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		//m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n16_j4_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		//m_pPsiIntegralLutTex->load16("textures/sym2_psi_int_n10_j02_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pPsiLutTex = std::make_shared<CTexture2D>();
-		m_pPsiLutTex->load16("textures/db2_psi_n10_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pPsiLutTex->load16("textures/db2_psi_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		//m_pPsiLutTex->load16("textures/db2_psi_n16_j4_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		//m_pPsiLutTex->load16("textures/sym2_psi_n10_j02_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 #ifdef WOIT_ENABLE_QERROR_CALCULATION
 		m_pQuantizationErrorTex = std::make_shared<CTexture2D>();
@@ -380,7 +415,7 @@ private:
 		m_pWOITCalculateQErrorFrameBuffer->set(EAttachment::COLOR0, m_pQuantizationErrorTex);
 
 		m_pTotalQuantizationErrorImage = std::make_shared<CImage2D>();
-		m_pTotalQuantizationErrorImage->createEmpty(1, 1, GL_R32F, 7);
+		m_pTotalQuantizationErrorImage->createEmpty(1, 2, GL_R32F, 7);
 #endif
 
 #endif
@@ -633,16 +668,18 @@ private:
 			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 		}
 
+#ifdef WOIT_ENABLE_FULL_PDF
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_ClearWaveletCoeffPDFImagePBO);
 		glBindTexture(GL_TEXTURE_2D, m_pWaveletCoeffPDFImage->getObjectID());
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, k_totalTileCount, k_pdfSliceCount, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+#endif
 
 #ifdef WOIT_ENABLE_QERROR_CALCULATION
-		float data = 0;
+		float data[2] = { 0 };
 		glBindTexture(GL_TEXTURE_2D, m_pTotalQuantizationErrorImage->getObjectID());
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1, 1, GL_RED, GL_FLOAT, &data);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1, 2, GL_RED, GL_FLOAT, &data);
 		glBindTexture(GL_TEXTURE_2D, 0);
 #endif
 
@@ -677,7 +714,16 @@ private:
 
 		auto pCamera = CRenderer::getInstance()->fetchCamera();
 
-		//pass0: compute pdf
+		//pass0.0: clear coeff feature image
+#ifndef WOIT_ENABLE_FULL_PDF
+		m_pClearCoeffFeatureImageSP->bind();
+		m_pClearCoeffFeatureImageSP->updateUniform1i("uTileCountW", k_tileCountW);
+		m_pClearCoeffFeatureImageSP->updateUniform1i("uTileCountD", k_tileCountD);
+		glDispatchCompute(k_tileCountW, k_tileCountH, k_tileCountD);
+		m_pClearCoeffFeatureImageSP->unbind();
+#endif
+
+		//pass0.1: compute pdf
 		m_pWOITComputePDFFrameBuffer->bind();
 		glViewport(0, 0, k_pdfFrameBufferWidth, k_pdfFrameBufferHeight);
 
@@ -697,11 +743,6 @@ private:
 		m_pComputePDFSP->updateUniform1i("uTileCountD", k_tileCountD);
 
 		float representativeDataBuffer[514] = { 0 };
-		//glActiveTexture(GL_TEXTURE3);
-		//glBindTexture(GL_TEXTURE_2D, m_pOptimalQuantizerParamsImage->getObjectID());
-		//glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, representativeDataBuffer);
-		//glBindTexture(GL_TEXTURE_2D, 0);
-		//m_pComputePDFSP->updateUniform1fv("uRepresentativeData", 514, representativeDataBuffer);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -731,7 +772,7 @@ private:
 			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 		}
 
-		//pass0.1: compute quantizer paramters
+		//pass0.2: compute quantizer paramters
 		m_pComputeQuantizerParamsSP->bind();
 		m_pComputeQuantizerParamsSP->updateUniform1i("uTileCountW", k_tileCountW);
 		m_pComputeQuantizerParamsSP->updateUniform1i("uTileCountD", k_tileCountD);
@@ -894,12 +935,14 @@ private:
 
 		m_pWOITCalculateQErrorFrameBuffer->unbind();
 
-		float totalError = 0;
+		float totalError[2];
 		glBindTexture(GL_TEXTURE_2D, m_pTotalQuantizationErrorImage->getObjectID());
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, &totalError);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		std::cout << totalError << std::endl;
+		std::cout << "Total Error: " << totalError[0] << std::endl;
+		//std::cout << totalError[1] << std::endl;
+		std::cout << "SNR:" << 10 * log10(totalError[1] / totalError[0]) << std::endl;
 #endif
 	}
 #endif
@@ -1019,6 +1062,7 @@ private:
 	std::unique_ptr<CShaderProgram> m_pComputeRepresentativeBoundariesSP;
 	std::unique_ptr<CShaderProgram> m_pComputePDFSP;
 	std::unique_ptr<CShaderProgram> m_pComputeQuantizerParamsSP;
+	std::unique_ptr<CShaderProgram> m_pClearCoeffFeatureImageSP;
 
 	std::unique_ptr<CFrameBuffer>	m_pWOITComputePDFFrameBuffer;
 	std::unique_ptr<CFrameBuffer>	m_pWOITFrameBuffer1;
@@ -1033,7 +1077,13 @@ private:
 
 	std::shared_ptr<CImage2DArray>	m_pWaveletOpacityMaps;
 	std::shared_ptr<CImage2DArray>	m_pQuantizedWaveletOpacityMaps;
+
+#ifdef WOIT_ENABLE_FULL_PDF
 	std::shared_ptr<CImage2D>		m_pWaveletCoeffPDFImage;
+#else
+	std::shared_ptr<CImage2D>		m_pWaveletCoeffFeatureImage;
+#endif
+
 	std::shared_ptr<CImage3D>		m_pDefaultQuantizerParamsImage;
 	std::shared_ptr<CImage2DArray>	m_pOptimalQuantizerParamsImage;
 
@@ -1044,18 +1094,23 @@ private:
 
 	GLuint m_ClearWaveletOpacityMapPBO;
 	GLuint m_ClearQuantizedWaveletOpacityMapPBO;
+
+#ifdef WOIT_ENABLE_FULL_PDF
 	GLuint m_ClearWaveletCoeffPDFImagePBO;
+#endif
 
 	const int k_coeffMapCount = 16;
-	const int k_scaleSize = 4;
+	const int k_scaleSize = 2;
 	const int k_pdfFrameBufferWidth = WIN_WIDTH / k_scaleSize;
 	const int k_pdfFrameBufferHeight = WIN_HEIGHT / k_scaleSize;
-	const int k_tileSize = 32;
+	const int k_tileSize = 2048;
 	const int k_tileCountW = (k_pdfFrameBufferWidth - 1) / k_tileSize + 1;
 	const int k_tileCountH = (k_pdfFrameBufferHeight - 1) / k_tileSize + 1;
-	const int k_tileCountD = 4;
+	const int k_tileCountD = 1;
 	const int k_totalTileCount = k_tileCountW * k_tileCountH * k_tileCountD;
-	const int k_pdfSliceCount = 1024; // 需要与shader中的数值保持一致
+	const int k_pdfSliceCount = 2048; // 需要与shader中的数值保持一致
+	const int k_coeffFeatureSize = 4;
+
 #endif
 };
 

@@ -4,14 +4,20 @@
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-layout(binding = 2, r32ui)	 uniform uimage2D		uPDFImage;
+#ifdef WOIT_ENABLE_FULL_PDF
+	layout(binding = 2, r32ui)				coherent uniform uimage2D		uPDFImage;
+#else
+	layout(binding = 2, r32ui)				coherent uniform uimage2D		uCoeffFeatureImage;
+#endif
+
 layout(binding = 3, rgba16f) uniform image3D		uDefaultQuantizerParamsImage;
 layout(binding = 4, r16f)	 uniform image2DArray	uOptimalQuantizerParamsImage;
 
 uniform int	uTileCountW;
 uniform int	uTileCountD;
 
-void main()
+#ifdef WOIT_ENABLE_FULL_PDF
+void processWithFullPDF()
 {
 	ivec3 tileCoord = ivec3(gl_GlobalInvocationID.xyz);
 	int tileIndex = (tileCoord.y * uTileCountW + tileCoord.x) * uTileCountD + tileCoord.z;
@@ -116,5 +122,35 @@ void main()
 	}
 	imageStore(uOptimalQuantizerParamsImage, ivec3(tileCoord.xy, 255), vec4(partitions[255], 0, 0, 0));
 
+#endif
+}
+#else
+void processWithoutFullPDF()
+{
+	ivec3 tileCoord = ivec3(gl_GlobalInvocationID.xyz);
+	int tileIndex = (tileCoord.y * uTileCountW + tileCoord.x) * uTileCountD + tileCoord.z;
+
+	float minValue = float(imageLoad(uCoeffFeatureImage, ivec2(tileIndex, 0)).r);
+	minValue = (minValue / 1e6) * (_IntervalMax - _IntervalMin) + _IntervalMin;
+	if (minValue > 0.5 * _IntervalMax) minValue = _IntervalMin;
+
+	float maxValue = float(imageLoad(uCoeffFeatureImage, ivec2(tileIndex, 1)).r);
+	maxValue = (maxValue / 1e6) * (_IntervalMax - _IntervalMin) + _IntervalMin;
+	if (maxValue < 0.5 * _IntervalMin) maxValue = _IntervalMax;
+
+	float delta = (maxValue - minValue) / 253;
+
+#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
+	imageStore(uDefaultQuantizerParamsImage, tileCoord, vec4(minValue, maxValue, delta, 0));
+#endif
+}
+#endif
+
+void main()
+{
+#ifdef WOIT_ENABLE_FULL_PDF
+	processWithFullPDF();
+#else
+	processWithoutFullPDF();
 #endif
 }

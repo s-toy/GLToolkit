@@ -1,0 +1,21 @@
+{
+  "skybox": {
+    "filePath": ""
+  },
+
+  "models": {
+    "opaqueModels": [],
+    "transparentModels": [
+      {
+        "filePath": "models/dragon/dragon.obj",
+        "position": [ 0.0, 0.0, 2.0 ],
+        "scale": [ 1.0, 1.0, 1.0 ],
+        "rotation": {
+          "angle": 1.57,
+          "axis": [ 0.0, 1.0, 0.0 ]
+        },
+        "parameters": [ 0.0, 0.0, 0.3, 0.3 ]
+      }
+    ]
+  }
+}

@@ -107,23 +107,8 @@
     <None Include="shaders\reconstruction_config.glsl">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </None>
-    <None Include="scene_03.json">
-      <Filter>Resource Files\scenes</Filter>
-    </None>
-    <None Include="scene_01.json">
-      <Filter>Resource Files\scenes</Filter>
-    </None>
-    <None Include="scene_02.json">
-      <Filter>Resource Files\scenes</Filter>
-    </None>
-    <None Include="scene_04.json">
-      <Filter>Resource Files\scenes</Filter>
-    </None>
     <None Include="shaders\common.glsl">
       <Filter>Resource Files\shaders\Common</Filter>
-    </None>
-    <None Include="scene_05.json">
-      <Filter>Resource Files\scenes</Filter>
     </None>
     <None Include="shaders\WOIT_merge_color.frag">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
@@ -143,12 +128,6 @@
     <None Include="shaders\WOIT_common.glsl">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </None>
-    <None Include="scene_02_1.json">
-      <Filter>Resource Files\scenes</Filter>
-    </None>
-    <None Include="scene_04_1.json">
-      <Filter>Resource Files\scenes</Filter>
-    </None>
     <None Include="shaders\WOIT_compute_pdf.vert">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </None>
@@ -164,6 +143,33 @@
     <None Include="shaders\WOIT_quantization.glsl">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </None>
+    <None Include="dragon.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="plane.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="planes.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="sphere-bot.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="bunnys.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="bunny.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="bmws.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="bmw.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
+    <None Include="dragons.json">
+      <Filter>Resource Files\scenes</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\moment_math.glsl">
@@ -172,6 +178,9 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\compute_quantizer_parameters.compute">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\WOIT_clear_coeff_feature_image.compute">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </FxCompile>
   </ItemGroup>

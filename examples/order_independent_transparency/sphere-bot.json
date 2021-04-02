@@ -1,0 +1,51 @@
+{
+  "skybox": {
+    "filePath": ""
+  },
+
+  "models": {
+    "opaqueModels": [
+      {
+        "filePath": "models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae",
+        "position": [ 0.0, -1.0, -4.0 ],
+        "rotation": {
+          "angle": 1.57,
+          "axis": [ 1.0, 0.0, 0.0 ]
+        },
+        "scale": [ 0.6, 0.6, 0.6 ]
+      }
+    ],
+    "transparentModels": [
+      {
+        "filePath": "models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae",
+        "position": [ 0.0, -1.0, 0.0 ],
+        "rotation": {
+          "angle": 1.57,
+          "axis": [ 1.0, 0.0, 0.0 ]
+        },
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.0, 0.5, 0.0, 0.2 ]
+      },
+      {
+        "filePath": "models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae",
+        "position": [ 1.15, -1.0, -2.0 ],
+        "rotation": {
+          "angle": 1.57,
+          "axis": [ 1.0, 0.0, 0.0 ]
+        },
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.5, 0.0, 0.0, 0.5 ]
+      },
+      {
+        "filePath": "models/sphere-bot/Armature_001-(COLLADA_3 (COLLAborative Design Activity)).dae",
+        "position": [ -1.15, -1.0, -2.0 ],
+        "rotation": {
+          "angle": 1.57,
+          "axis": [ 1.0, 0.0, 0.0 ]
+        },
+        "scale": [ 0.6, 0.6, 0.6 ],
+        "parameters": [ 0.0, 0.0, 0.5, 0.8 ]
+      }
+    ]
+  }
+}

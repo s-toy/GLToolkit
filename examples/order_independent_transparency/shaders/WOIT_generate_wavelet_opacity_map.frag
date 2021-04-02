@@ -92,6 +92,7 @@ void main()
 
 		//texCoord.z = (float(i) + 0.5) / float(basisNumPerTile * uTileCountD);
 		texCoord.z = (float(i / basisNumPerTile) + 0.5) / float(uTileCountD);
+		//texCoord.z = depth;
 		vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
 
 #if defined(WOIT_ENABLE_QUANTIZATION) || defined(WOIT_ENABLE_QERROR_CALCULATION)

@@ -162,13 +162,15 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="scene_01.json" />
-    <None Include="scene_02.json" />
-    <None Include="scene_02_1.json" />
-    <None Include="scene_03.json" />
-    <None Include="scene_04.json" />
-    <None Include="scene_04_1.json" />
-    <None Include="scene_05.json" />
+    <None Include="bmw.json" />
+    <None Include="dragon.json" />
+    <None Include="dragons.json" />
+    <None Include="plane.json" />
+    <None Include="planes.json" />
+    <None Include="sphere-bot.json" />
+    <None Include="bunnys.json" />
+    <None Include="bunny.json" />
+    <None Include="bmws.json" />
     <None Include="shaders\common.glsl" />
     <None Include="shaders\complex_algebra.glsl" />
     <None Include="shaders\compute_reflection_color.glsl" />
@@ -209,6 +211,10 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\compute_quantizer_parameters.compute">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shaders\WOIT_clear_coeff_feature_image.compute">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

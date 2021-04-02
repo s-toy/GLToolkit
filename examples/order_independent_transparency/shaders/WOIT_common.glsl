@@ -1,8 +1,10 @@
 #define PI 3.1415926
 
-#define WOIT_ENABLE_QUANTIZATION
+//#define WOIT_ENABLE_QUANTIZATION
 #define WOIT_ENABLE_QERROR_CALCULATION
+//#define WOIT_ENABLE_FULL_PDF
 //#define ENABLE_DEPTH_REMAPPING
+//#define ENABLE_SIGMA_AVERAGING
 
 #define UNIFORM_QUANTIZATION		0
 #define LLOYD_MAX_QUANTIZATION		1
@@ -14,28 +16,29 @@
 #define BASIS_TYPE		MEYER_BASIS
 
 #if BASIS_TYPE == FOURIER_BASIS
-#define BASIS_NUM 10
+#define BASIS_NUM 9
 #elif BASIS_TYPE == HAAR_BASIS
 #define BASIS_NUM 8
 #elif BASIS_TYPE == MEYER_BASIS
-#define BASIS_NUM 10
+#define BASIS_NUM 8
 #endif
 
-#define BASIS_SLICE_COUNT 2001
+#define BASIS_SLICE_COUNT 1001
 #define BASIS_SCALE 20
 #define WOIT_FLT_PRECISION r16f
 
 #ifdef ENABLE_SIGMA_AVERAGING
-#define SIGMA_K(k, n) (sin(k*PI/n) / (k*PI/n))
+#define SIGMA_K(k, n) pow(sin(k*PI/n) / (k*PI/n), 16.0)
+
 #else
 #define SIGMA_K(k, n) 1
 #endif
 
-const int PDF_SLICE_COUNT = 1024;
+const int PDF_SLICE_COUNT = 2048;
 
-const float _IntervalMin = -100;
-const float _IntervalMax = 100;
-const float _Mu = 0;
+const float _IntervalMin = -50;
+const float _IntervalMax = 50;
+const float _Mu = 0.0;
 
 float haar_phi_integral(float d)
 {
@@ -87,18 +90,38 @@ float expandFuncMiu(float x, float intervalMin, float intervalMax, float mu)
 {
 	if (mu < 1e-6) return x;
 
-    x = (x - intervalMin) / (intervalMax - intervalMin) * 2 - 1;
-    float y = sign(x) * log(1+mu*abs(x)) / log(1+mu);
-    y = (y * 0.5 + 0.5) * (intervalMax - intervalMin) + intervalMin;
-	return y;
+	if (x < 0)
+	{ 
+		x = -x / intervalMin;
+		float y = sign(x) * log(1+mu*abs(x)) / log(1+mu);
+		y = -y * intervalMin;
+		return y;
+	}
+	else
+	{
+		x = x  / intervalMax;
+		float y = sign(x) * log(1+mu*abs(x)) / log(1+mu);
+		y = y * intervalMax;
+		return y;
+	}
 }
 
 float expandFuncMiuReverse(float x, float intervalMin, float intervalMax, float mu)
 {
 	if (mu < 1e-6) return x;
 
-    x = (x - intervalMin) / (intervalMax - intervalMin) * 2 - 1;
-    float y = sign(x) * (1 / mu) * (pow(1 + mu, abs(x)) - 1);
-    y = (y * 0.5 + 0.5) * (intervalMax - intervalMin) + intervalMin;
-	return y;
+	if (x < 0)
+	{ 
+		x = -x / intervalMin;
+		 float y = sign(x) * (1 / mu) * (pow(1 + mu, abs(x)) - 1);
+		y = -y * intervalMin;
+		return y;
+	}
+	else
+	{
+		x = x  / intervalMax;
+		 float y = sign(x) * (1 / mu) * (pow(1 + mu, abs(x)) - 1);
+		y = y * intervalMax;
+		return y;
+	}
 }

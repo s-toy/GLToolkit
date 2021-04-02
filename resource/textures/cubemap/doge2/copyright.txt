@@ -1,0 +1,4 @@
+Image by Paul Debevec
+httpwww.debevec.orgprobes
+
+Converted from HDR .hdr to .exr

@@ -14,8 +14,8 @@ void main()
 	float totalOpticalDepth = texelFetch(uTotalAbsorbanceTex, uv, 0).x;
 	float totalTransmittance = exp(-totalOpticalDepth);
 
-	//vec3 finalColor = mix(translucentColor.rgb / (translucentColor.a + 1e-5), opaqueColor, totalTransmittance);
+	vec3 finalColor = mix(translucentColor.rgb / (translucentColor.a + 1e-5), opaqueColor, totalTransmittance);
 	//vec3 finalColor = mix(translucentColor.rgb, opaqueColor, totalTransmittance);
-	vec3 finalColor = translucentColor.rgb + opaqueColor * totalTransmittance;
+	//vec3 finalColor = translucentColor.rgb + opaqueColor * totalTransmittance;
 	gl_FragColor = vec4(finalColor, 1.0);
 }

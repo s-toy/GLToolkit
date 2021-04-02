@@ -61,6 +61,7 @@ float basisIntegralFunc(float x, int i)
 		int k = (i - 1) / 2 + 1;
 		result = (i % 2 == 1) ? sin(2*PI*k*x) : (1 - cos(2*PI*k*x));
 		result /= 2 * PI * k;
+		result *= SIGMA_K(k, BASIS_NUM / 2);
 	}
 #elif BASIS_TYPE == HAAR_BASIS
 	if (i == 0)
@@ -102,6 +103,7 @@ void main()
 	{
 		//texCoord.z = (float(i) + 0.5) / float(basisNumPerTile * uTileCountD);
 		texCoord.z = (float(i / basisNumPerTile) + 0.5) / float(uTileCountD);
+		//texCoord.z = depth;
 		vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
 
 #ifndef WOIT_ENABLE_QUANTIZATION

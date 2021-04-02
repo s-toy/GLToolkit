@@ -11,6 +11,13 @@ void CScene::load(const std::string& vFilePath)
 	CJsonReader JsonReader(vFilePath);
 	const auto& Doc = JsonReader.getDocument();
 	if (Doc.HasMember("models")) __parseModels(Doc["models"]);
+	if (Doc.HasMember("cameraPos"))
+	{
+		auto Array = Doc["cameraPos"].GetArray();
+		_ASSERTE(Array.Size() == 3);
+		m_CameraPos = glm::vec3(Array[0].GetFloat(), Array[1].GetFloat(), Array[2].GetFloat());
+		m_HasCameraPos = true;
+	}
 }
 
 //************************************************************

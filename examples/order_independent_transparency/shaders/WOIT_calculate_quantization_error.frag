@@ -27,6 +27,7 @@ void main()
 	int basisNumPerTile = (BASIS_NUM - 1) / uTileCountD + 1;
 
 	float error = 0;
+	float coeff2 = 0;
 
 	for (int i = 0; i < BASIS_NUM; ++i)
 	{
@@ -44,11 +45,14 @@ void main()
 	#endif
 
 		error += (coeff - coeffQuan) * (coeff - coeffQuan);
+		coeff2 += coeff * coeff;
 	}
 
 	error /= BASIS_NUM;
+	coeff2 /= BASIS_NUM;
 
-	imageAtomicAdd(uTotalQuantizationErrorImage, ivec2(0,0), error);
+	imageAtomicAdd(uTotalQuantizationErrorImage, ivec2(0, 0), error);
+	imageAtomicAdd(uTotalQuantizationErrorImage, ivec2(0, 1), coeff2);
 
 	_outQuantizationError = error;
 }
