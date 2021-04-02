@@ -4,30 +4,22 @@
 
 #include "common.glsl"
 #include "compute_phong_shading.glsl"
-
-uniform sampler3D		uDefaultQuantizerParamsImage;
-uniform sampler2DArray	uOptimalQuantizerParamsImage;
-
-#include "WOIT_quantization.glsl"
-
-layout(binding = 0, WOIT_FLT_PRECISION) uniform image2DArray	uWaveletOpacityMaps;
-layout(binding = 1, r8ui)				uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
+#include "WOIT_common.glsl"
 
 uniform sampler2D		uMaterialDiffuseTex;
 uniform sampler2D		uMaterialSpecularTex;
 uniform sampler2D		uOpaqueDepthTex;
 uniform sampler2D		uPsiIntegralLutTex;
+uniform sampler2D		uWaveletCoeffsMap1;
+uniform sampler2D		uWaveletCoeffsMap2;
+uniform sampler2D		uWaveletCoeffsMap3;
+uniform sampler2D		uWaveletCoeffsMap4;
 
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
 uniform float	uCoverage;
 uniform float	uNearPlane;
 uniform float	uFarPlane;
-uniform int		uScaleSize;
-uniform int		uTileSize;
-uniform int		uTileCountW;
-uniform int		uTileCountH;
-uniform int		uTileCountD;
 
 layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
@@ -81,42 +73,49 @@ void main()
 
 	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
 
-#ifdef ENABLE_DEPTH_REMAPPING
-	float nearestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).x;
-	float farthestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).y;
-	depth = remap(depth, nearestSurfaceZ, farthestSurfaceZ, 0.1, 0.9);
-#endif
+//#ifdef ENABLE_DEPTH_REMAPPING
+//	float nearestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).x;
+//	float farthestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).y;
+//	depth = remap(depth, nearestSurfaceZ, farthestSurfaceZ, 0.1, 0.9);
+//#endif
 
 	float opticalDepth = 0.0;
+	int basisIndex = 0;
 
-	float basisIntegral[BASIS_NUM];
-	for (int i = 0; i < BASIS_NUM; ++i)
+	if (BASIS_NUM >= 4)
 	{
-		basisIntegral[i] = basisIntegralFunc(depth, i);
+		vec4 coeffs = texelFetch(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy), 0);
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
 	}
 
-	vec3 texCoord;
-	texCoord.xy = gl_FragCoord.xy / (vec2(uTileCountW, uTileCountH) * uTileSize * uScaleSize);
-	int basisNumPerTile = (BASIS_NUM - 1) / uTileCountD + 1;
-
-	for (int i = 0; i < BASIS_NUM; ++i)
+	if (BASIS_NUM >= 8)
 	{
-		//texCoord.z = (float(i) + 0.5) / float(basisNumPerTile * uTileCountD);
-		texCoord.z = (float(i / basisNumPerTile) + 0.5) / float(uTileCountD);
-		//texCoord.z = depth;
-		vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
+		vec4 coeffs = texelFetch(uWaveletCoeffsMap2, ivec2(gl_FragCoord.xy), 0);
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	}
 
-#ifndef WOIT_ENABLE_QUANTIZATION
-		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
-#else
-	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
-		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, uniformQuantizerParams.x, uniformQuantizerParams.z);
-		coeff = expandFuncMiuReverse(coeff, _IntervalMin, _IntervalMax, _Mu);
-	#elif QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
-		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, texCoord.xy);
-	#endif
-#endif
-		opticalDepth += coeff * basisIntegral[i];
+	if (BASIS_NUM >= 12)
+	{
+		vec4 coeffs = texelFetch(uWaveletCoeffsMap3, ivec2(gl_FragCoord.xy), 0);
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	}
+
+	if (BASIS_NUM >= 16)
+	{
+		vec4 coeffs = texelFetch(uWaveletCoeffsMap4, ivec2(gl_FragCoord.xy), 0);
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
 	}
 
 	float transmittance = exp(-opticalDepth);

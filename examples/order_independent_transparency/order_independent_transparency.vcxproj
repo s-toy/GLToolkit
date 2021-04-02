@@ -195,29 +195,15 @@
     <None Include="shaders\WBOIT_merge_color.frag" />
     <None Include="shaders\WBOIT_weighted_blending.frag" />
     <None Include="shaders\WBOIT_weighted_blending.vert" />
-    <None Include="shaders\WOIT_calculate_quantization_error.frag" />
     <None Include="shaders\WOIT_common.glsl" />
-    <None Include="shaders\WOIT_compute_pdf.frag" />
-    <None Include="shaders\WOIT_compute_pdf.vert" />
     <None Include="shaders\WOIT_generate_wavelet_opacity_map.frag" />
     <None Include="shaders\WOIT_generate_wavelet_opacity_map.vert" />
     <None Include="shaders\WOIT_merge_color.frag" />
-    <None Include="shaders\WOIT_quantization.glsl" />
     <None Include="shaders\WOIT_reconstruct_transmittance.frag" />
     <None Include="shaders\WOIT_reconstruct_transmittance.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\moment_math.glsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="shaders\compute_quantizer_parameters.compute">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="shaders\WOIT_clear_coeff_feature_image.compute">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

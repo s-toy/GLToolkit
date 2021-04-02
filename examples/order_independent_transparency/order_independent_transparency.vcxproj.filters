@@ -128,20 +128,8 @@
     <None Include="shaders\WOIT_common.glsl">
       <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </None>
-    <None Include="shaders\WOIT_compute_pdf.vert">
-      <Filter>Resource Files\shaders\WaveletOIT</Filter>
-    </None>
-    <None Include="shaders\WOIT_compute_pdf.frag">
-      <Filter>Resource Files\shaders\WaveletOIT</Filter>
-    </None>
-    <None Include="shaders\WOIT_calculate_quantization_error.frag">
-      <Filter>Resource Files\shaders\WaveletOIT</Filter>
-    </None>
     <None Include="shaders\transparency_blur.frag">
       <Filter>Resource Files\shaders\Common</Filter>
-    </None>
-    <None Include="shaders\WOIT_quantization.glsl">
-      <Filter>Resource Files\shaders\WaveletOIT</Filter>
     </None>
     <None Include="dragon.json">
       <Filter>Resource Files\scenes</Filter>
@@ -175,13 +163,5 @@
     <ClInclude Include="shaders\moment_math.glsl">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="shaders\compute_quantizer_parameters.compute">
-      <Filter>Resource Files\shaders\WaveletOIT</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\WOIT_clear_coeff_feature_image.compute">
-      <Filter>Resource Files\shaders\WaveletOIT</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

@@ -1,31 +1,22 @@
 #version 460 core
-#extension GL_NV_fragment_shader_interlock : require
-#extension GL_NV_shader_atomic_float : require
 
 #include "common.glsl"
+#include "WOIT_common.glsl"
 
 uniform sampler2D		uOpaqueDepthTex;
 uniform sampler2D		uPsiLutTex;
-uniform sampler3D		uDefaultQuantizerParamsImage;
-uniform sampler2DArray	uOptimalQuantizerParamsImage;
-
-#include "WOIT_quantization.glsl"
 
 uniform float		uCoverage;
 uniform float		uNearPlane;
 uniform float		uFarPlane;
-uniform int			uScaleSize;
-uniform int			uTileSize;
-uniform int			uTileCountW;
-uniform int			uTileCountH;
-uniform int			uTileCountD;
 
 layout(location = 0) in float _inFragDepth;
 
 layout(location = 0) out float _outTotalAbsorbance;
-
-layout(binding = 0, WOIT_FLT_PRECISION) coherent uniform image2DArray	uWaveletOpacityMaps;
-layout(binding = 1, r8ui)				coherent uniform uimage2DArray	uQuantizedWaveletOpacityMaps;
+layout(location = 1) out vec4 _outWaveletCoeffs1;
+layout(location = 2) out vec4 _outWaveletCoeffs2;
+layout(location = 3) out vec4 _outWaveletCoeffs3;
+layout(location = 4) out vec4 _outWaveletCoeffs4;
 
 float meyer_basis(float d, int i)
 {
@@ -74,51 +65,36 @@ void main()
 
 	_outTotalAbsorbance = absorbance;
 
-	float coeffsIncr[BASIS_NUM];
-	for (int i = 0; i < BASIS_NUM; ++i)
+	int basisIndex = 0;
+	if (BASIS_NUM >= 4)
 	{
-		coeffsIncr[i] = basisFunc(depth, i) * absorbance;
+		_outWaveletCoeffs1.r = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs1.g = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs1.b = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs1.a = basisFunc(depth, basisIndex++) * absorbance;
 	}
 
-	vec3 texCoord;
-	texCoord.xy = gl_FragCoord.xy / (vec2(uTileCountW, uTileCountH) * uTileSize * uScaleSize);
-	int basisNumPerTile = (BASIS_NUM - 1) / uTileCountD + 1;
-
-	beginInvocationInterlockNV();
-
-	for (int i = 0; i < BASIS_NUM; ++i)
+	if (BASIS_NUM >= 8)
 	{
-		if (abs(coeffsIncr[i]) < 0.001) continue;
-
-		//texCoord.z = (float(i) + 0.5) / float(basisNumPerTile * uTileCountD);
-		texCoord.z = (float(i / basisNumPerTile) + 0.5) / float(uTileCountD);
-		//texCoord.z = depth;
-		vec3 uniformQuantizerParams = texture(uDefaultQuantizerParamsImage, texCoord).xyz;
-
-#if defined(WOIT_ENABLE_QUANTIZATION) || defined(WOIT_ENABLE_QERROR_CALCULATION)
-	{
-	#if QUANTIZATION_METHOD == UNIFORM_QUANTIZATION
-		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, uniformQuantizerParams.x, uniformQuantizerParams.z);
-		coeff = expandFuncMiuReverse(coeff, _IntervalMin, _IntervalMax, _Mu);
-		coeff += coeffsIncr[i];
-		coeff = expandFuncMiu(coeff, _IntervalMin, _IntervalMax, _Mu);
-		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff, uniformQuantizerParams.x, uniformQuantizerParams.z), 0, 0, 0));
-	#elif QUANTIZATION_METHOD == LLOYD_MAX_QUANTIZATION
-		float coeff = dequantize(imageLoad(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r, texCoord.xy);
-		coeff += coeffsIncr[i];
-		imageStore(uQuantizedWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), ivec4(quantize(coeff, texCoord.xy), 0, 0, 0));
-	#endif
+		_outWaveletCoeffs2.r = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs2.g = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs2.b = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs2.a = basisFunc(depth, basisIndex++) * absorbance;
 	}
-#endif
 
-#if !defined(WOIT_ENABLE_QUANTIZATION) || defined(WOIT_ENABLE_QERROR_CALCULATION)
+	if (BASIS_NUM >= 12)
 	{
-		float coeff = imageLoad(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i)).r;
-		coeff += coeffsIncr[i];
-		imageStore(uWaveletOpacityMaps, ivec3(gl_FragCoord.xy, i), vec4(coeff, 0, 0, 0));
+		_outWaveletCoeffs3.r = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs3.g = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs3.b = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs3.a = basisFunc(depth, basisIndex++) * absorbance;
 	}
-#endif
-	} //end for
 
-	endInvocationInterlockNV();
+	if (BASIS_NUM >= 16)
+	{
+		_outWaveletCoeffs4.r = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs4.g = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs4.b = basisFunc(depth, basisIndex++) * absorbance;
+		_outWaveletCoeffs4.a = basisFunc(depth, basisIndex++) * absorbance;
+	}
 }
