@@ -71,8 +71,8 @@ void main()
 	float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
-	//depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
-	depth = gl_FragCoord.z;
+	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+	//depth = gl_FragCoord.z;
 
 //#ifdef ENABLE_DEPTH_REMAPPING
 //	float nearestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).x;

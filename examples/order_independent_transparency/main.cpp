@@ -21,7 +21,7 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define USING_WAVELET_OIT
+#define USING_LINKED_LIST_OIT
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -34,10 +34,10 @@ const int WIN_WIDTH = 1024;
 const int WIN_HEIGHT = 1024;
 const float CAMERA_MOVE_SPEED = 0.005;
 const float NEAR_PLANE = 0.1;
-const float FAR_PLANE = 10;
+const float FAR_PLANE = 15;
 const bool DISPLAY_FPS = false;
 const glm::dvec3 DEFAULT_CAMERA_POS = glm::dvec3(0, 0, 3);
-const std::string SCENE_NAME = "bmw.json";
+const std::string SCENE_NAME = "bmws.json";
 
 enum class EOITMethod : unsigned char
 {
