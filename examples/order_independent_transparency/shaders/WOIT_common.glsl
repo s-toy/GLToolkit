@@ -1,6 +1,9 @@
+#ifndef WOIT_COMMON
+#define WOIT_COMMON
+
 #define PI 3.1415926
 
-//#define WOIT_ENABLE_QUANTIZATION
+#define WOIT_ENABLE_QUANTIZATION
 #define WOIT_ENABLE_QERROR_CALCULATION
 //#define WOIT_ENABLE_FULL_PDF
 //#define ENABLE_DEPTH_REMAPPING
@@ -38,6 +41,7 @@ const int PDF_SLICE_COUNT = 2048;
 
 const float _IntervalMin = -50;
 const float _IntervalMax = 50;
+const float _Delta = (_IntervalMax - _IntervalMin) / 256;
 const float _Mu = 0.0;
 
 float haar_phi_integral(float d)
@@ -86,6 +90,41 @@ float haar_psi(float x, float j, float k)
 		return 0;
 }
 
+uint quantize(float data)
+{
+	if (abs(data) < 1e-6) return 0;
+
+	if (data <= _IntervalMin) 
+	{
+		return 1;
+	}
+	else if (data > _IntervalMin + _Delta * 253)
+	{
+		return 255;
+	}
+	else
+	{
+		return 1 + uint(ceil((data - _IntervalMin) / _Delta));
+	}
+}
+
+float dequantize(uint data)
+{ 
+	if (data == 0) return 0;
+
+	return _IntervalMin + data * _Delta - 1.5 * _Delta;
+}
+
+uvec4 quantize(vec4 data)
+{
+	return uvec4(quantize(data.x), quantize(data.y), quantize(data.z), quantize(data.w));
+}
+
+vec4 dequantize(uvec4 data)
+{ 
+	return vec4(dequantize(data.x), dequantize(data.y), dequantize(data.z), dequantize(data.w));
+}
+
 float expandFuncMiu(float x, float intervalMin, float intervalMax, float mu)
 {
 	if (mu < 1e-6) return x;
@@ -104,6 +143,16 @@ float expandFuncMiu(float x, float intervalMin, float intervalMax, float mu)
 		y = y * intervalMax;
 		return y;
 	}
+}
+
+vec4 expandFuncMiu(vec4 coeffs, float intervalMin, float intervalMax, float mu)
+{
+	return vec4(
+		expandFuncMiu(coeffs.x, intervalMin, intervalMax, mu),
+		expandFuncMiu(coeffs.y, intervalMin, intervalMax, mu),
+		expandFuncMiu(coeffs.z, intervalMin, intervalMax, mu),
+		expandFuncMiu(coeffs.w, intervalMin, intervalMax, mu)
+	);
 }
 
 float expandFuncMiuReverse(float x, float intervalMin, float intervalMax, float mu)
@@ -125,3 +174,15 @@ float expandFuncMiuReverse(float x, float intervalMin, float intervalMax, float 
 		return y;
 	}
 }
+
+vec4 expandFuncMiuReverse(vec4 coeffs, float intervalMin, float intervalMax, float mu)
+{
+	return vec4(
+		expandFuncMiuReverse(coeffs.x, intervalMin, intervalMax, mu),
+		expandFuncMiuReverse(coeffs.y, intervalMin, intervalMax, mu),
+		expandFuncMiuReverse(coeffs.z, intervalMin, intervalMax, mu),
+		expandFuncMiuReverse(coeffs.w, intervalMin, intervalMax, mu)
+	);
+}
+
+#endif

@@ -10,10 +10,18 @@ uniform sampler2D		uMaterialDiffuseTex;
 uniform sampler2D		uMaterialSpecularTex;
 uniform sampler2D		uOpaqueDepthTex;
 uniform sampler2D		uPsiIntegralLutTex;
-uniform sampler2D		uWaveletCoeffsMap1;
-uniform sampler2D		uWaveletCoeffsMap2;
-uniform sampler2D		uWaveletCoeffsMap3;
-uniform sampler2D		uWaveletCoeffsMap4;
+
+#ifndef WOIT_ENABLE_QUANTIZATION
+	uniform sampler2D		uWaveletCoeffsMap1;
+	uniform sampler2D		uWaveletCoeffsMap2;
+	uniform sampler2D		uWaveletCoeffsMap3;
+	uniform sampler2D		uWaveletCoeffsMap4;
+#else
+	layout(binding = 0, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap1;
+	layout(binding = 1, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap2;
+	layout(binding = 2, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap3;
+	layout(binding = 3, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap4;
+#endif
 
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
@@ -83,6 +91,7 @@ void main()
 	float opticalDepth = 0.0;
 	int basisIndex = 0;
 
+#ifndef WOIT_ENABLE_QUANTIZATION
 	if (BASIS_NUM >= 4)
 	{
 		vec4 coeffs = texelFetch(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy), 0);
@@ -118,6 +127,51 @@ void main()
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
 	}
+#else
+	if (BASIS_NUM >= 4)
+	{
+		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy)));
+		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	}
+
+	if (BASIS_NUM >= 8)
+	{
+		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap2, ivec2(gl_FragCoord.xy)));
+		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	}
+
+	if (BASIS_NUM >= 12)
+	{
+		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap3, ivec2(gl_FragCoord.xy)));
+		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	}
+
+	if (BASIS_NUM >= 16)
+	{
+		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap4, ivec2(gl_FragCoord.xy)));
+		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
+		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	}
+#endif
 
 	float transmittance = exp(-opticalDepth);
 

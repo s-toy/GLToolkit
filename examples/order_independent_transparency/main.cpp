@@ -21,7 +21,9 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define USING_LINKED_LIST_OIT
+#define WOIT_ENABLE_QUANTIZATION //shader要一起改
+
+#define USING_WAVELET_OIT
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -35,7 +37,7 @@ const int WIN_HEIGHT = 1024;
 const float CAMERA_MOVE_SPEED = 0.005;
 const float NEAR_PLANE = 0.1;
 const float FAR_PLANE = 15;
-const bool DISPLAY_FPS = false;
+const bool DISPLAY_FPS = true;
 const glm::dvec3 DEFAULT_CAMERA_POS = glm::dvec3(0, 0, 3);
 const std::string SCENE_NAME = "bmws.json";
 
@@ -291,6 +293,20 @@ private:
 #endif
 
 #ifdef USING_WAVELET_OIT
+
+#ifdef WOIT_ENABLE_QUANTIZATION
+		m_pWaveletOpacityMap1 = std::make_shared<CImage2D>();
+		m_pWaveletOpacityMap1->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8UI, 0, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pWaveletOpacityMap2 = std::make_shared<CImage2D>();
+		m_pWaveletOpacityMap2->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8UI, 1, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pWaveletOpacityMap3 = std::make_shared<CImage2D>();
+		m_pWaveletOpacityMap3->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8UI, 2, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pWaveletOpacityMap4 = std::make_shared<CImage2D>();
+		m_pWaveletOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8UI, 3, GL_CLAMP_TO_BORDER, GL_NEAREST);
+#else
 		m_pWaveletOpacityMap1 = std::make_shared<CTexture2D>();
 		m_pWaveletOpacityMap1->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
@@ -302,19 +318,24 @@ private:
 
 		m_pWaveletOpacityMap4 = std::make_shared<CTexture2D>();
 		m_pWaveletOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+#endif
 
 		m_pTotalAbsorbanceTex = std::make_shared<CTexture2D>();
-		m_pTotalAbsorbanceTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
-		 
+		m_pTotalAbsorbanceTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST); 
+
 		m_pWOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR0, m_pTotalAbsorbanceTex);
+#ifndef WOIT_ENABLE_QUANTIZATION
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR1, m_pWaveletOpacityMap1);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR2, m_pWaveletOpacityMap2);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR3, m_pWaveletOpacityMap3);
 		m_pWOITFrameBuffer1->set(EAttachment::COLOR4, m_pWaveletOpacityMap4);
+#endif
 
 		m_pWOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pWOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
+
+		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 
 		m_pPsiIntegralLutTex = std::make_shared<CTexture2D>();
 		m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
@@ -564,6 +585,17 @@ private:
 
 		CRenderer::getInstance()->setDepthMask(true);
 
+
+#ifdef WOIT_ENABLE_QUANTIZATION
+		m_pClearImageFrameBuffer->bind();
+		m_pClearImageFrameBuffer->set(EAttachment::COLOR0, m_pWaveletOpacityMap1);
+		m_pClearImageFrameBuffer->set(EAttachment::COLOR1, m_pWaveletOpacityMap2);
+		m_pClearImageFrameBuffer->set(EAttachment::COLOR2, m_pWaveletOpacityMap3);
+		m_pClearImageFrameBuffer->set(EAttachment::COLOR3, m_pWaveletOpacityMap4);
+		CRenderer::getInstance()->clear();
+		m_pClearImageFrameBuffer->unbind();
+#endif
+
 		//pass1: generate wavelet opacity map
 		m_pWOITFrameBuffer1->bind();
 		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
@@ -608,16 +640,19 @@ private:
 		m_pWOITReconstructTransmittanceSP->bind();
 		m_pOpaqueDepthTex->bindV(2);
 		m_pPsiIntegralLutTex->bindV(3);
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uPsiIntegralLutTex", m_pPsiIntegralLutTex.get());
+
+#ifndef WOIT_ENABLE_QUANTIZATION
 		m_pWaveletOpacityMap1->bindV(4);
 		m_pWaveletOpacityMap2->bindV(5);
 		m_pWaveletOpacityMap3->bindV(6);
 		m_pWaveletOpacityMap4->bindV(7);
-		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uPsiIntegralLutTex", m_pPsiIntegralLutTex.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletCoeffsMap1", m_pWaveletOpacityMap1.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletCoeffsMap2", m_pWaveletOpacityMap2.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletCoeffsMap3", m_pWaveletOpacityMap3.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletCoeffsMap4", m_pWaveletOpacityMap4.get());
+#endif
 
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
@@ -760,11 +795,19 @@ private:
 	std::unique_ptr<CShaderProgram> m_pWOITMergerColorSP;
 	std::unique_ptr<CFrameBuffer>	m_pWOITFrameBuffer1;
 	std::unique_ptr<CFrameBuffer>	m_pWOITFrameBuffer2;
+	std::unique_ptr<CFrameBuffer>	m_pClearWaveletOpacityMapFrameBuffer;
 
+#ifdef WOIT_ENABLE_QUANTIZATION
+	std::shared_ptr<CImage2D>	m_pWaveletOpacityMap1;
+	std::shared_ptr<CImage2D>	m_pWaveletOpacityMap2;
+	std::shared_ptr<CImage2D>	m_pWaveletOpacityMap3;
+	std::shared_ptr<CImage2D>	m_pWaveletOpacityMap4;
+#else
 	std::shared_ptr<CTexture2D>	m_pWaveletOpacityMap1;
 	std::shared_ptr<CTexture2D>	m_pWaveletOpacityMap2;
 	std::shared_ptr<CTexture2D>	m_pWaveletOpacityMap3;
 	std::shared_ptr<CTexture2D>	m_pWaveletOpacityMap4;
+#endif
 
 	std::shared_ptr<CTexture2D>		m_pPsiLutTex;
 	std::shared_ptr<CTexture2D>		m_pPsiIntegralLutTex;

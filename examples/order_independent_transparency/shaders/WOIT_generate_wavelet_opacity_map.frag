@@ -1,4 +1,5 @@
 #version 460 core
+#extension GL_NV_fragment_shader_interlock : require
 
 #include "common.glsl"
 #include "WOIT_common.glsl"
@@ -13,10 +14,20 @@ uniform float		uFarPlane;
 layout(location = 0) in float _inFragDepth;
 
 layout(location = 0) out float _outTotalAbsorbance;
-layout(location = 1) out vec4 _outWaveletCoeffs1;
-layout(location = 2) out vec4 _outWaveletCoeffs2;
-layout(location = 3) out vec4 _outWaveletCoeffs3;
-layout(location = 4) out vec4 _outWaveletCoeffs4;
+
+#ifndef WOIT_ENABLE_QUANTIZATION
+	layout(location = 1) out vec4 _outWaveletCoeffs1;
+	layout(location = 2) out vec4 _outWaveletCoeffs2;
+	layout(location = 3) out vec4 _outWaveletCoeffs3;
+	layout(location = 4) out vec4 _outWaveletCoeffs4;
+#else
+	layout(binding = 0, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap1;
+	layout(binding = 1, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap2;
+	layout(binding = 2, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap3;
+	layout(binding = 3, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap4;
+#endif
+
+
 
 float meyer_basis(float d, int i)
 {
@@ -66,6 +77,7 @@ void main()
 
 	_outTotalAbsorbance = absorbance;
 
+#ifndef WOIT_ENABLE_QUANTIZATION
 	int basisIndex = 0;
 	if (BASIS_NUM >= 4)
 	{
@@ -98,4 +110,58 @@ void main()
 		_outWaveletCoeffs4.b = basisFunc(depth, basisIndex++) * absorbance;
 		_outWaveletCoeffs4.a = basisFunc(depth, basisIndex++) * absorbance;
 	}
+#else
+	beginInvocationInterlockNV();
+
+	int basisIndex = 0;
+	if (BASIS_NUM >= 4)
+	{
+		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy)));
+		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		coeffs.x += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.y += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.z += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.w += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs = expandFuncMiu(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		imageStore(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy), quantize(coeffs));
+	}
+
+	if (BASIS_NUM >= 8)
+	{
+		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap2, ivec2(gl_FragCoord.xy)));
+		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		coeffs.x += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.y += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.z += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.w += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs = expandFuncMiu(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		imageStore(uWaveletCoeffsMap2, ivec2(gl_FragCoord.xy), quantize(coeffs));
+	}
+
+	if (BASIS_NUM >= 12)
+	{
+		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap3, ivec2(gl_FragCoord.xy)));
+		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		coeffs.x += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.y += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.z += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.w += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs = expandFuncMiu(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		imageStore(uWaveletCoeffsMap3, ivec2(gl_FragCoord.xy), quantize(coeffs));
+	}
+
+	if (BASIS_NUM >= 16)
+	{
+		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap4, ivec2(gl_FragCoord.xy)));
+		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		coeffs.x += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.y += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.z += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs.w += basisFunc(depth, basisIndex++) * absorbance;
+		coeffs = expandFuncMiu(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		imageStore(uWaveletCoeffsMap4, ivec2(gl_FragCoord.xy), quantize(coeffs));
+	}
+
+	endInvocationInterlockNV();
+#endif
 }
