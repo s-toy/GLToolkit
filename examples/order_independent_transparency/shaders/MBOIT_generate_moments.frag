@@ -14,6 +14,8 @@ layout(binding = 1, rgba32f) uniform image2D uMomentsImage;
 layout(location = 0) in float _inFragDepth;
 
 layout(location = 0) out float	_outMomentB0;
+layout(location = 1) out vec4	_outMomentB1234;
+layout(location = 2) out vec4	_outMomentB5678;
 
 void main()
 {
@@ -32,11 +34,14 @@ void main()
 	float depth_pow4 = depth_pow2 * depth_pow2;
 	float depth_pow6 = depth_pow2 * depth_pow4;
 
-	beginInvocationInterlockARB();
+	_outMomentB1234 = vec4(depth, depth_pow2, depth_pow2 * depth, depth_pow4) * absorbance;
+	if (NUM_MOMENTS > 4) _outMomentB5678 = vec4(depth * depth_pow4, depth_pow2 * depth_pow4, depth * depth_pow6, depth_pow4 * depth_pow4) * absorbance;
 
-	vec4 Moments = imageLoad(uMomentsImage, ivec2(gl_FragCoord.xy)).xyzw;
-	Moments += vec4(depth, depth_pow2, depth_pow2 * depth, depth_pow4) * absorbance;
-	imageStore(uMomentsImage, ivec2(gl_FragCoord.xy), Moments); 
+	//beginInvocationInterlockARB();
 
-	endInvocationInterlockARB();
+	//vec4 Moments = imageLoad(uMomentsImage, ivec2(gl_FragCoord.xy)).xyzw;
+	//Moments += vec4(depth, depth_pow2, depth_pow2 * depth, depth_pow4) * absorbance;
+	//imageStore(uMomentsImage, ivec2(gl_FragCoord.xy), Moments); 
+
+	//endInvocationInterlockARB();
 }

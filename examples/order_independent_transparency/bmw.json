@@ -12,7 +12,7 @@
         "filePath": "models/bmw/bmw.obj",
         "position": [ 0.0, -0.5, 1.0 ],
         "scale": [ 0.006, 0.006, 0.006 ],
-        "parameters": [ 0.2, 0.2, 0.2, 0.3 ]
+        "parameters": [ 0.2, 0.2, 0.2, 0.8 ]
       }
     ]
   }

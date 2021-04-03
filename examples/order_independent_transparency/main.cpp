@@ -21,7 +21,7 @@
 #define M_PI 3.14159265358979323f
 #endif
 
-#define WOIT_ENABLE_QUANTIZATION //shader要一起改
+//#define WOIT_ENABLE_QUANTIZATION //shader要一起改
 
 #define USING_WAVELET_OIT
 
@@ -32,8 +32,8 @@
 #define USING_WAVELET_OIT
 #endif
 
-const int WIN_WIDTH = 1024;
-const int WIN_HEIGHT = 1024;
+const int WIN_WIDTH = 1600;
+const int WIN_HEIGHT = 900;
 const float CAMERA_MOVE_SPEED = 0.005;
 const float NEAR_PLANE = 0.1;
 const float FAR_PLANE = 15;
@@ -258,14 +258,19 @@ private:
 		m_pTransparencyColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 #ifdef USING_MOMENT_BASED_OIT
-		m_pMomentB0Tex = std::make_shared<CTexture2D>();
-		m_pMomentB0Tex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pMomentB0Map = std::make_shared<CTexture2D>();
+		m_pMomentB0Map->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
-		m_pMomentsImage = std::make_shared<CImage2D>();
-		m_pMomentsImage->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, 1);
+		m_pMomentsMap1 = std::make_shared<CTexture2D>();
+		m_pMomentsMap1->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+
+		m_pMomentsMap2 = std::make_shared<CTexture2D>();
+		m_pMomentsMap2->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA32F, GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pMBOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
-		m_pMBOITFrameBuffer1->set(EAttachment::COLOR0, m_pMomentB0Tex);
+		m_pMBOITFrameBuffer1->set(EAttachment::COLOR0, m_pMomentB0Map);
+		m_pMBOITFrameBuffer1->set(EAttachment::COLOR1, m_pMomentsMap1);
+		m_pMBOITFrameBuffer1->set(EAttachment::COLOR2, m_pMomentsMap2);
 
 		m_pMBOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 		m_pMBOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
@@ -338,13 +343,13 @@ private:
 		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 
 		m_pPsiIntegralLutTex = std::make_shared<CTexture2D>();
-		m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
-		//m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n16_j4_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		//m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n16_j4_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 		//m_pPsiIntegralLutTex->load16("textures/sym2_psi_int_n10_j02_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pPsiLutTex = std::make_shared<CTexture2D>();
-		m_pPsiLutTex->load16("textures/db2_psi_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
-		//m_pPsiLutTex->load16("textures/db2_psi_n16_j4_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		//m_pPsiLutTex->load16("textures/db2_psi_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pPsiLutTex->load16("textures/db2_psi_n16_j4_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 		//m_pPsiLutTex->load16("textures/sym2_psi_n10_j02_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 #endif
 
@@ -462,10 +467,10 @@ private:
 #ifdef USING_MOMENT_BASED_OIT
 	void __renderUsingMomentBasedOIT()
 	{
-		m_pClearImageFrameBuffer->bind();
-		m_pClearImageFrameBuffer->set(EAttachment::COLOR0, m_pMomentsImage);
-		CRenderer::getInstance()->clear();
-		m_pClearImageFrameBuffer->unbind();
+		//m_pClearImageFrameBuffer->bind();
+		//m_pClearImageFrameBuffer->set(EAttachment::COLOR0, m_pMomentsMap1);
+		//CRenderer::getInstance()->clear();
+		//m_pClearImageFrameBuffer->unbind();
 
 		//pass1: generate moments
 		m_pMBOITFrameBuffer1->bind();
@@ -509,9 +514,13 @@ private:
 
 		m_pReconstructTransmittanceShaderProgram->bind();
 		m_pOpaqueDepthTex->bindV(2);
-		m_pMomentB0Tex->bindV(3);
+		m_pMomentB0Map->bindV(3);
+		m_pMomentsMap1->bindV(4);
+		m_pMomentsMap2->bindV(5);
 		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
-		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
+		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentB0Map", m_pMomentB0Map.get());
+		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentsMap1", m_pMomentsMap1.get());
+		m_pReconstructTransmittanceShaderProgram->updateUniformTexture("uMomentsMap2", m_pMomentsMap2.get());
 		m_pReconstructTransmittanceShaderProgram->updateUniform4f("uWrappingZoneParameters", m_WrappingZoneParameters);
 
 		m_pReconstructTransmittanceShaderProgram->updateUniform1f("uNearPlane", pCamera->getNear());
@@ -536,12 +545,12 @@ private:
 
 		m_pOpaqueColorTex->bindV(0);
 		m_pTransparencyColorTex->bindV(1);
-		m_pMomentB0Tex->bindV(2);
+		m_pMomentB0Map->bindV(2);
 
 		m_pMBOITMergeColorShaderProgram->bind();
 		m_pMBOITMergeColorShaderProgram->updateUniformTexture("uOpaqueColorTex", m_pOpaqueColorTex.get());
 		m_pMBOITMergeColorShaderProgram->updateUniformTexture("uTranslucentColorTex", m_pTransparencyColorTex.get());
-		m_pMBOITMergeColorShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Tex.get());
+		m_pMBOITMergeColorShaderProgram->updateUniformTexture("uMomentB0Tex", m_pMomentB0Map.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pMBOITMergeColorShaderProgram);
 	}
@@ -758,8 +767,9 @@ private:
 	std::unique_ptr<CShaderProgram> m_pMBOITMergeColorShaderProgram;
 	std::unique_ptr<CFrameBuffer>	m_pMBOITFrameBuffer1;
 	std::unique_ptr<CFrameBuffer>	m_pMBOITFrameBuffer2;
-	std::shared_ptr<CTexture2D>		m_pMomentB0Tex;
-	std::shared_ptr<CImage2D>		m_pMomentsImage;
+	std::shared_ptr<CTexture2D>		m_pMomentB0Map;
+	std::shared_ptr<CTexture2D>		m_pMomentsMap1;
+	std::shared_ptr<CTexture2D>		m_pMomentsMap2;
 	glm::vec4	m_WrappingZoneParameters;
 #endif
 
