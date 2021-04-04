@@ -49,8 +49,8 @@ SAABB CModel::getAABB() const
 		Box.Max = max(Box.Max, mesh->getAABB().Max);
 	}
 
-	Box.Min += getPosition();
-	Box.Max += getPosition();
+	//Box.Min += getPosition();
+	//Box.Max += getPosition();
 
 	return Box;
 }

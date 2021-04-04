@@ -167,6 +167,7 @@
     <None Include="dragons.json" />
     <None Include="plane.json" />
     <None Include="planes.json" />
+    <None Include="shaders\WOIT_compute_depth_remap_texture.frag" />
     <None Include="sphere-bot.json" />
     <None Include="bunnys.json" />
     <None Include="bunny.json" />

@@ -9,7 +9,13 @@
 uniform sampler2D		uMaterialDiffuseTex;
 uniform sampler2D		uMaterialSpecularTex;
 uniform sampler2D		uOpaqueDepthTex;
-uniform sampler2D		uPsiIntegralLutTex;
+
+#ifdef ENABLE_PRE_INTEGRAL
+	uniform sampler2D		uPsiLutTex;
+#else
+	uniform sampler2D		uPsiIntegralLutTex;
+#endif
+
 
 #ifndef WOIT_ENABLE_QUANTIZATION
 	uniform sampler2D		uWaveletCoeffsMap1;
@@ -42,7 +48,12 @@ float meyer_basis_integral(float d, int i)
 	int indexX = int(BASIS_SLICE_COUNT * d);
 	indexX = min(max(indexX, 0), BASIS_SLICE_COUNT - 1);
 	int indexY = i;
+
+#ifdef ENABLE_PRE_INTEGRAL
+	return 2 * BASIS_SCALE * texelFetch(uPsiLutTex, ivec2(indexX, indexY), 0).r - BASIS_SCALE;
+#else
 	return 2 * BASIS_SCALE * texelFetch(uPsiIntegralLutTex, ivec2(indexX, indexY), 0).r - BASIS_SCALE;
+#endif
 }
 
 float basisIntegralFunc(float x, int i)
@@ -174,6 +185,7 @@ void main()
 #endif
 
 	float transmittance = exp(-opticalDepth);
+	transmittance = clamp(transmittance, 0, 1);
 
 	vec3 reflectColor = computeReflectColor();
 	_outTransparencyColor.rgb = transmittance * uCoverage * reflectColor;

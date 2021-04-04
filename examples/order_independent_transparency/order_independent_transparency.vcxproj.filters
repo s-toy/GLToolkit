@@ -158,6 +158,9 @@
     <None Include="dragons.json">
       <Filter>Resource Files\scenes</Filter>
     </None>
+    <None Include="shaders\WOIT_compute_depth_remap_texture.frag">
+      <Filter>Resource Files\shaders\WaveletOIT</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shaders\moment_math.glsl">

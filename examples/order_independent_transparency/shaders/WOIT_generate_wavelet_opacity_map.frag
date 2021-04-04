@@ -5,7 +5,12 @@
 #include "WOIT_common.glsl"
 
 uniform sampler2D		uOpaqueDepthTex;
-uniform sampler2D		uPsiLutTex;
+
+#ifndef ENABLE_PRE_INTEGRAL
+	uniform sampler2D		uPsiLutTex;
+#else
+	uniform sampler2D		uPsiIntegralLutTex;
+#endif
 
 uniform float		uCoverage;
 uniform float		uNearPlane;
@@ -27,14 +32,18 @@ layout(location = 0) out float _outTotalAbsorbance;
 	layout(binding = 3, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap4;
 #endif
 
-
-
 float meyer_basis(float d, int i)
 {
 	int indexX = int(BASIS_SLICE_COUNT * d);
 	indexX = min(max(indexX, 0), BASIS_SLICE_COUNT - 1);
 	int indexY = i;
+
+#ifdef ENABLE_PRE_INTEGRAL
+	float tmp = texelFetch(uPsiIntegralLutTex, ivec2(BASIS_SLICE_COUNT - 20, indexY), 0).r - texelFetch(uPsiIntegralLutTex, ivec2(indexX, indexY), 0).r;
+	return  2 * BASIS_SCALE * tmp;
+#else
 	return 2 * BASIS_SCALE * texelFetch(uPsiLutTex, ivec2(indexX, indexY), 0).r - BASIS_SCALE;
+#endif
 }
 
 float basisFunc(float x, int i)

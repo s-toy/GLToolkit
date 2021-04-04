@@ -3,7 +3,7 @@
     "filePath": ""
   },
 
-  "cameraPos": [ 0, 0, 5.0 ],
+  "cameraPos": [ 0, 0, 4.0 ],
 
   "models": {
     "opaqueModels": [],
@@ -12,7 +12,7 @@
         "filePath": "models/bmw/bmw.obj",
         "position": [ 0.0, -1.0, 0.0 ],
         "scale": [ 0.01, 0.01, 0.01 ],
-        "parameters": [ 0.5, 0.0, 0.0, 0.2 ]
+        "parameters": [ 0.5, 0.0, 0.0, 0.95 ]
       },
       {
         "filePath": "models/bmw/bmw.obj",

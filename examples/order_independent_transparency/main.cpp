@@ -22,6 +22,7 @@
 #endif
 
 //#define WOIT_ENABLE_QUANTIZATION //shader要一起改
+//#define ENABLE_PRE_INTEGRAL
 
 #define USING_WAVELET_OIT
 
@@ -37,9 +38,9 @@ const int WIN_HEIGHT = 900;
 const float CAMERA_MOVE_SPEED = 0.005;
 const float NEAR_PLANE = 0.1;
 const float FAR_PLANE = 15;
-const bool DISPLAY_FPS = true;
+const bool DISPLAY_FPS = false;
 const glm::dvec3 DEFAULT_CAMERA_POS = glm::dvec3(0, 0, 3);
-const std::string SCENE_NAME = "bmws.json";
+const std::string SCENE_NAME = "dragons.json";
 
 enum class EOITMethod : unsigned char
 {
@@ -77,6 +78,14 @@ struct SMaterial
 	glm::vec3 diffuse = glm::vec3(0.0);
 	glm::vec3 transmittance = glm::vec3(0.0);
 	float coverage = 0.0;
+};
+
+#define MAX_NUM_AABB 32
+
+struct AABBs 
+{
+	glm::vec3 minVertices[MAX_NUM_AABB] = {};
+	glm::vec3 maxVertices[MAX_NUM_AABB] = {};
 };
 
 class CMyApplication : public CApplicationBase
@@ -195,6 +204,10 @@ private:
 		m_pWOITMergerColorSP = std::make_unique<CShaderProgram>();
 		m_pWOITMergerColorSP->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
 		m_pWOITMergerColorSP->addShader("shaders/WOIT_merge_color.frag", EShaderType::FRAGMENT_SHADER);
+
+		m_pComputeDepthRemapTexSP = std::make_unique<CShaderProgram>();
+		m_pComputeDepthRemapTexSP->addShader("shaders/draw_screen_coord.vert", EShaderType::VERTEX_SHADER);
+		m_pComputeDepthRemapTexSP->addShader("shaders/WOIT_compute_depth_remap_texture.frag", EShaderType::FRAGMENT_SHADER);
 
 #endif //USING_WAVELET_OIT
 		}
@@ -328,29 +341,31 @@ private:
 		m_pTotalAbsorbanceTex = std::make_shared<CTexture2D>();
 		m_pTotalAbsorbanceTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST); 
 
-		m_pWOITFrameBuffer1 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
-		m_pWOITFrameBuffer1->set(EAttachment::COLOR0, m_pTotalAbsorbanceTex);
+		m_pDepthRemapTex = std::make_shared<CTexture2D>();
+		m_pDepthRemapTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RG16F, GL_CLAMP_TO_BORDER, GL_LINEAR);
+
+		m_pComputeDepthRemapTexFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
+		m_pComputeDepthRemapTexFrameBuffer->set(EAttachment::COLOR0, m_pDepthRemapTex);
+
+		m_pWOITProjectionFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR0, m_pTotalAbsorbanceTex);
 #ifndef WOIT_ENABLE_QUANTIZATION
-		m_pWOITFrameBuffer1->set(EAttachment::COLOR1, m_pWaveletOpacityMap1);
-		m_pWOITFrameBuffer1->set(EAttachment::COLOR2, m_pWaveletOpacityMap2);
-		m_pWOITFrameBuffer1->set(EAttachment::COLOR3, m_pWaveletOpacityMap3);
-		m_pWOITFrameBuffer1->set(EAttachment::COLOR4, m_pWaveletOpacityMap4);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR1, m_pWaveletOpacityMap1);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR2, m_pWaveletOpacityMap2);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR3, m_pWaveletOpacityMap3);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR4, m_pWaveletOpacityMap4);
 #endif
 
-		m_pWOITFrameBuffer2 = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
-		m_pWOITFrameBuffer2->set(EAttachment::COLOR0, m_pTransparencyColorTex);
+		m_pWOITReconstructionFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
+		m_pWOITReconstructionFrameBuffer->set(EAttachment::COLOR0, m_pTransparencyColorTex);
 
 		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 
 		m_pPsiIntegralLutTex = std::make_shared<CTexture2D>();
-		//m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
-		m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n16_j4_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
-		//m_pPsiIntegralLutTex->load16("textures/sym2_psi_int_n10_j02_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n8_j32_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pPsiLutTex = std::make_shared<CTexture2D>();
-		//m_pPsiLutTex->load16("textures/db2_psi_n8_j3_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
-		m_pPsiLutTex->load16("textures/db2_psi_n16_j4_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
-		//m_pPsiLutTex->load16("textures/sym2_psi_n10_j02_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pPsiLutTex->load16("textures/db2_psi_n8_j32_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
 #endif
 
 #if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT) || defined(USING_WAVELET_OIT)
@@ -605,8 +620,44 @@ private:
 		m_pClearImageFrameBuffer->unbind();
 #endif
 
-		//pass1: generate wavelet opacity map
-		m_pWOITFrameBuffer1->bind();
+		//pass0: compute depth remapping texture
+		m_pComputeDepthRemapTexFrameBuffer->bind();
+		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
+		CRenderer::getInstance()->clear();
+
+		AABBs aabbs;
+
+		for (int i = 0; i < m_TransparentModels.size(); ++i)
+		{
+			SAABB aabb = m_TransparentModels[i]->getAABB();
+
+			auto ModelMatrix = glm::translate(glm::mat4(1.0), m_TransparentModels[i]->getPosition());
+			ModelMatrix = glm::rotate(ModelMatrix, m_TransparentModels[i]->getRotation().w, glm::vec3(m_TransparentModels[i]->getRotation()));
+			ModelMatrix = glm::scale(ModelMatrix, m_TransparentModels[i]->getScale());
+
+			aabb.Min = ModelMatrix * glm::vec4(aabb.Min, 1);
+			aabb.Max = ModelMatrix * glm::vec4(aabb.Max, 1);
+
+			aabbs.minVertices[i] = aabb.Min;
+			aabbs.maxVertices[i] = aabb.Max;
+		}
+
+		m_pComputeDepthRemapTexSP->bind();
+
+		m_pComputeDepthRemapTexSP->updateUniform1i("uScreenWidth", WIN_WIDTH);
+		m_pComputeDepthRemapTexSP->updateUniform1i("uScreenHeight", WIN_HEIGHT);
+		m_pComputeDepthRemapTexSP->updateUniform1i("uAABBNum", m_TransparentModels.size());
+		glUniform3fv(glGetUniformLocation(m_pComputeDepthRemapTexSP->getProgramID(), "minAABBVertices"), MAX_NUM_AABB, (const GLfloat*)aabbs.minVertices);
+		glUniform3fv(glGetUniformLocation(m_pComputeDepthRemapTexSP->getProgramID(), "maxAABBVertices"), MAX_NUM_AABB, (const GLfloat*)aabbs.maxVertices);
+
+		CRenderer::getInstance()->drawScreenQuad(*m_pComputeDepthRemapTexSP);
+
+		m_pComputeDepthRemapTexSP->unbind();
+
+		m_pComputeDepthRemapTexFrameBuffer->unbind();
+
+		//pass1: projection
+		m_pWOITProjectionFrameBuffer->bind();
 		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 
 		CRenderer::getInstance()->clear();
@@ -617,9 +668,15 @@ private:
 
 		m_pGenWaveletOpacityMapSP->bind();
 		m_pOpaqueDepthTex->bindV(2);
-		m_pPsiLutTex->bindV(3);
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+
+#ifdef ENABLE_PRE_INTEGRAL
+		m_pPsiIntegralLutTex->bindV(3);
+		m_pGenWaveletOpacityMapSP->updateUniformTexture("uPsiIntegralLutTex", m_pPsiIntegralLutTex.get());
+#else
+		m_pPsiLutTex->bindV(3);
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uPsiLutTex", m_pPsiLutTex.get());
+#endif
 
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uFarPlane", pCamera->getFar());
@@ -635,10 +692,10 @@ private:
 		CRenderer::getInstance()->setDepthMask(true);
 		CRenderer::getInstance()->enableBlend(false);
 
-		m_pWOITFrameBuffer1->unbind();
+		m_pWOITProjectionFrameBuffer->unbind();
 
-		//pass2: reconstruct transmittance
-		m_pWOITFrameBuffer2->bind();
+		//pass2: reconstruction
+		m_pWOITReconstructionFrameBuffer->bind();
 
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(false);
@@ -648,9 +705,15 @@ private:
 
 		m_pWOITReconstructTransmittanceSP->bind();
 		m_pOpaqueDepthTex->bindV(2);
-		m_pPsiIntegralLutTex->bindV(3);
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+
+#ifdef ENABLE_PRE_INTEGRAL
+		m_pPsiLutTex->bindV(3);
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uPsiLutTex", m_pPsiLutTex.get());
+#else
+		m_pPsiIntegralLutTex->bindV(3);
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uPsiIntegralLutTex", m_pPsiIntegralLutTex.get());
+#endif
 
 #ifndef WOIT_ENABLE_QUANTIZATION
 		m_pWaveletOpacityMap1->bindV(4);
@@ -679,7 +742,7 @@ private:
 		CRenderer::getInstance()->setDepthMask(true);
 		CRenderer::getInstance()->enableBlend(false);
 
-		m_pWOITFrameBuffer2->unbind();
+		m_pWOITReconstructionFrameBuffer->unbind();
 
 		//pass3: merge color
 		CRenderer::getInstance()->clear();
@@ -803,9 +866,12 @@ private:
 	std::unique_ptr<CShaderProgram> m_pGenWaveletOpacityMapSP;
 	std::unique_ptr<CShaderProgram> m_pWOITReconstructTransmittanceSP;
 	std::unique_ptr<CShaderProgram> m_pWOITMergerColorSP;
-	std::unique_ptr<CFrameBuffer>	m_pWOITFrameBuffer1;
-	std::unique_ptr<CFrameBuffer>	m_pWOITFrameBuffer2;
+	std::unique_ptr<CShaderProgram> m_pComputeDepthRemapTexSP;
+
 	std::unique_ptr<CFrameBuffer>	m_pClearWaveletOpacityMapFrameBuffer;
+	std::unique_ptr<CFrameBuffer>	m_pComputeDepthRemapTexFrameBuffer;
+	std::unique_ptr<CFrameBuffer>	m_pWOITProjectionFrameBuffer;
+	std::unique_ptr<CFrameBuffer>	m_pWOITReconstructionFrameBuffer;
 
 #ifdef WOIT_ENABLE_QUANTIZATION
 	std::shared_ptr<CImage2D>	m_pWaveletOpacityMap1;
@@ -822,6 +888,7 @@ private:
 	std::shared_ptr<CTexture2D>		m_pPsiLutTex;
 	std::shared_ptr<CTexture2D>		m_pPsiIntegralLutTex;
 	std::shared_ptr<CTexture2D>		m_pTotalAbsorbanceTex;
+	std::shared_ptr<CTexture2D>		m_pDepthRemapTex;
 #endif
 };
 
