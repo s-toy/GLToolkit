@@ -5,6 +5,7 @@
 #include "WOIT_common.glsl"
 
 uniform sampler2D		uOpaqueDepthTex;
+uniform sampler2D		uDepthRemapTex;
 
 #ifndef ENABLE_PRE_INTEGRAL
 	uniform sampler2D		uPsiLutTex;
@@ -15,6 +16,8 @@ uniform sampler2D		uOpaqueDepthTex;
 uniform float		uCoverage;
 uniform float		uNearPlane;
 uniform float		uFarPlane;
+uniform float		uScreenWidth;
+uniform float		uScreenHeight;
 
 layout(location = 0) in float _inFragDepth;
 
@@ -76,11 +79,16 @@ float basisFunc(float x, int i)
 
 void main()
 {
-	float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
-	if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
+	//float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+	//if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
 	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
-	//float depth = gl_FragCoord.z;
+
+#ifdef ENABLE_DEPTH_REMAPPING
+    vec2 uv = gl_FragCoord.xy / vec2(uScreenWidth, uScreenHeight);
+	vec2 minMaxZ = textureLod(uDepthRemapTex, uv, 0).xy;
+	depth = remap(depth, minMaxZ.x, minMaxZ.y, 0.01, 0.99);
+#endif
 
 	float absorbance = -log(1.0 - uCoverage + 1e-5);
 

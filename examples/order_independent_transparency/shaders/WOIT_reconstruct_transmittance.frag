@@ -9,6 +9,7 @@
 uniform sampler2D		uMaterialDiffuseTex;
 uniform sampler2D		uMaterialSpecularTex;
 uniform sampler2D		uOpaqueDepthTex;
+uniform sampler2D		uDepthRemapTex;
 
 #ifdef ENABLE_PRE_INTEGRAL
 	uniform sampler2D		uPsiLutTex;
@@ -34,6 +35,8 @@ uniform vec3	uDiffuseColor;
 uniform float	uCoverage;
 uniform float	uNearPlane;
 uniform float	uFarPlane;
+uniform float	uScreenWidth;
+uniform float	uScreenHeight;
 
 layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
@@ -87,17 +90,16 @@ float basisIntegralFunc(float x, int i)
 
 void main()
 {
-	float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
-	if (depth != 0.0 && gl_FragCoord.z > depth) discard;
+	//float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+	//if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
-	depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
-	//depth = gl_FragCoord.z;
+	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
 
-//#ifdef ENABLE_DEPTH_REMAPPING
-//	float nearestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).x;
-//	float farthestSurfaceZ = imageLoad(uSurfaceZImage, ivec2(gl_FragCoord.xy)).y;
-//	depth = remap(depth, nearestSurfaceZ, farthestSurfaceZ, 0.1, 0.9);
-//#endif
+#ifdef ENABLE_DEPTH_REMAPPING
+    vec2 uv = gl_FragCoord.xy / vec2(uScreenWidth, uScreenHeight);
+	vec2 minMaxZ = textureLod(uDepthRemapTex, uv, 0).xy;
+	depth = remap(depth, minMaxZ.x, minMaxZ.y, 0.01, 0.99);
+#endif
 
 	float opticalDepth = 0.0;
 	int basisIndex = 0;

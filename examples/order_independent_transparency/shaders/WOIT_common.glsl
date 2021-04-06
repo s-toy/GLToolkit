@@ -6,9 +6,9 @@
 //#define WOIT_ENABLE_QUANTIZATION
 #define WOIT_ENABLE_QERROR_CALCULATION
 //#define WOIT_ENABLE_FULL_PDF
-//#define ENABLE_DEPTH_REMAPPING
+#define ENABLE_DEPTH_REMAPPING
 #define ENABLE_SIGMA_AVERAGING
-//#define ENABLE_PRE_INTEGRAL
+#define ENABLE_PRE_INTEGRAL
 
 #define UNIFORM_QUANTIZATION		0
 #define LLOYD_MAX_QUANTIZATION		1
@@ -24,7 +24,7 @@
 #elif BASIS_TYPE == HAAR_BASIS
 #define BASIS_NUM 8
 #elif BASIS_TYPE == MEYER_BASIS
-#define BASIS_NUM 8
+#define BASIS_NUM 16
 #endif
 
 #define BASIS_SLICE_COUNT 2001
@@ -40,10 +40,10 @@
 
 const int PDF_SLICE_COUNT = 2048;
 
-const float _IntervalMin = -100;
-const float _IntervalMax = 100;
+const float _IntervalMin = -20;
+const float _IntervalMax = 20;
 const float _Delta = (_IntervalMax - _IntervalMin) / 256;
-const float _Mu = 10.0;
+const float _Mu = 0.0;
 
 float haar_phi_integral(float d)
 {

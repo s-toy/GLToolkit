@@ -12,19 +12,19 @@
         "filePath": "models/bmw/bmw.obj",
         "position": [ 0.0, -1.0, 0.0 ],
         "scale": [ 0.01, 0.01, 0.01 ],
-        "parameters": [ 0.5, 0.0, 0.0, 0.95 ]
+        "parameters": [ 0.5, 0.0, 0.0, 0.5 ]
       },
       {
         "filePath": "models/bmw/bmw.obj",
-        "position": [ 0.0, -1.0, -3.0 ],
+        "position": [ 5.0, -1.0, 0.0 ],
         "scale": [ 0.01, 0.01, 0.01 ],
-        "parameters": [ 0.0, 0.5, 0.0, 0.2]
+        "parameters": [ 0.5, 0.0, 0.0, 0.2 ]
       },
       {
         "filePath": "models/bmw/bmw.obj",
-        "position": [ 0.0, -1.0, -6.0 ],
+        "position": [ 0.0, -1.0, -5.0 ],
         "scale": [ 0.01, 0.01, 0.01 ],
-        "parameters": [ 0.0, 0.0, 0.5, 0.3 ]
+        "parameters": [ 0.0, 0.5, 0.0, 0.2 ]
       }
     ]
   }

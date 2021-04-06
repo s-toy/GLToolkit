@@ -7,6 +7,8 @@ uniform int uScreenHeight;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform vec3 uViewPos;
+uniform float uNearPlane;
+uniform float uFarPlane;
 
 layout (location = 0) out vec2 _outMinMaxDepth;
 
@@ -25,6 +27,17 @@ vec2 intersectAABB(vec3 rayOrigin, vec3 rayDir, vec3 boxMin, vec3 boxMax) {
     float tFar = min(min(t2.x, t2.y), t2.z);
     return vec2(tNear, tFar);
 };
+
+vec2 intersectSphere( in vec3 rayOrigin, in vec3 rayDir, in vec3 ce, float ra )
+{
+    vec3 oc = rayOrigin - ce;
+    float b = dot( oc, rayDir );
+    float c = dot( oc, oc ) - ra*ra;
+    float h = b*b - c;
+    if( h<0.0 ) return vec2(-1.0); // no intersection
+    h = sqrt( h );
+    return vec2( -b-h, -b+h );
+}
 
 vec3 getRayFromScreenSpace(vec2 pos)
 {
@@ -47,21 +60,34 @@ void main()
 	vec3 rayOri = uViewPos;
 	vec3 rayDir = getRayFromScreenSpace(vec2(gl_FragCoord.x, uScreenHeight - gl_FragCoord.y - 1));
 
-	float hit = 0; 
+	float tmin = 1e6, tmax = -1e6;
 
 	for (int i = 0; i < uAABBNum; ++i)
 	{
-		vec2 hitInfo = intersectAABB(rayOri, rayDir, minAABBVertices[i], maxAABBVertices[i]);
-		float tnear = hitInfo.x;
-		float tfar = hitInfo.y;
+		//vec2 hitInfo = intersectAABB(rayOri, rayDir, minAABBVertices[i], maxAABBVertices[i]);
+		vec2 hitInfo = intersectSphere(rayOri, rayDir, 0.5 * (minAABBVertices[i] + maxAABBVertices[i]), 0.5 * length(maxAABBVertices[i] - minAABBVertices[i]));
 
-		if (tnear < tfar)
+		if (hitInfo.x < hitInfo.y)
 		{
-			vec3 nearPos = rayOri + tnear * rayDir;
-			vec3 farPos = rayOri + tfar * rayDir;
-			hit = 1;
+			tmin = min(tmin, hitInfo.x);
+			tmax = max(tmax, hitInfo.y);
 		}
 	}
 
-	_outMinMaxDepth = vec2(hit);
+	if (tmin < tmax)
+	{
+		vec3 minPosWS = rayOri + rayDir * tmin;
+		vec3 maxPosWS = rayOri + rayDir * tmax;
+
+		vec4 minPosVS = uViewMatrix * vec4(minPosWS, 1);
+		vec4 maxPosVS = uViewMatrix * vec4(maxPosWS, 1);
+
+		float minZ = (-minPosVS.z - uNearPlane) / (uFarPlane - uNearPlane);
+		float maxZ = (-maxPosVS.z - uNearPlane) / (uFarPlane - uNearPlane);
+		_outMinMaxDepth = vec2(minZ, maxZ);
+	}
+	else
+	{
+		_outMinMaxDepth = vec2(0);
+	}
 }

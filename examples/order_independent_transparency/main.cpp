@@ -22,7 +22,8 @@
 #endif
 
 //#define WOIT_ENABLE_QUANTIZATION //shader要一起改
-//#define ENABLE_PRE_INTEGRAL
+#define ENABLE_PRE_INTEGRAL
+#define ENABLE_DEPTH_REMAPPING
 
 #define USING_WAVELET_OIT
 
@@ -37,10 +38,12 @@ const int WIN_WIDTH = 1600;
 const int WIN_HEIGHT = 900;
 const float CAMERA_MOVE_SPEED = 0.005;
 const float NEAR_PLANE = 0.1;
-const float FAR_PLANE = 15;
+const float FAR_PLANE = 20;
 const bool DISPLAY_FPS = false;
 const glm::dvec3 DEFAULT_CAMERA_POS = glm::dvec3(0, 0, 3);
-const std::string SCENE_NAME = "dragons.json";
+const std::string SCENE_NAME = "bmw.json";
+const std::string LUT_INT_NAME = "textures/db2_psi_int_n16_j43_s20.png";
+const std::string LUT_NAME = "textures/db2_psi_n16_j43_s20.png";
 
 enum class EOITMethod : unsigned char
 {
@@ -50,6 +53,7 @@ enum class EOITMethod : unsigned char
 	FOURIER_OIT,
 	WAVELET_OIT
 };
+
 
 using namespace glt;
 
@@ -342,7 +346,7 @@ private:
 		m_pTotalAbsorbanceTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST); 
 
 		m_pDepthRemapTex = std::make_shared<CTexture2D>();
-		m_pDepthRemapTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RG16F, GL_CLAMP_TO_BORDER, GL_LINEAR);
+		m_pDepthRemapTex->createEmpty(WIN_WIDTH / DEPTH_REMAP_TEX_SCALE, WIN_HEIGHT / DEPTH_REMAP_TEX_SCALE, GL_RG16F, GL_CLAMP_TO_BORDER, GL_LINEAR_MIPMAP_LINEAR, true);
 
 		m_pComputeDepthRemapTexFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
 		m_pComputeDepthRemapTexFrameBuffer->set(EAttachment::COLOR0, m_pDepthRemapTex);
@@ -362,10 +366,10 @@ private:
 		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 
 		m_pPsiIntegralLutTex = std::make_shared<CTexture2D>();
-		m_pPsiIntegralLutTex->load16("textures/db2_psi_int_n8_j32_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pPsiIntegralLutTex->load16(LUT_INT_NAME.c_str(), GL_CLAMP_TO_BORDER, GL_NEAREST);
 
 		m_pPsiLutTex = std::make_shared<CTexture2D>();
-		m_pPsiLutTex->load16("textures/db2_psi_n8_j32_s20.png", GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pPsiLutTex->load16(LUT_NAME.c_str(), GL_CLAMP_TO_BORDER, GL_NEAREST);
 #endif
 
 #if defined(USING_LINKED_LIST_OIT) || defined(USING_MOMENT_BASED_OIT) || defined(USING_WAVELET_OIT)
@@ -609,7 +613,6 @@ private:
 
 		CRenderer::getInstance()->setDepthMask(true);
 
-
 #ifdef WOIT_ENABLE_QUANTIZATION
 		m_pClearImageFrameBuffer->bind();
 		m_pClearImageFrameBuffer->set(EAttachment::COLOR0, m_pWaveletOpacityMap1);
@@ -621,8 +624,10 @@ private:
 #endif
 
 		//pass0: compute depth remapping texture
+#ifdef ENABLE_DEPTH_REMAPPING
 		m_pComputeDepthRemapTexFrameBuffer->bind();
-		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
+		glViewport(0, 0, WIN_WIDTH / DEPTH_REMAP_TEX_SCALE, WIN_HEIGHT / DEPTH_REMAP_TEX_SCALE);
+		CRenderer::getInstance()->setClearColor(0, 1, 0, 0);
 		CRenderer::getInstance()->clear();
 
 		AABBs aabbs;
@@ -644,8 +649,10 @@ private:
 
 		m_pComputeDepthRemapTexSP->bind();
 
-		m_pComputeDepthRemapTexSP->updateUniform1i("uScreenWidth", WIN_WIDTH);
-		m_pComputeDepthRemapTexSP->updateUniform1i("uScreenHeight", WIN_HEIGHT);
+		m_pComputeDepthRemapTexSP->updateUniform1i("uScreenWidth", WIN_WIDTH / DEPTH_REMAP_TEX_SCALE);
+		m_pComputeDepthRemapTexSP->updateUniform1i("uScreenHeight", WIN_HEIGHT / DEPTH_REMAP_TEX_SCALE);
+		m_pComputeDepthRemapTexSP->updateUniform1f("uNearPlane", NEAR_PLANE);
+		m_pComputeDepthRemapTexSP->updateUniform1f("uFarPlane", FAR_PLANE);
 		m_pComputeDepthRemapTexSP->updateUniform1i("uAABBNum", m_TransparentModels.size());
 		glUniform3fv(glGetUniformLocation(m_pComputeDepthRemapTexSP->getProgramID(), "minAABBVertices"), MAX_NUM_AABB, (const GLfloat*)aabbs.minVertices);
 		glUniform3fv(glGetUniformLocation(m_pComputeDepthRemapTexSP->getProgramID(), "maxAABBVertices"), MAX_NUM_AABB, (const GLfloat*)aabbs.maxVertices);
@@ -655,11 +662,12 @@ private:
 		m_pComputeDepthRemapTexSP->unbind();
 
 		m_pComputeDepthRemapTexFrameBuffer->unbind();
+#endif
 
 		//pass1: projection
 		m_pWOITProjectionFrameBuffer->bind();
 		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
-
+		CRenderer::getInstance()->setClearColor(0, 0, 0, 0);
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(false);
 		CRenderer::getInstance()->setDepthMask(false);
@@ -667,8 +675,12 @@ private:
 		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE);
 
 		m_pGenWaveletOpacityMapSP->bind();
-		m_pOpaqueDepthTex->bindV(2);
-		m_pGenWaveletOpacityMapSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		//m_pOpaqueDepthTex->bindV(2);
+		//m_pGenWaveletOpacityMapSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+
+		m_pDepthRemapTex->bindV(2);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		m_pGenWaveletOpacityMapSP->updateUniformTexture("uDepthRemapTex", m_pDepthRemapTex.get());
 
 #ifdef ENABLE_PRE_INTEGRAL
 		m_pPsiIntegralLutTex->bindV(3);
@@ -680,6 +692,8 @@ private:
 
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pGenWaveletOpacityMapSP->updateUniform1f("uFarPlane", pCamera->getFar());
+		m_pGenWaveletOpacityMapSP->updateUniform1f("uScreenWidth", WIN_WIDTH);
+		m_pGenWaveletOpacityMapSP->updateUniform1f("uScreenHeight", WIN_HEIGHT);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -704,8 +718,11 @@ private:
 		CRenderer::getInstance()->setBlendFunc(GL_ONE, GL_ONE);
 
 		m_pWOITReconstructTransmittanceSP->bind();
-		m_pOpaqueDepthTex->bindV(2);
-		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+		//m_pOpaqueDepthTex->bindV(2);
+		//m_pWOITReconstructTransmittanceSP->updateUniformTexture("uOpaqueDepthTex", m_pOpaqueDepthTex.get());
+
+		m_pDepthRemapTex->bindV(2);
+		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uDepthRemapTex", m_pDepthRemapTex.get());
 
 #ifdef ENABLE_PRE_INTEGRAL
 		m_pPsiLutTex->bindV(3);
@@ -728,6 +745,8 @@ private:
 
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
 		m_pWOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
+		m_pWOITReconstructTransmittanceSP->updateUniform1f("uScreenWidth", WIN_WIDTH);
+		m_pWOITReconstructTransmittanceSP->updateUniform1f("uScreenHeight", WIN_HEIGHT);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -889,6 +908,8 @@ private:
 	std::shared_ptr<CTexture2D>		m_pPsiIntegralLutTex;
 	std::shared_ptr<CTexture2D>		m_pTotalAbsorbanceTex;
 	std::shared_ptr<CTexture2D>		m_pDepthRemapTex;
+
+	const int DEPTH_REMAP_TEX_SCALE = 4;
 #endif
 };
 
