@@ -35,7 +35,7 @@ layout(location = 0) out float _outTotalAbsorbance;
 	layout(binding = 3, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap4;
 #endif
 
-float meyer_basis(float d, int i)
+float wavelet_basis(float d, int i)
 {
 	int indexX = int(BASIS_SLICE_COUNT * d);
 	indexX = min(max(indexX, 0), BASIS_SLICE_COUNT - 1);
@@ -70,8 +70,8 @@ float basisFunc(float x, int i)
 			result = haar_phi(x);
 		else
 			result = haar_psi(x, indexJ, indexK);
-#elif BASIS_TYPE == MEYER_BASIS
-	result = meyer_basis(x, i);
+#elif BASIS_TYPE == WAVELET_BASIS
+	result = wavelet_basis(x, i);
 #endif
 
 	return result;
@@ -98,34 +98,58 @@ void main()
 	int basisIndex = 0;
 	if (BASIS_NUM >= 4)
 	{
-		_outWaveletCoeffs1.r = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs1.g = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs1.b = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs1.a = basisFunc(depth, basisIndex++) * absorbance;
+	#ifdef DISCARD_UNUSED_BASIS_GEN
+		if (depth >= 0.0/16.0 && depth <= 5.0/16.0)
+	#endif
+		{
+			_outWaveletCoeffs1.r = basisFunc(depth, basisIndex) * absorbance;
+			_outWaveletCoeffs1.g = basisFunc(depth, basisIndex+1) * absorbance;
+			_outWaveletCoeffs1.b = basisFunc(depth, basisIndex+2) * absorbance;
+			_outWaveletCoeffs1.a = basisFunc(depth, basisIndex+3) * absorbance;
+		}
+		basisIndex += 4;
 	}
 
 	if (BASIS_NUM >= 8)
 	{
-		_outWaveletCoeffs2.r = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs2.g = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs2.b = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs2.a = basisFunc(depth, basisIndex++) * absorbance;
+	#ifdef DISCARD_UNUSED_BASIS_GEN
+		if (depth >= 3.0/16.0 && depth <= 9.0/16.0)
+	#endif
+		{
+			_outWaveletCoeffs2.r = basisFunc(depth, basisIndex) * absorbance;
+			_outWaveletCoeffs2.g = basisFunc(depth, basisIndex+1) * absorbance;
+			_outWaveletCoeffs2.b = basisFunc(depth, basisIndex+2) * absorbance;
+			_outWaveletCoeffs2.a = basisFunc(depth, basisIndex+3) * absorbance;
+		}
+		basisIndex += 4;
 	}
 
 	if (BASIS_NUM >= 12)
 	{
-		_outWaveletCoeffs3.r = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs3.g = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs3.b = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs3.a = basisFunc(depth, basisIndex++) * absorbance;
+	#ifdef DISCARD_UNUSED_BASIS_GEN
+		if (depth >= 7.0/16.0 && depth <= 13.0/16.0)
+	#endif
+		{
+			_outWaveletCoeffs3.r = basisFunc(depth, basisIndex) * absorbance;
+			_outWaveletCoeffs3.g = basisFunc(depth, basisIndex+1) * absorbance;
+			_outWaveletCoeffs3.b = basisFunc(depth, basisIndex+2) * absorbance;
+			_outWaveletCoeffs3.a = basisFunc(depth, basisIndex+3) * absorbance;
+		}
+		basisIndex += 4;
 	}
 
 	if (BASIS_NUM >= 16)
 	{
-		_outWaveletCoeffs4.r = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs4.g = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs4.b = basisFunc(depth, basisIndex++) * absorbance;
-		_outWaveletCoeffs4.a = basisFunc(depth, basisIndex++) * absorbance;
+	#ifdef DISCARD_UNUSED_BASIS_GEN
+		if (depth >= 11.0/16.0 && depth <= 16.0/16.0)
+	#endif
+		{
+			_outWaveletCoeffs4.r = basisFunc(depth, basisIndex) * absorbance;
+			_outWaveletCoeffs4.g = basisFunc(depth, basisIndex+1) * absorbance;
+			_outWaveletCoeffs4.b = basisFunc(depth, basisIndex+2) * absorbance;
+			_outWaveletCoeffs4.a = basisFunc(depth, basisIndex+3) * absorbance;
+		}
+		basisIndex += 4;
 	}
 #else
 	beginInvocationInterlockNV();

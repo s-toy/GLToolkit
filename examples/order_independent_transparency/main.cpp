@@ -22,10 +22,10 @@
 #endif
 
 //#define WOIT_ENABLE_QUANTIZATION //shader要一起改
-#define ENABLE_PRE_INTEGRAL
+//#define ENABLE_PRE_INTEGRAL
 #define ENABLE_DEPTH_REMAPPING
 
-#define USING_MOMENT_BASED_OIT
+#define USING_WAVELET_OIT
 
 #ifdef USING_ALL_METHODS
 #define USING_MOMENT_BASED_OIT
@@ -42,8 +42,8 @@ const float FAR_PLANE = 20;
 const bool DISPLAY_FPS = true;
 const glm::dvec3 DEFAULT_CAMERA_POS = glm::dvec3(0, 0, 3);
 const std::string SCENE_NAME = "bmw.json";
-const std::string LUT_INT_NAME = "textures/db4_psi_int_n16_j43_s20.png";
-const std::string LUT_NAME = "textures/db4_psi_n16_j43_s20.png";
+const std::string LUT_INT_NAME = "textures/db2_psi_int_n16_j43_s20.png";
+const std::string LUT_NAME = "textures/db2_psi_n16_j43_s20.png";
 
 enum class EOITMethod : unsigned char
 {
@@ -53,7 +53,6 @@ enum class EOITMethod : unsigned char
 	FOURIER_OIT,
 	WAVELET_OIT
 };
-
 
 using namespace glt;
 

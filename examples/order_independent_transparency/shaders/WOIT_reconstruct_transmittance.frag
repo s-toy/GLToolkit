@@ -17,7 +17,6 @@ uniform sampler2D		uDepthRemapTex;
 	uniform sampler2D		uPsiIntegralLutTex;
 #endif
 
-
 #ifndef WOIT_ENABLE_QUANTIZATION
 	uniform sampler2D		uWaveletCoeffsMap1;
 	uniform sampler2D		uWaveletCoeffsMap2;
@@ -46,7 +45,7 @@ layout(location = 0) out vec4 _outTransparencyColor;
 
 #include "compute_reflection_color.glsl"
 
-float meyer_basis_integral(float d, int i)
+float wavelet_basis_integral(float d, int i)
 {
 	int indexX = int(BASIS_SLICE_COUNT * d);
 	indexX = min(max(indexX, 0), BASIS_SLICE_COUNT - 1);
@@ -82,8 +81,8 @@ float basisIntegralFunc(float x, int i)
 		result = haar_phi_integral(x);
 	else
 		result = haar_psi_integral(x, indexJ, indexK);
-#elif BASIS_TYPE == MEYER_BASIS
-	result = meyer_basis_integral(x, i);
+#elif BASIS_TYPE == WAVELET_BASIS
+	result = wavelet_basis_integral(x, i);
 #endif
 	return result;
 }
@@ -107,38 +106,62 @@ void main()
 #ifndef WOIT_ENABLE_QUANTIZATION
 	if (BASIS_NUM >= 4)
 	{
-		vec4 coeffs = texelFetch(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy), 0);
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	#ifdef DISCARD_UNUSED_BASIS_REC
+		if (depth >= 0 && depth <= 5.0/16.0)
+	#endif
+		{
+			vec4 coeffs = texelFetch(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy), 0);
+			opticalDepth += basisIntegralFunc(depth, basisIndex) * coeffs.x;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 1) * coeffs.y;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 2) * coeffs.z;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 3) * coeffs.w;
+		}
+		basisIndex += 4;
 	}
 
 	if (BASIS_NUM >= 8)
 	{
-		vec4 coeffs = texelFetch(uWaveletCoeffsMap2, ivec2(gl_FragCoord.xy), 0);
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	#ifdef DISCARD_UNUSED_BASIS_REC
+		if (depth >= 3.0/16.0 && depth <= 9.0/16.0)
+	#endif
+		{
+			vec4 coeffs = texelFetch(uWaveletCoeffsMap2, ivec2(gl_FragCoord.xy), 0);
+			opticalDepth += basisIntegralFunc(depth, basisIndex) * coeffs.x;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 1) * coeffs.y;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 2) * coeffs.z;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 3) * coeffs.w;
+		}
+		basisIndex += 4;
 	}
 
 	if (BASIS_NUM >= 12)
 	{
-		vec4 coeffs = texelFetch(uWaveletCoeffsMap3, ivec2(gl_FragCoord.xy), 0);
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	#ifdef DISCARD_UNUSED_BASIS_REC
+		if (depth >= 7.0/16.0 && depth <= 13.0/16.0)
+	#endif
+		{
+			vec4 coeffs = texelFetch(uWaveletCoeffsMap3, ivec2(gl_FragCoord.xy), 0);
+			opticalDepth += basisIntegralFunc(depth, basisIndex) * coeffs.x;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 1) * coeffs.y;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 2) * coeffs.z;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 3) * coeffs.w;
+		}
+		basisIndex += 4;
 	}
 
 	if (BASIS_NUM >= 16)
 	{
-		vec4 coeffs = texelFetch(uWaveletCoeffsMap4, ivec2(gl_FragCoord.xy), 0);
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.z;
-		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.w;
+	#ifdef DISCARD_UNUSED_BASIS_REC
+		if (depth >= 11.0/16.0 && depth <= 16.0/16.0)
+	#endif
+		{
+			vec4 coeffs = texelFetch(uWaveletCoeffsMap4, ivec2(gl_FragCoord.xy), 0);
+			opticalDepth += basisIntegralFunc(depth, basisIndex) * coeffs.x;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 1) * coeffs.y;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 2) * coeffs.z;
+			opticalDepth += basisIntegralFunc(depth, basisIndex + 3) * coeffs.w;
+		}
+		basisIndex += 4;
 	}
 #else
 	if (BASIS_NUM >= 4)

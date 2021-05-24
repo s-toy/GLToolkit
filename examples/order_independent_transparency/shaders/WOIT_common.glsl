@@ -8,7 +8,9 @@
 //#define WOIT_ENABLE_FULL_PDF
 #define ENABLE_DEPTH_REMAPPING
 #define ENABLE_SIGMA_AVERAGING
-#define ENABLE_PRE_INTEGRAL
+//#define ENABLE_PRE_INTEGRAL
+#define DISCARD_UNUSED_BASIS_GEN
+//#define DISCARD_UNUSED_BASIS_REC
 
 #define UNIFORM_QUANTIZATION		0
 #define LLOYD_MAX_QUANTIZATION		1
@@ -16,14 +18,14 @@
 
 #define FOURIER_BASIS	0
 #define HAAR_BASIS		1
-#define MEYER_BASIS		2
-#define BASIS_TYPE		MEYER_BASIS
+#define WAVELET_BASIS	2
+#define BASIS_TYPE		WAVELET_BASIS
 
 #if BASIS_TYPE == FOURIER_BASIS
 #define BASIS_NUM 15
 #elif BASIS_TYPE == HAAR_BASIS
 #define BASIS_NUM 8
-#elif BASIS_TYPE == MEYER_BASIS
+#elif BASIS_TYPE == WAVELET_BASIS
 #define BASIS_NUM 16
 #endif
 
@@ -33,7 +35,6 @@
 
 #ifdef ENABLE_SIGMA_AVERAGING
 #define SIGMA_K(k, n) pow(sin(k*PI/n) / (k*PI/n), 16.0)
-
 #else
 #define SIGMA_K(k, n) 1
 #endif
