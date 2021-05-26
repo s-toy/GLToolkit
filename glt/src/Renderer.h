@@ -45,6 +45,9 @@ namespace glt
 
 		CCamera* fetchCamera() const { return m_pCamera; }
 
+		void pushEvent(const std::string& vEventName) const;
+		void popEvent() const;
+
 	protected:
 		void _setTime(float vTime) { m_Time = vTime; }
 

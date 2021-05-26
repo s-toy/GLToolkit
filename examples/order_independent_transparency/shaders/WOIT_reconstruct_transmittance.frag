@@ -89,7 +89,7 @@ void main()
 	//if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
 	float depth = _linearizeDepth(gl_FragCoord.z, NEAR_PLANE, FAR_PLANE);
-    vec2 texCoord = gl_FragCoord.xy / vec2(WIN_WIDTH, WIN_HEIGHT);
+    vec2 texCoord = gl_FragCoord.xy / vec2(TRANSPARENT_TEX_WIDTH, TRANSPARENT_TEX_HEIGHT);
 
 #ifdef ENABLE_DEPTH_REMAPPING
 	vec2 minMaxZ = textureLod(uDepthRemapTex, texCoord, 0).xy;

@@ -9,8 +9,10 @@ void main()
 {
 	ivec2 fragCoord = ivec2(gl_FragCoord.xy);
 	vec2  texCoord = fragCoord / vec2(WIN_WIDTH, WIN_HEIGHT);
+
 	vec3  opaqueColor = texelFetch(uOpaqueColorTex, fragCoord, 0).rgb;
-	vec4  translucentColor = texelFetch(uTranslucentColorTex, fragCoord, 0).rgba;
+
+	vec4  translucentColor = texture(uTranslucentColorTex, texCoord).rgba;
 
 	float totalOpticalDepth = texture(uTotalAbsorbanceTex, texCoord).r;
 	float totalTransmittance = exp(-totalOpticalDepth);

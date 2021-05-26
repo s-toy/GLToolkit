@@ -89,6 +89,9 @@ protected:
 
 		CFileLocator::getInstance()->addFileSearchPath("../../resource");
 
+		m_pRenderer = CRenderer::getInstance();
+		assert(m_pRenderer != nullptr);
+
 		__initShaders();
 		__initScene();
 		__initTexturesAndBuffers();
@@ -100,7 +103,10 @@ protected:
 	void _renderV() override
 	{
 		__drawOpaqueObjects();
+
+		m_pRenderer->pushEvent("Draw Transparent Objects");
 		__drawTransparentObjects();
+		m_pRenderer->popEvent();
 	}
 
 	void _updateV() override
@@ -260,7 +266,7 @@ private:
 		m_pOpaqueFrameBuffer->set(EAttachment::DEPTH, m_pOpaqueDepthTex);
 
 		m_pTransparencyColorTex = std::make_shared<CTexture2D>();
-		m_pTransparencyColorTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pTransparencyColorTex->createEmpty(TRANSPARENT_TEX_WIDTH, TRANSPARENT_TEX_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_EDGE, GL_LINEAR);
 
 #ifdef USING_MOMENT_BASED_OIT
 		m_pMomentB0Map = std::make_shared<CTexture2D>();
@@ -348,7 +354,7 @@ private:
 		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR4, m_pWaveletOpacityMap4);
 #endif
 
-		m_pWOITReconstructionFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
+		m_pWOITReconstructionFrameBuffer = std::make_unique<CFrameBuffer>(TRANSPARENT_TEX_WIDTH, TRANSPARENT_TEX_HEIGHT);
 		m_pWOITReconstructionFrameBuffer->set(EAttachment::COLOR0, m_pTransparencyColorTex);
 
 		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
@@ -376,15 +382,17 @@ private:
 
 	void __drawOpaqueObjects()
 	{
-		//draw skybox
+		m_pRenderer->pushEvent("Draw Skybox");
 		m_pOpaqueFrameBuffer->bind();
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(true);
 		if (m_pSkybox) CRenderer::getInstance()->drawSkybox(*m_pSkybox, 0);
+		m_pRenderer->popEvent();
 
-		//draw opaque objects
+		m_pRenderer->pushEvent("Draw Opaque Objects");
 		if (!m_OpaqueModels.empty()) CRenderer::getInstance()->draw(m_OpaqueModels, *m_pOpaqueShaderProgram);
 		m_pOpaqueFrameBuffer->unbind();
+		m_pRenderer->popEvent();
 	}
 
 	void __drawTransparentObjects()
@@ -611,7 +619,7 @@ private:
 		m_pClearImageFrameBuffer->unbind();
 #endif
 
-		//pass0: compute depth remapping texture
+		m_pRenderer->pushEvent("Compute Depth Remapping Texture");
 #ifdef ENABLE_DEPTH_REMAPPING
 		m_pComputeDepthRemapTexFrameBuffer->bind();
 		glViewport(0, 0, DEPTH_REMAP_TEX_WIDTH, DEPTH_REMAP_TEX_HEIGHT);
@@ -647,8 +655,9 @@ private:
 
 		m_pComputeDepthRemapTexFrameBuffer->unbind();
 #endif
+		m_pRenderer->popEvent();
 
-		//pass1: projection
+		m_pRenderer->pushEvent("Projection");
 		m_pWOITProjectionFrameBuffer->bind();
 		glViewport(0, 0, COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT);
 		CRenderer::getInstance()->setClearColor(0, 0, 0, 0);
@@ -686,10 +695,11 @@ private:
 		CRenderer::getInstance()->enableBlend(false);
 
 		m_pWOITProjectionFrameBuffer->unbind();
+		m_pRenderer->popEvent();
 
-		//pass2: reconstruction
+		m_pRenderer->pushEvent("Reconstruction");
 		m_pWOITReconstructionFrameBuffer->bind();
-		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
+		glViewport(0, 0, TRANSPARENT_TEX_WIDTH, TRANSPARENT_TEX_HEIGHT);
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(false);
 		CRenderer::getInstance()->setDepthMask(false);
@@ -736,8 +746,10 @@ private:
 		CRenderer::getInstance()->enableBlend(false);
 
 		m_pWOITReconstructionFrameBuffer->unbind();
+		m_pRenderer->popEvent();
 
-		//pass3: merge color
+		m_pRenderer->pushEvent("Merge Color");
+		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 		CRenderer::getInstance()->clear();
 
 		m_pOpaqueColorTex->bindV(0);
@@ -750,6 +762,7 @@ private:
 		m_pWOITMergerColorSP->updateUniformTexture("uTotalAbsorbanceTex", m_pTotalAbsorbanceTex.get());
 
 		CRenderer::getInstance()->drawScreenQuad(*m_pWOITMergerColorSP);
+		m_pRenderer->popEvent();
 	}
 #endif
 
@@ -805,7 +818,9 @@ private:
 	std::vector<std::shared_ptr<CModel>>			m_OpaqueModels;
 	std::vector<std::shared_ptr<CModel>>			m_TransparentModels;
 	std::map<std::shared_ptr<CModel>, SMaterial>	m_Model2MaterialMap;
-	CScene m_Scene;
+
+	CScene		m_Scene;
+	CRenderer*	m_pRenderer = nullptr;
 
 	std::unique_ptr<CShaderProgram> m_pOpaqueShaderProgram;
 	std::unique_ptr<CFrameBuffer>	m_pOpaqueFrameBuffer;

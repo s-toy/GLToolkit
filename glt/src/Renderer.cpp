@@ -207,6 +207,20 @@ void CRenderer::update()
 
 //***********************************************************************************************
 //FUNCTION:
+void CRenderer::pushEvent(const std::string& vEventName) const
+{
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, vEventName.c_str());
+}
+
+//***********************************************************************************************
+//FUNCTION:
+void CRenderer::popEvent() const
+{
+	glPopDebugGroup();
+}
+
+//***********************************************************************************************
+//FUNCTION:
 void CRenderer::__updateShaderUniform(const CShaderProgram& vShaderProgram) const
 {
 	vShaderProgram.updateUniform3f("uViewPos", m_pCamera->getPosition());
