@@ -1,0 +1,49 @@
+#ifndef GLOBAL_MARCO
+#define GLOBAL_MARCO
+
+#define PI 3.1415926
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323f
+#endif
+
+const int WIN_WIDTH = 1600;
+const int WIN_HEIGHT = 900;
+const float NEAR_PLANE = 0.1;
+const float FAR_PLANE = 20;
+
+//#define WOIT_ENABLE_QUANTIZATION
+#define ENABLE_DEPTH_REMAPPING
+//#define ENABLE_SIGMA_AVERAGING
+#define ENABLE_PRE_INTEGRAL
+//#define DISCARD_UNUSED_BASIS_GEN
+//#define DISCARD_UNUSED_BASIS_REC
+
+#define UNIFORM_QUANTIZATION		0
+#define LLOYD_MAX_QUANTIZATION		1
+#define QUANTIZATION_METHOD			UNIFORM_QUANTIZATION
+
+#define FOURIER_BASIS	0
+#define HAAR_BASIS		1
+#define WAVELET_BASIS	2
+#define BASIS_TYPE		WAVELET_BASIS
+
+#if BASIS_TYPE == FOURIER_BASIS
+#define BASIS_NUM 16
+#elif BASIS_TYPE == HAAR_BASIS
+#define BASIS_NUM 16
+#elif BASIS_TYPE == WAVELET_BASIS
+#define BASIS_NUM 16
+#endif
+
+#define BASIS_SLICE_COUNT 2001
+#define BASIS_SCALE 20
+#define WOIT_FLT_PRECISION r16f
+
+#ifdef ENABLE_SIGMA_AVERAGING
+#define SIGMA_K(k, n) pow(sin(k*PI/n) / (k*PI/n), 16.0)
+#else
+#define SIGMA_K(k, n) 1
+#endif
+
+#endif

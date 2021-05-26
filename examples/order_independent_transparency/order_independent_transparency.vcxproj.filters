@@ -166,5 +166,8 @@
     <ClInclude Include="shaders\moment_math.glsl">
       <Filter>Resource Files\shaders\MomentBasedOIT</Filter>
     </ClInclude>
+    <ClInclude Include="shaders\global_marco.h">
+      <Filter>Resource Files\shaders\Common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

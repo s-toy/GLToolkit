@@ -16,14 +16,7 @@
 #include "InputManager.h"
 #include "CpuTimer.h"
 #include "Scene.h"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323f
-#endif
-
-//#define WOIT_ENABLE_QUANTIZATION //shader要一起改
-//#define ENABLE_PRE_INTEGRAL
-#define ENABLE_DEPTH_REMAPPING
+#include "shaders/global_marco.h"
 
 #define USING_WAVELET_OIT
 
@@ -34,11 +27,7 @@
 #define USING_WAVELET_OIT
 #endif
 
-const int WIN_WIDTH = 1600;
-const int WIN_HEIGHT = 900;
 const float CAMERA_MOVE_SPEED = 0.005;
-const float NEAR_PLANE = 0.1;
-const float FAR_PLANE = 20;
 const bool DISPLAY_FPS = true;
 const glm::dvec3 DEFAULT_CAMERA_POS = glm::dvec3(0, 0, 3);
 const std::string SCENE_NAME = "bmw.json";

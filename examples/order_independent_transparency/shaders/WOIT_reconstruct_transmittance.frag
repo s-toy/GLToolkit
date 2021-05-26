@@ -167,7 +167,7 @@ void main()
 	if (BASIS_NUM >= 4)
 	{
 		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy)));
-		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		coeffs = expandFuncMuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
 
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
@@ -178,7 +178,7 @@ void main()
 	if (BASIS_NUM >= 8)
 	{
 		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap2, ivec2(gl_FragCoord.xy)));
-		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		coeffs = expandFuncMuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
 
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
@@ -189,7 +189,7 @@ void main()
 	if (BASIS_NUM >= 12)
 	{
 		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap3, ivec2(gl_FragCoord.xy)));
-		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		coeffs = expandFuncMuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
 
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;
@@ -200,7 +200,7 @@ void main()
 	if (BASIS_NUM >= 16)
 	{
 		vec4 coeffs = dequantize(imageLoad(uWaveletCoeffsMap4, ivec2(gl_FragCoord.xy)));
-		coeffs = expandFuncMiuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
+		coeffs = expandFuncMuReverse(coeffs, _IntervalMin, _IntervalMax, _Mu);
 
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.x;
 		opticalDepth += basisIntegralFunc(depth, basisIndex++) * coeffs.y;

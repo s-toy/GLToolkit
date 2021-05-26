@@ -204,6 +204,7 @@
     <None Include="shaders\WOIT_reconstruct_transmittance.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="shaders\global_marco.h" />
     <ClInclude Include="shaders\moment_math.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

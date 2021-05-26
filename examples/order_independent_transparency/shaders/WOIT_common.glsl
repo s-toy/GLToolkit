@@ -1,45 +1,7 @@
 #ifndef WOIT_COMMON
 #define WOIT_COMMON
 
-#define PI 3.1415926
-
-//#define WOIT_ENABLE_QUANTIZATION
-#define WOIT_ENABLE_QERROR_CALCULATION
-//#define WOIT_ENABLE_FULL_PDF
-#define ENABLE_DEPTH_REMAPPING
-#define ENABLE_SIGMA_AVERAGING
-//#define ENABLE_PRE_INTEGRAL
-#define DISCARD_UNUSED_BASIS_GEN
-//#define DISCARD_UNUSED_BASIS_REC
-
-#define UNIFORM_QUANTIZATION		0
-#define LLOYD_MAX_QUANTIZATION		1
-#define QUANTIZATION_METHOD			UNIFORM_QUANTIZATION
-
-#define FOURIER_BASIS	0
-#define HAAR_BASIS		1
-#define WAVELET_BASIS	2
-#define BASIS_TYPE		WAVELET_BASIS
-
-#if BASIS_TYPE == FOURIER_BASIS
-#define BASIS_NUM 15
-#elif BASIS_TYPE == HAAR_BASIS
-#define BASIS_NUM 8
-#elif BASIS_TYPE == WAVELET_BASIS
-#define BASIS_NUM 16
-#endif
-
-#define BASIS_SLICE_COUNT 2001
-#define BASIS_SCALE 20
-#define WOIT_FLT_PRECISION r16f
-
-#ifdef ENABLE_SIGMA_AVERAGING
-#define SIGMA_K(k, n) pow(sin(k*PI/n) / (k*PI/n), 16.0)
-#else
-#define SIGMA_K(k, n) 1
-#endif
-
-const int PDF_SLICE_COUNT = 2048;
+#include "global_marco.h"
 
 const float _IntervalMin = -20;
 const float _IntervalMax = 20;
@@ -77,7 +39,6 @@ float haar_phi(float x)
 float haar_psi(float x, float j, float k)
 {
 	float value = pow(2.0f, j / 2.0f);
-	//value *= value;
 
 	const float intervalLength = 1.0f / pow(2.0f, j + 1);
 	const float intervalMin = 2 * k * intervalLength;
@@ -127,7 +88,7 @@ vec4 dequantize(uvec4 data)
 	return vec4(dequantize(data.x), dequantize(data.y), dequantize(data.z), dequantize(data.w));
 }
 
-float expandFuncMiu(float x, float intervalMin, float intervalMax, float mu)
+float expandFuncMu(float x, float intervalMin, float intervalMax, float mu)
 {
 	if (mu < 1e-6) return x;
 
@@ -147,17 +108,17 @@ float expandFuncMiu(float x, float intervalMin, float intervalMax, float mu)
 	}
 }
 
-vec4 expandFuncMiu(vec4 coeffs, float intervalMin, float intervalMax, float mu)
+vec4 expandFuncMu(vec4 coeffs, float intervalMin, float intervalMax, float mu)
 {
 	return vec4(
-		expandFuncMiu(coeffs.x, intervalMin, intervalMax, mu),
-		expandFuncMiu(coeffs.y, intervalMin, intervalMax, mu),
-		expandFuncMiu(coeffs.z, intervalMin, intervalMax, mu),
-		expandFuncMiu(coeffs.w, intervalMin, intervalMax, mu)
+		expandFuncMu(coeffs.x, intervalMin, intervalMax, mu),
+		expandFuncMu(coeffs.y, intervalMin, intervalMax, mu),
+		expandFuncMu(coeffs.z, intervalMin, intervalMax, mu),
+		expandFuncMu(coeffs.w, intervalMin, intervalMax, mu)
 	);
 }
 
-float expandFuncMiuReverse(float x, float intervalMin, float intervalMax, float mu)
+float expandFuncMuReverse(float x, float intervalMin, float intervalMax, float mu)
 {
 	if (mu < 1e-6) return x;
 
@@ -177,13 +138,13 @@ float expandFuncMiuReverse(float x, float intervalMin, float intervalMax, float 
 	}
 }
 
-vec4 expandFuncMiuReverse(vec4 coeffs, float intervalMin, float intervalMax, float mu)
+vec4 expandFuncMuReverse(vec4 coeffs, float intervalMin, float intervalMax, float mu)
 {
 	return vec4(
-		expandFuncMiuReverse(coeffs.x, intervalMin, intervalMax, mu),
-		expandFuncMiuReverse(coeffs.y, intervalMin, intervalMax, mu),
-		expandFuncMiuReverse(coeffs.z, intervalMin, intervalMax, mu),
-		expandFuncMiuReverse(coeffs.w, intervalMin, intervalMax, mu)
+		expandFuncMuReverse(coeffs.x, intervalMin, intervalMax, mu),
+		expandFuncMuReverse(coeffs.y, intervalMin, intervalMax, mu),
+		expandFuncMuReverse(coeffs.z, intervalMin, intervalMax, mu),
+		expandFuncMuReverse(coeffs.w, intervalMin, intervalMax, mu)
 	);
 }
 
