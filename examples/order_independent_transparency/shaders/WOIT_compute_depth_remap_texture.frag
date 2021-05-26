@@ -1,14 +1,10 @@
 #version 460 core
-#include "common.glsl"
+#include "global_macro.h"
 
 uniform sampler2D uOpaqueColorTex;
-uniform int uScreenWidth;
-uniform int uScreenHeight;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform vec3 uViewPos;
-uniform float uNearPlane;
-uniform float uFarPlane;
 
 layout (location = 0) out vec2 _outMinMaxDepth;
 
@@ -41,8 +37,8 @@ vec2 intersectSphere( in vec3 rayOrigin, in vec3 rayDir, in vec3 ce, float ra )
 
 vec3 getRayFromScreenSpace(vec2 pos)
 {
-	float halfScreenWidth = 0.5 * float(uScreenWidth);
-	float halfScreenHeight = 0.5 * float(uScreenHeight);
+	float halfScreenWidth = 0.5 * float(DEPTH_REMAP_TEX_WIDTH);
+	float halfScreenHeight = 0.5 * float(DEPTH_REMAP_TEX_HEIGHT);
 
     mat4 invMat= inverse(uProjectionMatrix*uViewMatrix);
     vec4 near = vec4((pos.x - halfScreenWidth) / halfScreenWidth, -1*(pos.y - halfScreenHeight) / halfScreenHeight, -1, 1.0);
@@ -58,7 +54,7 @@ vec3 getRayFromScreenSpace(vec2 pos)
 void main()
 {
 	vec3 rayOri = uViewPos;
-	vec3 rayDir = getRayFromScreenSpace(vec2(gl_FragCoord.x, uScreenHeight - gl_FragCoord.y - 1));
+	vec3 rayDir = getRayFromScreenSpace(vec2(gl_FragCoord.x, DEPTH_REMAP_TEX_HEIGHT - gl_FragCoord.y - 1));
 
 	float tmin = 1e6, tmax = -1e6;
 
@@ -82,8 +78,8 @@ void main()
 		vec4 minPosVS = uViewMatrix * vec4(minPosWS, 1);
 		vec4 maxPosVS = uViewMatrix * vec4(maxPosWS, 1);
 
-		float minZ = (-minPosVS.z - uNearPlane) / (uFarPlane - uNearPlane);
-		float maxZ = (-maxPosVS.z - uNearPlane) / (uFarPlane - uNearPlane);
+		float minZ = (-minPosVS.z - NEAR_PLANE) / (FAR_PLANE - NEAR_PLANE);
+		float maxZ = (-maxPosVS.z - NEAR_PLANE) / (FAR_PLANE - NEAR_PLANE);
 		_outMinMaxDepth = vec2(minZ, maxZ);
 	}
 	else

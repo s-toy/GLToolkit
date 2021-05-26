@@ -1,7 +1,7 @@
 #ifndef WOIT_COMMON
 #define WOIT_COMMON
 
-#include "global_marco.h"
+#include "global_macro.h"
 
 const float _IntervalMin = -20;
 const float _IntervalMax = 20;

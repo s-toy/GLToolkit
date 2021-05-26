@@ -14,10 +14,6 @@ uniform sampler2D		uDepthRemapTex;
 #endif
 
 uniform float		uCoverage;
-uniform float		uNearPlane;
-uniform float		uFarPlane;
-uniform float		uScreenWidth;
-uniform float		uScreenHeight;
 
 layout(location = 0) in float _inFragDepth;
 
@@ -82,11 +78,11 @@ void main()
 	//float opaqueDepth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	//if (opaqueDepth != 0.0 && gl_FragCoord.z > opaqueDepth) discard;
 
-	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+	float depth = _linearizeDepth(gl_FragCoord.z, NEAR_PLANE, FAR_PLANE);
 
 #ifdef ENABLE_DEPTH_REMAPPING
-    vec2 uv = gl_FragCoord.xy / vec2(uScreenWidth, uScreenHeight);
-	vec2 minMaxZ = textureLod(uDepthRemapTex, uv, 0).xy;
+    vec2 texCoord = gl_FragCoord.xy / vec2(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT);
+	vec2 minMaxZ = textureLod(uDepthRemapTex, texCoord, 0).xy;
 	depth = remap(depth, minMaxZ.x, minMaxZ.y, 0.01, 0.99);
 #endif
 

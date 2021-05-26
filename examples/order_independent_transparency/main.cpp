@@ -16,7 +16,7 @@
 #include "InputManager.h"
 #include "CpuTimer.h"
 #include "Scene.h"
-#include "shaders/global_marco.h"
+#include "shaders/global_macro.h"
 
 #define USING_WAVELET_OIT
 
@@ -318,28 +318,28 @@ private:
 		m_pWaveletOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8UI, 3, GL_CLAMP_TO_BORDER, GL_NEAREST);
 #else
 		m_pWaveletOpacityMap1 = std::make_shared<CTexture2D>();
-		m_pWaveletOpacityMap1->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pWaveletOpacityMap1->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_MIRRORED_REPEAT, GL_LINEAR);
 
 		m_pWaveletOpacityMap2 = std::make_shared<CTexture2D>();
-		m_pWaveletOpacityMap2->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pWaveletOpacityMap2->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_MIRRORED_REPEAT, GL_LINEAR);
 
 		m_pWaveletOpacityMap3 = std::make_shared<CTexture2D>();
-		m_pWaveletOpacityMap3->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pWaveletOpacityMap3->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_MIRRORED_REPEAT, GL_LINEAR);
 
 		m_pWaveletOpacityMap4 = std::make_shared<CTexture2D>();
-		m_pWaveletOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_BORDER, GL_NEAREST);
+		m_pWaveletOpacityMap4->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_MIRRORED_REPEAT, GL_LINEAR);
 #endif
 
 		m_pTotalAbsorbanceTex = std::make_shared<CTexture2D>();
-		m_pTotalAbsorbanceTex->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_R16F, GL_CLAMP_TO_BORDER, GL_NEAREST); 
+		m_pTotalAbsorbanceTex->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_R16F, GL_MIRRORED_REPEAT, GL_LINEAR);
 
 		m_pDepthRemapTex = std::make_shared<CTexture2D>();
-		m_pDepthRemapTex->createEmpty(WIN_WIDTH / DEPTH_REMAP_TEX_SCALE, WIN_HEIGHT / DEPTH_REMAP_TEX_SCALE, GL_RG16F, GL_CLAMP_TO_BORDER, GL_LINEAR_MIPMAP_LINEAR, true);
+		m_pDepthRemapTex->createEmpty(DEPTH_REMAP_TEX_WIDTH, DEPTH_REMAP_TEX_HEIGHT, GL_RG16F, GL_CLAMP_TO_BORDER, GL_LINEAR_MIPMAP_LINEAR, true);
 
-		m_pComputeDepthRemapTexFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
+		m_pComputeDepthRemapTexFrameBuffer = std::make_unique<CFrameBuffer>(DEPTH_REMAP_TEX_WIDTH, DEPTH_REMAP_TEX_HEIGHT, false); // TODO
 		m_pComputeDepthRemapTexFrameBuffer->set(EAttachment::COLOR0, m_pDepthRemapTex);
 
-		m_pWOITProjectionFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT, false);
+		m_pWOITProjectionFrameBuffer = std::make_unique<CFrameBuffer>(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, false);
 		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR0, m_pTotalAbsorbanceTex);
 #ifndef WOIT_ENABLE_QUANTIZATION
 		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR1, m_pWaveletOpacityMap1);
@@ -614,7 +614,7 @@ private:
 		//pass0: compute depth remapping texture
 #ifdef ENABLE_DEPTH_REMAPPING
 		m_pComputeDepthRemapTexFrameBuffer->bind();
-		glViewport(0, 0, WIN_WIDTH / DEPTH_REMAP_TEX_SCALE, WIN_HEIGHT / DEPTH_REMAP_TEX_SCALE);
+		glViewport(0, 0, DEPTH_REMAP_TEX_WIDTH, DEPTH_REMAP_TEX_HEIGHT);
 		CRenderer::getInstance()->setClearColor(0, 1, 0, 0);
 		CRenderer::getInstance()->clear();
 
@@ -637,10 +637,6 @@ private:
 
 		m_pComputeDepthRemapTexSP->bind();
 
-		m_pComputeDepthRemapTexSP->updateUniform1i("uScreenWidth", WIN_WIDTH / DEPTH_REMAP_TEX_SCALE);
-		m_pComputeDepthRemapTexSP->updateUniform1i("uScreenHeight", WIN_HEIGHT / DEPTH_REMAP_TEX_SCALE);
-		m_pComputeDepthRemapTexSP->updateUniform1f("uNearPlane", NEAR_PLANE);
-		m_pComputeDepthRemapTexSP->updateUniform1f("uFarPlane", FAR_PLANE);
 		m_pComputeDepthRemapTexSP->updateUniform1i("uAABBNum", m_TransparentModels.size());
 		glUniform3fv(glGetUniformLocation(m_pComputeDepthRemapTexSP->getProgramID(), "minAABBVertices"), MAX_NUM_AABB, (const GLfloat*)aabbs.minVertices);
 		glUniform3fv(glGetUniformLocation(m_pComputeDepthRemapTexSP->getProgramID(), "maxAABBVertices"), MAX_NUM_AABB, (const GLfloat*)aabbs.maxVertices);
@@ -654,7 +650,7 @@ private:
 
 		//pass1: projection
 		m_pWOITProjectionFrameBuffer->bind();
-		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
+		glViewport(0, 0, COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT);
 		CRenderer::getInstance()->setClearColor(0, 0, 0, 0);
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(false);
@@ -678,11 +674,6 @@ private:
 		m_pGenWaveletOpacityMapSP->updateUniformTexture("uPsiLutTex", m_pPsiLutTex.get());
 #endif
 
-		m_pGenWaveletOpacityMapSP->updateUniform1f("uNearPlane", pCamera->getNear());
-		m_pGenWaveletOpacityMapSP->updateUniform1f("uFarPlane", pCamera->getFar());
-		m_pGenWaveletOpacityMapSP->updateUniform1f("uScreenWidth", WIN_WIDTH);
-		m_pGenWaveletOpacityMapSP->updateUniform1f("uScreenHeight", WIN_HEIGHT);
-
 		for (auto Model : m_TransparentModels)
 		{
 			auto Material = m_Model2MaterialMap[Model];
@@ -698,7 +689,7 @@ private:
 
 		//pass2: reconstruction
 		m_pWOITReconstructionFrameBuffer->bind();
-
+		glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 		CRenderer::getInstance()->clear();
 		CRenderer::getInstance()->enableCullFace(false);
 		CRenderer::getInstance()->setDepthMask(false);
@@ -730,11 +721,6 @@ private:
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletCoeffsMap3", m_pWaveletOpacityMap3.get());
 		m_pWOITReconstructTransmittanceSP->updateUniformTexture("uWaveletCoeffsMap4", m_pWaveletOpacityMap4.get());
 #endif
-
-		m_pWOITReconstructTransmittanceSP->updateUniform1f("uNearPlane", pCamera->getNear());
-		m_pWOITReconstructTransmittanceSP->updateUniform1f("uFarPlane", pCamera->getFar());
-		m_pWOITReconstructTransmittanceSP->updateUniform1f("uScreenWidth", WIN_WIDTH);
-		m_pWOITReconstructTransmittanceSP->updateUniform1f("uScreenHeight", WIN_HEIGHT);
 
 		for (auto Model : m_TransparentModels)
 		{
@@ -896,8 +882,6 @@ private:
 	std::shared_ptr<CTexture2D>		m_pPsiIntegralLutTex;
 	std::shared_ptr<CTexture2D>		m_pTotalAbsorbanceTex;
 	std::shared_ptr<CTexture2D>		m_pDepthRemapTex;
-
-	const int DEPTH_REMAP_TEX_SCALE = 4;
 #endif
 };
 

@@ -1,5 +1,5 @@
-#ifndef GLOBAL_MARCO
-#define GLOBAL_MARCO
+#ifndef GLOBAL_MACRO
+#define GLOBAL_MACRO
 
 #define PI 3.1415926
 
@@ -9,6 +9,15 @@
 
 const int WIN_WIDTH = 1600;
 const int WIN_HEIGHT = 900;
+
+const float DEPTH_REMAP_TEX_SCALE = 0.25f;
+const int	DEPTH_REMAP_TEX_WIDTH = int(WIN_WIDTH * DEPTH_REMAP_TEX_SCALE);
+const int	DEPTH_REMAP_TEX_HEIGHT = int(WIN_HEIGHT * DEPTH_REMAP_TEX_SCALE);
+
+const float COEFF_MAP_SCALE = 0.5f;
+const int	COEFF_MAP_WIDTH = int(WIN_WIDTH * COEFF_MAP_SCALE);
+const int	COEFF_MAP_HEIGHT = int(WIN_HEIGHT * COEFF_MAP_SCALE);
+
 const float NEAR_PLANE = 0.1;
 const float FAR_PLANE = 20;
 

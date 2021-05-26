@@ -32,10 +32,6 @@ uniform sampler2D		uDepthRemapTex;
 uniform vec3	uViewPos = vec3(0.0);
 uniform vec3	uDiffuseColor;
 uniform float	uCoverage;
-uniform float	uNearPlane;
-uniform float	uFarPlane;
-uniform float	uScreenWidth;
-uniform float	uScreenHeight;
 
 layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
@@ -92,11 +88,11 @@ void main()
 	//float depth = texelFetch(uOpaqueDepthTex, ivec2(gl_FragCoord.xy), 0).r;
 	//if (depth != 0.0 && gl_FragCoord.z > depth) discard;
 
-	float depth = _linearizeDepth(gl_FragCoord.z, uNearPlane, uFarPlane);
+	float depth = _linearizeDepth(gl_FragCoord.z, NEAR_PLANE, FAR_PLANE);
+    vec2 texCoord = gl_FragCoord.xy / vec2(WIN_WIDTH, WIN_HEIGHT);
 
 #ifdef ENABLE_DEPTH_REMAPPING
-    vec2 uv = gl_FragCoord.xy / vec2(uScreenWidth, uScreenHeight);
-	vec2 minMaxZ = textureLod(uDepthRemapTex, uv, 0).xy;
+	vec2 minMaxZ = textureLod(uDepthRemapTex, texCoord, 0).xy;
 	depth = remap(depth, minMaxZ.x, minMaxZ.y, 0.01, 0.99);
 #endif
 
@@ -110,7 +106,7 @@ void main()
 		if (depth >= 0 && depth <= 5.0/16.0)
 	#endif
 		{
-			vec4 coeffs = texelFetch(uWaveletCoeffsMap1, ivec2(gl_FragCoord.xy), 0);
+			vec4 coeffs = texture(uWaveletCoeffsMap1, texCoord);
 			opticalDepth += basisIntegralFunc(depth, basisIndex) * coeffs.x;
 			opticalDepth += basisIntegralFunc(depth, basisIndex + 1) * coeffs.y;
 			opticalDepth += basisIntegralFunc(depth, basisIndex + 2) * coeffs.z;
@@ -125,7 +121,7 @@ void main()
 		if (depth >= 3.0/16.0 && depth <= 9.0/16.0)
 	#endif
 		{
-			vec4 coeffs = texelFetch(uWaveletCoeffsMap2, ivec2(gl_FragCoord.xy), 0);
+			vec4 coeffs = texture(uWaveletCoeffsMap2, texCoord);
 			opticalDepth += basisIntegralFunc(depth, basisIndex) * coeffs.x;
 			opticalDepth += basisIntegralFunc(depth, basisIndex + 1) * coeffs.y;
 			opticalDepth += basisIntegralFunc(depth, basisIndex + 2) * coeffs.z;
@@ -140,7 +136,7 @@ void main()
 		if (depth >= 7.0/16.0 && depth <= 13.0/16.0)
 	#endif
 		{
-			vec4 coeffs = texelFetch(uWaveletCoeffsMap3, ivec2(gl_FragCoord.xy), 0);
+			vec4 coeffs = texture(uWaveletCoeffsMap3, texCoord);
 			opticalDepth += basisIntegralFunc(depth, basisIndex) * coeffs.x;
 			opticalDepth += basisIntegralFunc(depth, basisIndex + 1) * coeffs.y;
 			opticalDepth += basisIntegralFunc(depth, basisIndex + 2) * coeffs.z;
@@ -155,7 +151,7 @@ void main()
 		if (depth >= 11.0/16.0 && depth <= 16.0/16.0)
 	#endif
 		{
-			vec4 coeffs = texelFetch(uWaveletCoeffsMap4, ivec2(gl_FragCoord.xy), 0);
+			vec4 coeffs = texture(uWaveletCoeffsMap4, texCoord);
 			opticalDepth += basisIntegralFunc(depth, basisIndex) * coeffs.x;
 			opticalDepth += basisIntegralFunc(depth, basisIndex + 1) * coeffs.y;
 			opticalDepth += basisIntegralFunc(depth, basisIndex + 2) * coeffs.z;
