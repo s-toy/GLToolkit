@@ -37,7 +37,8 @@ layout(location = 0) in vec3 _inPositionW;
 layout(location = 1) in vec3 _inNormalW;
 layout(location = 2) in vec2 _inTexCoord;
 
-layout(location = 0) out vec4 _outTransparencyColor;
+layout(location = 0) out vec4  _outTransparencyColor;
+layout(location = 1) out float _outTotalAbsorbance;
 
 #include "compute_reflection_color.glsl"
 
@@ -207,8 +208,10 @@ void main()
 
 	float transmittance = exp(-opticalDepth);
 	transmittance = clamp(transmittance, 0, 1);
-
+	//transmittance = 0.2;
 	vec3 reflectColor = computeReflectColor();
 	_outTransparencyColor.rgb = transmittance * uCoverage * reflectColor;
 	_outTransparencyColor.a = transmittance * uCoverage;
+
+	_outTotalAbsorbance = -log(1.0 - uCoverage + 1e-5);
 }

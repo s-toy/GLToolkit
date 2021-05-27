@@ -17,13 +17,11 @@ uniform float		uCoverage;
 
 layout(location = 0) in float _inFragDepth;
 
-layout(location = 0) out float _outTotalAbsorbance;
-
 #ifndef WOIT_ENABLE_QUANTIZATION
-	layout(location = 1) out vec4 _outWaveletCoeffs1;
-	layout(location = 2) out vec4 _outWaveletCoeffs2;
-	layout(location = 3) out vec4 _outWaveletCoeffs3;
-	layout(location = 4) out vec4 _outWaveletCoeffs4;
+	layout(location = 0) out vec4 _outWaveletCoeffs1;
+	layout(location = 1) out vec4 _outWaveletCoeffs2;
+	layout(location = 2) out vec4 _outWaveletCoeffs3;
+	layout(location = 3) out vec4 _outWaveletCoeffs4;
 #else
 	layout(binding = 0, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap1;
 	layout(binding = 1, rgba8ui) coherent uniform uimage2D	uWaveletCoeffsMap2;
@@ -87,8 +85,6 @@ void main()
 #endif
 
 	float absorbance = -log(1.0 - uCoverage + 1e-5);
-
-	_outTotalAbsorbance = absorbance;
 
 #ifndef WOIT_ENABLE_QUANTIZATION
 	int basisIndex = 0;

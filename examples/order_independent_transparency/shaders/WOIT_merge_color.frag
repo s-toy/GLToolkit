@@ -19,6 +19,6 @@ void main()
 
 	vec3 finalColor = mix(translucentColor.rgb / (translucentColor.a + 1e-5), opaqueColor, totalTransmittance);
 	//vec3 finalColor = mix(translucentColor.rgb, opaqueColor, totalTransmittance);
-	//vec3 finalColor = translucentColor.rgb + opaqueColor * totalTransmittance;
+	//vec3 finalColor = translucentColor.rgb + opaqueColor * 0.4f;
 	gl_FragColor = vec4(finalColor, 1.0);
 }

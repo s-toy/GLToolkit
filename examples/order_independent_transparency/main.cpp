@@ -337,7 +337,7 @@ private:
 #endif
 
 		m_pTotalAbsorbanceTex = std::make_shared<CTexture2D>();
-		m_pTotalAbsorbanceTex->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_R16F, GL_MIRRORED_REPEAT, GL_LINEAR);
+		m_pTotalAbsorbanceTex->createEmpty(TRANSPARENT_TEX_WIDTH, TRANSPARENT_TEX_HEIGHT, GL_R16F, GL_MIRRORED_REPEAT, GL_LINEAR);
 
 		m_pDepthRemapTex = std::make_shared<CTexture2D>();
 		m_pDepthRemapTex->createEmpty(DEPTH_REMAP_TEX_WIDTH, DEPTH_REMAP_TEX_HEIGHT, GL_RG16F, GL_CLAMP_TO_BORDER, GL_LINEAR_MIPMAP_LINEAR, true);
@@ -346,16 +346,16 @@ private:
 		m_pComputeDepthRemapTexFrameBuffer->set(EAttachment::COLOR0, m_pDepthRemapTex);
 
 		m_pWOITProjectionFrameBuffer = std::make_unique<CFrameBuffer>(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, false);
-		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR0, m_pTotalAbsorbanceTex);
 #ifndef WOIT_ENABLE_QUANTIZATION
-		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR1, m_pWaveletOpacityMap1);
-		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR2, m_pWaveletOpacityMap2);
-		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR3, m_pWaveletOpacityMap3);
-		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR4, m_pWaveletOpacityMap4);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR0, m_pWaveletOpacityMap1);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR1, m_pWaveletOpacityMap2);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR2, m_pWaveletOpacityMap3);
+		m_pWOITProjectionFrameBuffer->set(EAttachment::COLOR3, m_pWaveletOpacityMap4);
 #endif
 
 		m_pWOITReconstructionFrameBuffer = std::make_unique<CFrameBuffer>(TRANSPARENT_TEX_WIDTH, TRANSPARENT_TEX_HEIGHT);
 		m_pWOITReconstructionFrameBuffer->set(EAttachment::COLOR0, m_pTransparencyColorTex);
+		m_pWOITReconstructionFrameBuffer->set(EAttachment::COLOR1, m_pTotalAbsorbanceTex);
 
 		m_pClearImageFrameBuffer = std::make_unique<CFrameBuffer>(WIN_WIDTH, WIN_HEIGHT);
 
