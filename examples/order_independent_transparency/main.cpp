@@ -324,20 +324,20 @@ private:
 		m_pWaveletOpacityMap4->createEmpty(WIN_WIDTH, WIN_HEIGHT, GL_RGBA8UI, 3, GL_CLAMP_TO_BORDER, GL_NEAREST);
 #else
 		m_pWaveletOpacityMap1 = std::make_shared<CTexture2D>();
-		m_pWaveletOpacityMap1->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_MIRRORED_REPEAT, GL_LINEAR);
+		m_pWaveletOpacityMap1->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_EDGE, GL_LINEAR);
 
 		m_pWaveletOpacityMap2 = std::make_shared<CTexture2D>();
-		m_pWaveletOpacityMap2->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_MIRRORED_REPEAT, GL_LINEAR);
+		m_pWaveletOpacityMap2->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_EDGE, GL_LINEAR);
 
 		m_pWaveletOpacityMap3 = std::make_shared<CTexture2D>();
-		m_pWaveletOpacityMap3->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_MIRRORED_REPEAT, GL_LINEAR);
+		m_pWaveletOpacityMap3->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_EDGE, GL_LINEAR);
 
 		m_pWaveletOpacityMap4 = std::make_shared<CTexture2D>();
-		m_pWaveletOpacityMap4->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_MIRRORED_REPEAT, GL_LINEAR);
+		m_pWaveletOpacityMap4->createEmpty(COEFF_MAP_WIDTH, COEFF_MAP_HEIGHT, GL_RGBA16F, GL_CLAMP_TO_EDGE, GL_LINEAR);
 #endif
 
 		m_pTotalAbsorbanceTex = std::make_shared<CTexture2D>();
-		m_pTotalAbsorbanceTex->createEmpty(TRANSPARENT_TEX_WIDTH, TRANSPARENT_TEX_HEIGHT, GL_R16F, GL_MIRRORED_REPEAT, GL_LINEAR);
+		m_pTotalAbsorbanceTex->createEmpty(TRANSPARENT_TEX_WIDTH, TRANSPARENT_TEX_HEIGHT, GL_R16F, GL_CLAMP_TO_EDGE, GL_LINEAR);
 
 		m_pDepthRemapTex = std::make_shared<CTexture2D>();
 		m_pDepthRemapTex->createEmpty(DEPTH_REMAP_TEX_WIDTH, DEPTH_REMAP_TEX_HEIGHT, GL_RG16F, GL_CLAMP_TO_BORDER, GL_LINEAR_MIPMAP_LINEAR, true);
