@@ -7,10 +7,10 @@
 uniform sampler2D		uOpaqueDepthTex;
 uniform sampler2D		uDepthRemapTex;
 
-#ifndef ENABLE_PRE_INTEGRAL
-	uniform sampler2D		uPsiLutTex;
-#else
+#ifdef ENABLE_PRE_INTEGRAL
 	uniform sampler2D		uPsiIntegralLutTex;
+#else
+	uniform sampler2D		uPsiLutTex;
 #endif
 
 uniform float		uCoverage;
